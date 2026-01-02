@@ -4,6 +4,7 @@ import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/constants/image_constants.dart';
 import 'package:shivay_construction/features/auth/screens/login_screen.dart';
+import 'package:shivay_construction/features/home/screens/home_screen.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
@@ -89,7 +90,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     Future.delayed(const Duration(seconds: 1), () {
       if (token != null && token.isNotEmpty) {
-        // Get.offAll(() => HomeScreen());
+        Get.offAll(() => HomeScreen());
       } else {
         Get.offAll(() => LoginScreen());
       }
