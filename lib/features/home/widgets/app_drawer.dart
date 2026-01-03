@@ -6,6 +6,11 @@ import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/constants/image_constants.dart';
 import 'package:shivay_construction/features/home/controllers/home_controller.dart';
 import 'package:shivay_construction/features/home/widgets/version_and_developer_info.dart';
+import 'package:shivay_construction/features/category%20master/screens/category_master_screen.dart';
+import 'package:shivay_construction/features/department%20master/screens/department_master_screen.dart';
+import 'package:shivay_construction/features/godown%20master/screens/godown_master_screen.dart';
+import 'package:shivay_construction/features/party%20masters/screens/party_master_list_screen.dart';
+import 'package:shivay_construction/features/site%20master/screens/site_master_list_screen.dart';
 import 'package:shivay_construction/features/user_settings/models/user_access_dm.dart';
 import 'package:shivay_construction/features/user_settings/screens/unauthorised_users_screen.dart';
 import 'package:shivay_construction/features/user_settings/screens/users_screen.dart';
@@ -410,14 +415,25 @@ class AppDrawer extends StatelessWidget {
         Get.to(() => UsersScreen(fromWhere: 'R'));
         break;
       case 'department master':
+        Get.to(() => DepartmentMasterScreen());
         break;
       case 'category master':
+        Get.to(() => CategoryMasterScreen());
         break;
       case 'vendor master':
+        Get.to(() => PartyMasterListScreen());
+        break;
+      case 'site master':
+        Get.to(() => SiteMasterListScreen());
         break;
       case 'item master':
         break;
       case 'item group master':
+        break;
+      case 'item sub group master':
+        break;
+      case 'godown master':
+        Get.to(() => GodownMasterScreen());
         break;
       default:
     }

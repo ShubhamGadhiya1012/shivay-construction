@@ -52,3 +52,20 @@ class UpperCaseTextInputFormatter extends TextInputFormatter {
     );
   }
 }
+
+class CapitalizeFirstLetterFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    String formattedText =
+        newValue.text[0].toUpperCase() + newValue.text.substring(1);
+
+    return TextEditingValue(text: formattedText, selection: newValue.selection);
+  }
+}
