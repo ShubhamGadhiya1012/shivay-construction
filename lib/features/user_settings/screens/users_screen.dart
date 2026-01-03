@@ -99,24 +99,16 @@ class UsersScreen extends StatelessWidget {
                             // Get.to(() => UserManagementScreen(isEdit: false));
                           },
                           shape: const CircleBorder(),
-                          backgroundColor: kColorSecondary,
-                          child: Icon(
-                            Icons.add,
-                            color: kColorPrimary,
-                            size: 40,
-                          ),
+                          backgroundColor: kColorPrimary,
+                          child: Icon(Icons.add, color: kColorWhite, size: 40),
                         )
                       : FloatingActionButton(
                           onPressed: () {
                             Get.to(() => UserManagementScreen(isEdit: false));
                           },
                           shape: const CircleBorder(),
-                          backgroundColor: kColorSecondary,
-                          child: Icon(
-                            Icons.add,
-                            color: kColorPrimary,
-                            size: 25,
-                          ),
+                          backgroundColor: kColorPrimary,
+                          child: Icon(Icons.add, color: kColorWhite, size: 25),
                         )
                 : null,
           ),

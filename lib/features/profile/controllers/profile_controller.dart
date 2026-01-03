@@ -6,7 +6,6 @@ import 'package:shivay_construction/utils/helpers/version_helper.dart';
 
 class ProfileController extends GetxController {
   var isLoading = false.obs;
-
   var fullName = ''.obs;
   var userType = ''.obs;
   var mobileNumber = ''.obs;

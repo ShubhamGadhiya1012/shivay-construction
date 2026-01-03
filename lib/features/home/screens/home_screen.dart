@@ -32,8 +32,6 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               children: [
                 tablet ? AppSpaces.v16 : AppSpaces.v10,
-
-                // Header
                 Container(
                   margin: AppPaddings.combined(
                     horizontal: tablet ? 16 : 12,
@@ -95,19 +93,11 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 tablet ? AppSpaces.v30 : AppSpaces.v20,
-
-                // Main Content
                 Expanded(
                   child: Obx(() {
-                    if (_controller.isLoading.value) {
-                      return Center(
-                        child: CircularProgressIndicator(color: kColorPrimary),
-                      );
-                    }
-
-                    if (!_controller.hasMenuAccess) {
+                    if (!_controller.hasMenuAccess &&
+                        !_controller.isLoading.value) {
                       return Center(
                         child: Padding(
                           padding: AppPaddings.combined(
@@ -179,7 +169,6 @@ class HomeScreen extends StatelessWidget {
 
           tablet ? AppSpaces.v20 : AppSpaces.v14,
 
-          // Quick Stats Grid
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),

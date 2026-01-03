@@ -3,9 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
+import 'package:shivay_construction/constants/image_constants.dart';
 import 'package:shivay_construction/features/home/controllers/home_controller.dart';
 import 'package:shivay_construction/features/home/widgets/version_and_developer_info.dart';
 import 'package:shivay_construction/features/user_settings/models/user_access_dm.dart';
+import 'package:shivay_construction/features/user_settings/screens/unauthorised_users_screen.dart';
+import 'package:shivay_construction/features/user_settings/screens/users_screen.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/extensions/app_size_extensions.dart';
@@ -27,7 +30,7 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: kColorPrimary,
+      backgroundColor: kColorWhite,
       width: web
           ? 320
           : tablet
@@ -38,41 +41,82 @@ class AppDrawer extends StatelessWidget {
           children: [
             tablet ? AppSpaces.v20 : AppSpaces.v16,
 
-            Padding(
-              padding: AppPaddings.combined(
+            Container(
+              margin: AppPaddings.combined(
                 horizontal: tablet ? 16 : 12,
                 vertical: tablet ? 12 : 8,
               ),
-              child: Column(
+              padding: AppPaddings.combined(
+                horizontal: tablet ? 20 : 16,
+                vertical: tablet ? 16 : 14,
+              ),
+              decoration: BoxDecoration(
+                color: kColorWhite,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: kColorPrimary.withOpacity(0.2),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: kColorPrimary.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
                 children: [
-                  // Logo placeholder - replace with your actual logo
                   Container(
-                    height: tablet ? 80 : 60,
-                    width: tablet ? 80 : 60,
+                    height: tablet ? 60 : 48,
+                    width: tablet ? 60 : 48,
                     decoration: BoxDecoration(
-                      color: kColorWhite,
-                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        colors: [kColorPrimary, kColorPrimary.withOpacity(0.7)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
-                      Icons.construction,
-                      size: tablet ? 40 : 32,
-                      color: kColorPrimary,
+                    padding: EdgeInsets.all(tablet ? 10 : 8),
+                    child: Image.asset(
+                      kImagelogo,
+                      fit: BoxFit.contain,
+                      color: kColorWhite,
                     ),
                   ),
-                  tablet ? AppSpaces.v16 : AppSpaces.v12,
-                  Text(
-                    'Shivay Construction',
-                    style: TextStyles.kBoldOutfit(
-                      fontSize: tablet
-                          ? FontSizes.k26FontSize
-                          : FontSizes.k20FontSize,
-                      color: kColorWhite,
+
+                  tablet ? AppSpaces.h14 : AppSpaces.h10,
+
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Shivay Construction',
+                          style: TextStyles.kBoldOutfit(
+                            fontSize: tablet
+                                ? FontSizes.k22FontSize
+                                : FontSizes.k18FontSize,
+                            color: kColorPrimary,
+                          ),
+                        ),
+                        AppSpaces.v2,
+                        Text(
+                          'Mobile App',
+                          style: TextStyles.kRegularOutfit(
+                            fontSize: tablet
+                                ? FontSizes.k14FontSize
+                                : FontSizes.k12FontSize,
+                            color: kColorSecondary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-
             tablet ? AppSpaces.v20 : AppSpaces.v16,
 
             Obx(() {
@@ -82,67 +126,78 @@ class AppDrawer extends StatelessWidget {
 
               if (accessibleMenus.isEmpty) {
                 return Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.menu_book_outlined,
-                          size: tablet ? 64 : 48,
-                          color: kColorWhite.withOpacity(0.6),
-                        ),
-                        tablet ? AppSpaces.v16 : AppSpaces.v12,
-                        Text(
-                          'No menu data available',
-                          style: TextStyles.kMediumOutfit(
-                            fontSize: tablet
-                                ? FontSizes.k22FontSize
-                                : FontSizes.k18FontSize,
-                            color: kColorWhite,
+                  child: RefreshIndicator(
+                    onRefresh: controller.refreshMenuData,
+                    color: kColorPrimary,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: SizedBox(
+                        height: 0.6.screenHeight, // Add minimum height
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.menu_book_outlined,
+                                size: tablet ? 64 : 48,
+                                color: kColorPrimary.withOpacity(0.3),
+                              ),
+                              tablet ? AppSpaces.v16 : AppSpaces.v12,
+                              Text(
+                                'No menu data available',
+                                style: TextStyles.kMediumOutfit(
+                                  fontSize: tablet
+                                      ? FontSizes.k22FontSize
+                                      : FontSizes.k18FontSize,
+                                  color: kColorPrimary,
+                                ),
+                              ),
+                              tablet ? AppSpaces.v8 : AppSpaces.v6,
+                              Padding(
+                                padding: AppPaddings.combined(
+                                  horizontal: tablet ? 32 : 24,
+                                  vertical: 0,
+                                ),
+                                child: Text(
+                                  'Please contact administrator for menu access',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyles.kRegularOutfit(
+                                    fontSize: tablet
+                                        ? FontSizes.k18FontSize
+                                        : FontSizes.k14FontSize,
+                                    color: kColorSecondary,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        tablet ? AppSpaces.v8 : AppSpaces.v6,
-                        Padding(
-                          padding: AppPaddings.combined(
-                            horizontal: tablet ? 32 : 24,
-                            vertical: 0,
-                          ),
-                          child: Text(
-                            'Please contact administrator for menu access',
-                            textAlign: TextAlign.center,
-                            style: TextStyles.kRegularOutfit(
-                              fontSize: tablet
-                                  ? FontSizes.k18FontSize
-                                  : FontSizes.k14FontSize,
-                              color: kColorWhite.withOpacity(0.8),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 );
               }
 
               return Expanded(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  padding: AppPaddings.combined(
-                    horizontal: tablet ? 8 : 6,
-                    vertical: 4,
+                child: RefreshIndicator(
+                  onRefresh: controller.refreshMenuData,
+                  color: kColorPrimary,
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: AppPaddings.combined(
+                      horizontal: tablet ? 12 : 8,
+                      vertical: 4,
+                    ),
+                    itemCount: accessibleMenus.length,
+                    separatorBuilder: (context, index) {
+                      return tablet ? AppSpaces.v8 : AppSpaces.v6;
+                    },
+                    itemBuilder: (context, index) {
+                      final menu = accessibleMenus[index];
+                      return _buildMenuItem(context, menu, tablet);
+                    },
                   ),
-                  itemCount: controller.menuAccess.length,
-                  separatorBuilder: (context, index) {
-                    final menu = controller.menuAccess[index];
-                    if (!menu.access) return const SizedBox.shrink();
-                    return SizedBox(height: tablet ? 10 : 6);
-                  },
-                  itemBuilder: (context, index) {
-                    final menu = controller.menuAccess[index];
-                    if (!menu.access) return const SizedBox.shrink();
-
-                    return _buildMenuItem(context, menu, tablet);
-                  },
                 ),
               );
             }),
@@ -162,70 +217,81 @@ class AppDrawer extends StatelessWidget {
 
     if (hasSubMenu && accessibleSubMenus.isNotEmpty) {
       return Container(
-        margin: AppPaddings.combined(horizontal: tablet ? 6 : 4, vertical: 4),
+        margin: AppPaddings.combined(horizontal: tablet ? 6 : 4, vertical: 0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(tablet ? 14 : 12),
-          color: kColorWhite.withOpacity(0.1),
+          color: kColorPrimary.withOpacity(0.05),
+          border: Border.all(color: kColorPrimary.withOpacity(0.1), width: 1),
         ),
-        child: ExpansionTile(
-          clipBehavior: Clip.none,
-          shape: const Border(),
-          collapsedShape: const Border(),
-          leading: _getMenuIcon(menu.menuName, tablet),
-          title: Text(
-            menu.menuName,
-            style: TextStyles.kMediumOutfit(
-              fontSize: tablet ? FontSizes.k22FontSize : FontSizes.k16FontSize,
-              color: kColorWhite,
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            clipBehavior: Clip.none,
+            shape: const Border(),
+            collapsedShape: const Border(),
+            leading: _getMenuIcon(menu.menuName, tablet),
+            title: Text(
+              menu.menuName,
+              style: TextStyles.kMediumOutfit(
+                fontSize: tablet
+                    ? FontSizes.k22FontSize
+                    : FontSizes.k16FontSize,
+                color: kColorPrimary,
+              ),
             ),
-          ),
-          iconColor: kColorWhite,
-          collapsedIconColor: kColorWhite,
-          tilePadding: AppPaddings.combined(
-            horizontal: tablet ? 14 : 10,
-            vertical: tablet ? 8 : 6,
-          ),
-          children: accessibleSubMenus.map((subMenu) {
-            return Container(
-              margin: EdgeInsets.only(
-                left: tablet ? 20 : 16,
-                right: tablet ? 8 : 6,
-                bottom: tablet ? 6 : 4,
-              ),
-              child: ListTile(
-                leading: Icon(
-                  Icons.chevron_right_rounded,
+            iconColor: kColorPrimary,
+            collapsedIconColor: kColorPrimary,
+            tilePadding: AppPaddings.combined(
+              horizontal: tablet ? 14 : 10,
+              vertical: tablet ? 8 : 6,
+            ),
+            children: accessibleSubMenus.map((subMenu) {
+              return Container(
+                margin: EdgeInsets.only(
+                  left: tablet ? 20 : 16,
+                  right: tablet ? 8 : 6,
+                  bottom: tablet ? 6 : 4,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(tablet ? 10 : 8),
                   color: kColorWhite,
-                  size: tablet ? 22 : 18,
                 ),
-                title: Text(
-                  subMenu.subMenuName,
-                  style: TextStyles.kRegularOutfit(
-                    fontSize: tablet
-                        ? FontSizes.k20FontSize
-                        : FontSizes.k15FontSize,
-                    color: kColorWhite,
+                child: ListTile(
+                  leading: Icon(
+                    Icons.chevron_right_rounded,
+                    color: kColorSecondary,
+                    size: tablet ? 22 : 18,
                   ),
+                  title: Text(
+                    subMenu.subMenuName,
+                    style: TextStyles.kRegularOutfit(
+                      fontSize: tablet
+                          ? FontSizes.k20FontSize
+                          : FontSizes.k15FontSize,
+                      color: kColorTextPrimary,
+                    ),
+                  ),
+                  contentPadding: AppPaddings.combined(
+                    horizontal: tablet ? 10 : 8,
+                    vertical: 2,
+                  ),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _navigateToSubMenu(subMenu);
+                  },
                 ),
-                contentPadding: AppPaddings.combined(
-                  horizontal: tablet ? 10 : 8,
-                  vertical: 2,
-                ),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _navigateToSubMenu(subMenu);
-                },
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
         ),
       );
     } else {
       return Container(
-        margin: AppPaddings.combined(horizontal: tablet ? 6 : 4, vertical: 4),
+        margin: AppPaddings.combined(horizontal: tablet ? 6 : 4, vertical: 0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(tablet ? 14 : 12),
-          color: kColorWhite.withOpacity(0.1),
+          color: kColorPrimary.withOpacity(0.05),
+          border: Border.all(color: kColorPrimary.withOpacity(0.1), width: 1),
         ),
         child: ListTile(
           leading: _getMenuIcon(menu.menuName, tablet),
@@ -233,7 +299,7 @@ class AppDrawer extends StatelessWidget {
             menu.menuName,
             style: TextStyles.kMediumOutfit(
               fontSize: tablet ? FontSizes.k22FontSize : FontSizes.k16FontSize,
-              color: kColorWhite,
+              color: kColorPrimary,
             ),
           ),
           contentPadding: AppPaddings.combined(
@@ -284,21 +350,21 @@ class AppDrawer extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(tablet ? 10 : 8),
       decoration: BoxDecoration(
-        color: kColorWhite.withOpacity(0.15),
+        color: kColorPrimary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(tablet ? 10 : 8),
-        border: Border.all(color: kColorWhite.withOpacity(0.3), width: 1),
+        border: Border.all(color: kColorPrimary.withOpacity(0.2), width: 1),
       ),
-      child: Icon(iconData, color: kColorWhite, size: tablet ? 22 : 18),
+      child: Icon(iconData, color: kColorPrimary, size: tablet ? 22 : 18),
     );
   }
 
   void _navigateToMenu(MenuAccessDm menu) {
     switch (menu.menuName.toLowerCase()) {
       case 'dashboard':
-        // Already on home screen
+        Get.back();
+        controller.refreshMenuData();
         break;
-      case 'projects':
-        // Get.to(() => ProjectsScreen());
+      case 'masters':
         break;
       case 'entry':
         if (menu.subMenu.isNotEmpty) {
@@ -333,24 +399,25 @@ class AppDrawer extends StatelessWidget {
 
   void _navigateToSubMenu(SubMenuAccessDm subMenu) {
     switch (subMenu.subMenuName.toLowerCase()) {
-      // Add your navigation cases here based on your app's features
-      case 'project entry':
-        // Get.to(() => ProjectEntryScreen());
+      case 'user authorization':
+        Get.to(() => UnauthorisedUsersScreen());
         break;
-      case 'material entry':
-        // Get.to(() => MaterialEntryScreen());
-        break;
-      case 'worker entry':
-        // Get.to(() => WorkerEntryScreen());
-        break;
-      case 'payment entry':
-        // Get.to(() => PaymentEntryScreen());
-        break;
-      case 'project report':
-        // Get.to(() => ProjectReportScreen());
-        break;
+
       case 'user management':
-        // Get.to(() => UserManagementScreen());
+        Get.to(() => UsersScreen(fromWhere: 'M'));
+        break;
+      case 'user rights':
+        Get.to(() => UsersScreen(fromWhere: 'R'));
+        break;
+      case 'department master':
+        break;
+      case 'category master':
+        break;
+      case 'vendor master':
+        break;
+      case 'item master':
+        break;
+      case 'item group master':
         break;
       default:
     }

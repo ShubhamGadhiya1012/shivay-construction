@@ -99,7 +99,7 @@ class _UserAccessScreenState extends State<UserAccessScreen> {
                           ),
                           Switch(
                             value: widget.appAccess,
-                            activeColor: kColorWhite,
+                            activeThumbColor: kColorWhite,
                             inactiveThumbColor: kColorWhite,
                             inactiveTrackColor: kColorGrey,
                             activeTrackColor: kColorSecondary,
@@ -246,7 +246,7 @@ class _UserAccessScreenState extends State<UserAccessScreen> {
                                   ),
                                   trailing: Switch(
                                     value: menuAccess.access,
-                                    activeColor: kColorWhite,
+                                    activeThumbColor: kColorWhite,
                                     inactiveThumbColor: kColorWhite,
                                     inactiveTrackColor: kColorGrey,
                                     activeTrackColor: kColorSecondary,
@@ -291,7 +291,7 @@ class _UserAccessScreenState extends State<UserAccessScreen> {
                                           ),
                                           trailing: Switch(
                                             value: subMenu.subMenuAccess,
-                                            activeColor: kColorWhite,
+                                            activeThumbColor: kColorWhite,
                                             inactiveThumbColor: kColorWhite,
                                             inactiveTrackColor: kColorGrey,
                                             activeTrackColor: kColorSecondary,

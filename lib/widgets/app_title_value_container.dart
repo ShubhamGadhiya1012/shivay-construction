@@ -95,7 +95,7 @@ class AppTitleValueContainer extends StatelessWidget {
             ? AppPaddings.combined(horizontal: 20, vertical: 12)
             : AppPaddings.p10,
         decoration: BoxDecoration(
-          color: color ?? kColorSecondary,
+          color: color ?? kColorLightGrey,
           borderRadius: BorderRadius.circular(
             web
                 ? 10

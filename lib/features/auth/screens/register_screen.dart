@@ -239,9 +239,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                       if (value == null || value.isEmpty) {
                                         return 'Please enter a password';
                                       }
-                                      if (value.length < 6) {
-                                        return 'Password must be at least 6 characters';
-                                      }
+
                                       return null;
                                     },
                                     isObscure:
