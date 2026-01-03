@@ -43,7 +43,7 @@ class AppProgressIndicator extends StatelessWidget {
       width: finalSize,
       height: finalSize,
       child: Lottie.asset(
-        'assets/jinee_lottie.json',
+        'assets/shivay_construction.json',
         width: finalSize,
         height: finalSize,
         fit: BoxFit.fill,
