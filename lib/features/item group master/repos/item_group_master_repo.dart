@@ -1,14 +1,14 @@
-import 'package:shivay_construction/features/category%20master/models/category_master_dm.dart';
+import 'package:shivay_construction/features/item%20group%20master/models/item_group_master_dm.dart';
 import 'package:shivay_construction/services/api_service.dart';
 import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
-class CategoryMasterRepo {
-  static Future<List<CategoryMasterDm>> getCategories() async {
+class ItemGroupMasterRepo {
+  static Future<List<ItemGroupMasterDm>> getItemGroups() async {
     String? token = await SecureStorageHelper.read('token');
 
     try {
       final response = await ApiService.getRequest(
-        endpoint: '/Master/getCategory',
+        endpoint: '/Master/getItemGroup',
         token: token,
       );
 
@@ -16,7 +16,7 @@ class CategoryMasterRepo {
 
       if (response['data'] != null) {
         return (response['data'] as List<dynamic>)
-            .map((item) => CategoryMasterDm.fromJson(item))
+            .map((item) => ItemGroupMasterDm.fromJson(item))
             .toList();
       }
 
@@ -26,17 +26,20 @@ class CategoryMasterRepo {
     }
   }
 
-  static Future<dynamic> addUpdateCategory({
-    required String cCode,
-    required String cName,
+  static Future<dynamic> addUpdateItemGroup({
+    required String igCode,
+    required String igName,
   }) async {
     String? token = await SecureStorageHelper.read('token');
 
-    final Map<String, dynamic> requestBody = {"CCode": cCode, "CName": cName};
+    final Map<String, dynamic> requestBody = {
+      "IGCode": igCode,
+      "IGName": igName,
+    };
 
     try {
       final response = await ApiService.postRequest(
-        endpoint: '/Master/addCategoryMaster',
+        endpoint: '/Master/addItemGroupMaster',
         requestBody: requestBody,
         token: token,
       );

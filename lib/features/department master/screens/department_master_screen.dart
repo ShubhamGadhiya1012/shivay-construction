@@ -247,19 +247,9 @@ class DepartmentMasterScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Department Name',
-                        style: TextStyles.kMediumOutfit(
-                          fontSize: tablet
-                              ? FontSizes.k16FontSize
-                              : FontSizes.k14FontSize,
-                          color: kColorTextPrimary,
-                        ),
-                      ),
-                      tablet ? AppSpaces.v10 : AppSpaces.v8,
                       AppTextFormField(
                         controller: _controller.dNameController,
-                        hintText: 'Enter department name',
+                        hintText: 'Department name*',
                         validator: (value) =>
                             (value == null || value.trim().isEmpty)
                             ? 'Please enter department name'

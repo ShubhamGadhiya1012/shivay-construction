@@ -9,6 +9,9 @@ import 'package:shivay_construction/features/home/widgets/version_and_developer_
 import 'package:shivay_construction/features/category%20master/screens/category_master_screen.dart';
 import 'package:shivay_construction/features/department%20master/screens/department_master_screen.dart';
 import 'package:shivay_construction/features/godown%20master/screens/godown_master_screen.dart';
+import 'package:shivay_construction/features/item%20group%20master/screens/item_group_master_screen.dart';
+import 'package:shivay_construction/features/item%20sub%20group%20master/screens/item_sub_group_master_screen.dart';
+import 'package:shivay_construction/features/item_master/screens/item_master_list_screen.dart';
 import 'package:shivay_construction/features/party%20masters/screens/party_master_list_screen.dart';
 import 'package:shivay_construction/features/site%20master/screens/site_master_list_screen.dart';
 import 'package:shivay_construction/features/user_settings/models/user_access_dm.dart';
@@ -137,7 +140,7 @@ class AppDrawer extends StatelessWidget {
                     child: SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       child: SizedBox(
-                        height: 0.6.screenHeight, // Add minimum height
+                        height: 0.6.screenHeight,
                         child: Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -427,10 +430,13 @@ class AppDrawer extends StatelessWidget {
         Get.to(() => SiteMasterListScreen());
         break;
       case 'item master':
+        Get.to(() => ItemMasterListScreen());
         break;
       case 'item group master':
+        Get.to(() => ItemGroupMasterScreen());
         break;
       case 'item sub group master':
+        Get.to(() => ItemSubGroupMasterScreen());
         break;
       case 'godown master':
         Get.to(() => GodownMasterScreen());

@@ -7,6 +7,7 @@ import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
+import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
 
 void showAppSnackbar({
   required String title,
@@ -111,7 +112,9 @@ void showAppSnackbar({
                         size: isWeb ? 20 : (tablet ? 28 : 24),
                       ),
                     ),
-                    SizedBox(width: isWeb ? 12 : (tablet ? 16 : 14)),
+                    isWeb
+                        ? AppSpaces.h12
+                        : (tablet ? AppSpaces.h16 : AppSpaces.h14),
                   ],
 
                   // Text content
@@ -131,7 +134,9 @@ void showAppSnackbar({
                                 : FontSizes.k18FontSize,
                           ),
                         ),
-                        SizedBox(height: isWeb ? 2 : (tablet ? 4 : 3)),
+                        isWeb
+                            ? AppSpaces.v2
+                            : (tablet ? AppSpaces.v4 : AppSpaces.v2),
                         Text(
                           message,
                           style: TextStyles.kRegularOutfit(
@@ -151,7 +156,7 @@ void showAppSnackbar({
 
                   // Close button
                   if (!isWeb) ...[
-                    SizedBox(width: tablet ? 12 : 8),
+                    tablet ? AppSpaces.h12 : AppSpaces.h8,
                     GestureDetector(
                       onTap: () => Get.back(),
                       child: Container(

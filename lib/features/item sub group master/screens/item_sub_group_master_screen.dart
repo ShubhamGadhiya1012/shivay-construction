@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
-import 'package:shivay_construction/features/category%20master/controllers/category_master_controller.dart';
-import 'package:shivay_construction/features/category%20master/widgets/category_master_card.dart';
+import 'package:shivay_construction/features/item%20sub%20group%20master/controllers/item_sub_group_master_controller.dart';
+import 'package:shivay_construction/features/item%20sub%20group%20master/widgets/item_sub_group_master_card.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
@@ -15,11 +15,11 @@ import 'package:shivay_construction/widgets/app_button.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
-class CategoryMasterScreen extends StatelessWidget {
-  CategoryMasterScreen({super.key});
+class ItemSubGroupMasterScreen extends StatelessWidget {
+  ItemSubGroupMasterScreen({super.key});
 
-  final CategoryMasterController _controller = Get.put(
-    CategoryMasterController(),
+  final ItemSubGroupMasterController _controller = Get.put(
+    ItemSubGroupMasterController(),
   );
 
   @override
@@ -32,7 +32,7 @@ class CategoryMasterScreen extends StatelessWidget {
           onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
           child: Scaffold(
             appBar: AppAppbar(
-              title: 'Category Master',
+              title: 'Item Sub Group Master',
               leading: IconButton(
                 icon: Icon(
                   Icons.arrow_back_ios,
@@ -50,12 +50,13 @@ class CategoryMasterScreen extends StatelessWidget {
                 children: [
                   AppTextFormField(
                     controller: _controller.searchController,
-                    hintText: 'Search Category',
-                    onChanged: (value) => _controller.filterCategories(value),
+                    hintText: 'Search Item Sub Group',
+                    onChanged: (value) =>
+                        _controller.filterItemSubGroups(value),
                   ),
-                  tablet ? AppSpaces.v16 : AppSpaces.v12,
+                  tablet ? AppSpaces.v16 : AppSpaces.v10,
                   Obx(() {
-                    if (_controller.filteredCategories.isEmpty &&
+                    if (_controller.filteredItemSubGroups.isEmpty &&
                         !_controller.isLoading.value) {
                       return Expanded(
                         child: Center(
@@ -63,13 +64,13 @@ class CategoryMasterScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.category_outlined,
+                                Icons.inventory_outlined,
                                 size: tablet ? 80 : 64,
                                 color: kColorLightGrey,
                               ),
                               tablet ? AppSpaces.v20 : AppSpaces.v16,
                               Text(
-                                'No Categories Found',
+                                'No Item Sub Groups Found',
                                 style: TextStyles.kMediumOutfit(
                                   fontSize: tablet
                                       ? FontSizes.k24FontSize
@@ -79,7 +80,7 @@ class CategoryMasterScreen extends StatelessWidget {
                               ),
                               AppSpaces.v8,
                               Text(
-                                'Add a new category to get started',
+                                'Add a new item sub group to get started',
                                 style: TextStyles.kRegularOutfit(
                                   fontSize: tablet
                                       ? FontSizes.k16FontSize
@@ -98,17 +99,17 @@ class CategoryMasterScreen extends StatelessWidget {
                         backgroundColor: kColorWhite,
                         color: kColorPrimary,
                         strokeWidth: 2.5,
-                        onRefresh: () => _controller.getCategories(),
+                        onRefresh: () => _controller.getItemSubGroups(),
                         child: ListView.builder(
-                          itemCount: _controller.filteredCategories.length,
+                          itemCount: _controller.filteredItemSubGroups.length,
                           itemBuilder: (context, index) {
-                            final category =
-                                _controller.filteredCategories[index];
-                            return CategoryMasterCard(
-                              category: category,
-                              onEdit: () => _showCategoryDialog(
-                                cCode: category.cCode,
-                                initialName: category.cName,
+                            final itemSubGroup =
+                                _controller.filteredItemSubGroups[index];
+                            return ItemSubGroupMasterCard(
+                              itemSubGroup: itemSubGroup,
+                              onEdit: () => _showItemSubGroupDialog(
+                                icCode: itemSubGroup.icCode,
+                                initialName: itemSubGroup.icName,
                               ),
                             );
                           },
@@ -133,7 +134,7 @@ class CategoryMasterScreen extends StatelessWidget {
                 ],
               ),
               child: FloatingActionButton.extended(
-                onPressed: () => _showCategoryDialog(),
+                onPressed: () => _showItemSubGroupDialog(),
                 backgroundColor: kColorPrimary,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -162,9 +163,9 @@ class CategoryMasterScreen extends StatelessWidget {
     );
   }
 
-  void _showCategoryDialog({String? cCode, String? initialName}) {
+  void _showItemSubGroupDialog({String? icCode, String? initialName}) {
     final bool tablet = AppScreenUtils.isTablet(Get.context!);
-    _controller.cNameController.text = initialName ?? '';
+    _controller.icNameController.text = initialName ?? '';
 
     showDialog(
       context: Get.context!,
@@ -216,7 +217,9 @@ class CategoryMasterScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(tablet ? 12 : 10),
                       ),
                       child: Icon(
-                        cCode != null ? Icons.edit_rounded : Icons.add_rounded,
+                        icCode != null
+                            ? Icons.edit_rounded
+                            : Icons.add_circle_outline_rounded,
                         color: kColorPrimary,
                         size: tablet ? 26 : 22,
                       ),
@@ -224,7 +227,9 @@ class CategoryMasterScreen extends StatelessWidget {
                     tablet ? AppSpaces.h12 : AppSpaces.h10,
                     Expanded(
                       child: Text(
-                        cCode != null ? 'Update Category' : 'Add New Category',
+                        icCode != null
+                            ? 'Update Item Sub Group'
+                            : 'Add New Item Sub Group',
                         style: TextStyles.kSemiBoldOutfit(
                           fontSize: tablet
                               ? FontSizes.k22FontSize
@@ -239,27 +244,29 @@ class CategoryMasterScreen extends StatelessWidget {
               Padding(
                 padding: tablet ? AppPaddings.p24 : AppPaddings.p20,
                 child: Form(
-                  key: _controller.categoryFormKey,
+                  key: _controller.itemSubGroupFormKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       AppTextFormField(
-                        controller: _controller.cNameController,
-                        hintText: 'Category name*',
+                        controller: _controller.icNameController,
+                        hintText: 'Item sub group name*',
                         validator: (value) =>
                             (value == null || value.trim().isEmpty)
-                            ? 'Please enter category name'
+                            ? 'Please enter item sub group name'
                             : value.trim().length < 2
                             ? 'Name must be at least 2 characters'
                             : null,
                       ),
+
                       tablet ? AppSpaces.v24 : AppSpaces.v20,
                       Row(
                         children: [
                           Expanded(
                             child: OutlinedButton(
                               onPressed: () {
-                                _controller.cNameController.clear();
+                                _controller.icNameController.clear();
+
                                 Get.back();
                               },
                               style: OutlinedButton.styleFrom(
@@ -291,7 +298,7 @@ class CategoryMasterScreen extends StatelessWidget {
                           tablet ? AppSpaces.h16 : AppSpaces.h12,
                           Expanded(
                             child: AppButton(
-                              title: cCode != null ? 'Update' : 'Add',
+                              title: icCode != null ? 'Update' : 'Add',
                               buttonColor: kColorPrimary,
                               titleColor: kColorWhite,
                               titleSize: tablet
@@ -299,15 +306,17 @@ class CategoryMasterScreen extends StatelessWidget {
                                   : FontSizes.k14FontSize,
                               buttonHeight: tablet ? 54 : 48,
                               onPressed: () async {
-                                if (_controller.categoryFormKey.currentState!
+                                if (_controller
+                                    .itemSubGroupFormKey
+                                    .currentState!
                                     .validate()) {
                                   Get.back();
-                                  await _controller.addUpdateCategory(
-                                    cCode: cCode ?? '',
-                                    cName: _controller.cNameController.text
+                                  await _controller.addUpdateItemSubGroup(
+                                    icCode: icCode ?? '',
+                                    icName: _controller.icNameController.text
                                         .trim(),
                                   );
-                                  _controller.cNameController.clear();
+                                  _controller.icNameController.clear();
                                 }
                               },
                             ),

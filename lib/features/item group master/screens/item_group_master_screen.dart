@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
-import 'package:shivay_construction/features/category%20master/controllers/category_master_controller.dart';
-import 'package:shivay_construction/features/category%20master/widgets/category_master_card.dart';
+import 'package:shivay_construction/features/item%20group%20master/controllers/item_group_master_controller.dart';
+import 'package:shivay_construction/features/item%20group%20master/widgets/item_group_master_card.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
@@ -15,11 +15,11 @@ import 'package:shivay_construction/widgets/app_button.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
-class CategoryMasterScreen extends StatelessWidget {
-  CategoryMasterScreen({super.key});
+class ItemGroupMasterScreen extends StatelessWidget {
+  ItemGroupMasterScreen({super.key});
 
-  final CategoryMasterController _controller = Get.put(
-    CategoryMasterController(),
+  final ItemGroupMasterController _controller = Get.put(
+    ItemGroupMasterController(),
   );
 
   @override
@@ -32,7 +32,7 @@ class CategoryMasterScreen extends StatelessWidget {
           onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
           child: Scaffold(
             appBar: AppAppbar(
-              title: 'Category Master',
+              title: 'Item Group Master',
               leading: IconButton(
                 icon: Icon(
                   Icons.arrow_back_ios,
@@ -50,12 +50,12 @@ class CategoryMasterScreen extends StatelessWidget {
                 children: [
                   AppTextFormField(
                     controller: _controller.searchController,
-                    hintText: 'Search Category',
-                    onChanged: (value) => _controller.filterCategories(value),
+                    hintText: 'Search Item Group',
+                    onChanged: (value) => _controller.filterItemGroups(value),
                   ),
                   tablet ? AppSpaces.v16 : AppSpaces.v12,
                   Obx(() {
-                    if (_controller.filteredCategories.isEmpty &&
+                    if (_controller.filteredItemGroups.isEmpty &&
                         !_controller.isLoading.value) {
                       return Expanded(
                         child: Center(
@@ -63,13 +63,13 @@ class CategoryMasterScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.category_outlined,
+                                Icons.inventory_2_outlined,
                                 size: tablet ? 80 : 64,
                                 color: kColorLightGrey,
                               ),
                               tablet ? AppSpaces.v20 : AppSpaces.v16,
                               Text(
-                                'No Categories Found',
+                                'No Item Groups Found',
                                 style: TextStyles.kMediumOutfit(
                                   fontSize: tablet
                                       ? FontSizes.k24FontSize
@@ -79,7 +79,7 @@ class CategoryMasterScreen extends StatelessWidget {
                               ),
                               AppSpaces.v8,
                               Text(
-                                'Add a new category to get started',
+                                'Add a new item group to get started',
                                 style: TextStyles.kRegularOutfit(
                                   fontSize: tablet
                                       ? FontSizes.k16FontSize
@@ -98,17 +98,17 @@ class CategoryMasterScreen extends StatelessWidget {
                         backgroundColor: kColorWhite,
                         color: kColorPrimary,
                         strokeWidth: 2.5,
-                        onRefresh: () => _controller.getCategories(),
+                        onRefresh: () => _controller.getItemGroups(),
                         child: ListView.builder(
-                          itemCount: _controller.filteredCategories.length,
+                          itemCount: _controller.filteredItemGroups.length,
                           itemBuilder: (context, index) {
-                            final category =
-                                _controller.filteredCategories[index];
-                            return CategoryMasterCard(
-                              category: category,
-                              onEdit: () => _showCategoryDialog(
-                                cCode: category.cCode,
-                                initialName: category.cName,
+                            final itemGroup =
+                                _controller.filteredItemGroups[index];
+                            return ItemGroupMasterCard(
+                              itemGroup: itemGroup,
+                              onEdit: () => _showItemGroupDialog(
+                                igCode: itemGroup.igCode,
+                                initialName: itemGroup.igName,
                               ),
                             );
                           },
@@ -133,7 +133,7 @@ class CategoryMasterScreen extends StatelessWidget {
                 ],
               ),
               child: FloatingActionButton.extended(
-                onPressed: () => _showCategoryDialog(),
+                onPressed: () => _showItemGroupDialog(),
                 backgroundColor: kColorPrimary,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -162,9 +162,9 @@ class CategoryMasterScreen extends StatelessWidget {
     );
   }
 
-  void _showCategoryDialog({String? cCode, String? initialName}) {
+  void _showItemGroupDialog({String? igCode, String? initialName}) {
     final bool tablet = AppScreenUtils.isTablet(Get.context!);
-    _controller.cNameController.text = initialName ?? '';
+    _controller.igNameController.text = initialName ?? '';
 
     showDialog(
       context: Get.context!,
@@ -216,7 +216,9 @@ class CategoryMasterScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(tablet ? 12 : 10),
                       ),
                       child: Icon(
-                        cCode != null ? Icons.edit_rounded : Icons.add_rounded,
+                        igCode != null
+                            ? Icons.edit_rounded
+                            : Icons.add_circle_outline_rounded,
                         color: kColorPrimary,
                         size: tablet ? 26 : 22,
                       ),
@@ -224,7 +226,9 @@ class CategoryMasterScreen extends StatelessWidget {
                     tablet ? AppSpaces.h12 : AppSpaces.h10,
                     Expanded(
                       child: Text(
-                        cCode != null ? 'Update Category' : 'Add New Category',
+                        igCode != null
+                            ? 'Update Item Group'
+                            : 'Add New Item Group',
                         style: TextStyles.kSemiBoldOutfit(
                           fontSize: tablet
                               ? FontSizes.k22FontSize
@@ -239,16 +243,16 @@ class CategoryMasterScreen extends StatelessWidget {
               Padding(
                 padding: tablet ? AppPaddings.p24 : AppPaddings.p20,
                 child: Form(
-                  key: _controller.categoryFormKey,
+                  key: _controller.itemGroupFormKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       AppTextFormField(
-                        controller: _controller.cNameController,
-                        hintText: 'Category name*',
+                        controller: _controller.igNameController,
+                        hintText: 'Item group name*',
                         validator: (value) =>
                             (value == null || value.trim().isEmpty)
-                            ? 'Please enter category name'
+                            ? 'Please enter item group name'
                             : value.trim().length < 2
                             ? 'Name must be at least 2 characters'
                             : null,
@@ -259,7 +263,7 @@ class CategoryMasterScreen extends StatelessWidget {
                           Expanded(
                             child: OutlinedButton(
                               onPressed: () {
-                                _controller.cNameController.clear();
+                                _controller.igNameController.clear();
                                 Get.back();
                               },
                               style: OutlinedButton.styleFrom(
@@ -291,7 +295,7 @@ class CategoryMasterScreen extends StatelessWidget {
                           tablet ? AppSpaces.h16 : AppSpaces.h12,
                           Expanded(
                             child: AppButton(
-                              title: cCode != null ? 'Update' : 'Add',
+                              title: igCode != null ? 'Update' : 'Add',
                               buttonColor: kColorPrimary,
                               titleColor: kColorWhite,
                               titleSize: tablet
@@ -299,15 +303,15 @@ class CategoryMasterScreen extends StatelessWidget {
                                   : FontSizes.k14FontSize,
                               buttonHeight: tablet ? 54 : 48,
                               onPressed: () async {
-                                if (_controller.categoryFormKey.currentState!
+                                if (_controller.itemGroupFormKey.currentState!
                                     .validate()) {
                                   Get.back();
-                                  await _controller.addUpdateCategory(
-                                    cCode: cCode ?? '',
-                                    cName: _controller.cNameController.text
+                                  await _controller.addUpdateItemGroup(
+                                    igCode: igCode ?? '',
+                                    igName: _controller.igNameController.text
                                         .trim(),
                                   );
-                                  _controller.cNameController.clear();
+                                  _controller.igNameController.clear();
                                 }
                               },
                             ),

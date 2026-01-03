@@ -52,7 +52,7 @@ class GodownMasterScreen extends StatelessWidget {
                     hintText: 'Search Godown',
                     onChanged: (value) => _controller.filterGodowns(value),
                   ),
-                  tablet ? AppSpaces.v16 : AppSpaces.v12,
+                  tablet ? AppSpaces.v16 : AppSpaces.v10,
                   Obx(() {
                     if (_controller.filteredGodowns.isEmpty &&
                         !_controller.isLoading.value) {
@@ -265,7 +265,7 @@ class GodownMasterScreen extends StatelessWidget {
                     children: [
                       AppTextFormField(
                         controller: _controller.gdNameController,
-                        hintText: 'Enter godown name*',
+                        hintText: 'Godown name*',
                         validator: (value) =>
                             (value == null || value.trim().isEmpty)
                             ? 'Please enter godown name'
@@ -273,7 +273,7 @@ class GodownMasterScreen extends StatelessWidget {
                             ? 'Name must be at least 2 characters'
                             : null,
                       ),
-                      tablet ? AppSpaces.v16 : AppSpaces.v12,
+                      tablet ? AppSpaces.v16 : AppSpaces.v10,
 
                       Obx(
                         () => AppDropdown(
