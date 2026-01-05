@@ -9,6 +9,7 @@ import 'package:shivay_construction/features/home/widgets/version_and_developer_
 import 'package:shivay_construction/features/category_master/screens/category_master_screen.dart';
 import 'package:shivay_construction/features/department_master/screens/department_master_screen.dart';
 import 'package:shivay_construction/features/godown_master/screens/godown_master_screen.dart';
+import 'package:shivay_construction/features/indent_entry/screens/indents_screen.dart';
 import 'package:shivay_construction/features/item_group_master/screens/item_group_master_screen.dart';
 import 'package:shivay_construction/features/item_sub_group_master/screens/item_sub_group_master_screen.dart';
 import 'package:shivay_construction/features/item_master/screens/item_master_list_screen.dart';
@@ -444,6 +445,17 @@ class AppDrawer extends StatelessWidget {
         break;
       case 'opening stock entry':
         Get.to(() => OpeningStocksScreen());
+        break;
+      case 'indent entry':
+        Get.to(() => IndentsScreen());
+        break;
+      case 'purchase order entry':
+        break;
+      case 'GRN entry':
+        break;
+      case 'site transfer entry':
+        break;
+      case 'repair entry':
         break;
       default:
     }
