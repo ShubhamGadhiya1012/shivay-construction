@@ -12,6 +12,7 @@ import 'package:shivay_construction/features/godown_master/screens/godown_master
 import 'package:shivay_construction/features/item_group_master/screens/item_group_master_screen.dart';
 import 'package:shivay_construction/features/item_sub_group_master/screens/item_sub_group_master_screen.dart';
 import 'package:shivay_construction/features/item_master/screens/item_master_list_screen.dart';
+import 'package:shivay_construction/features/opening_stock_entry/screens/opening_stocks_screen.dart';
 import 'package:shivay_construction/features/party_masters/screens/party_master_list_screen.dart';
 import 'package:shivay_construction/features/site_master/screens/site_master_list_screen.dart';
 import 'package:shivay_construction/features/user_settings/models/user_access_dm.dart';
@@ -440,6 +441,9 @@ class AppDrawer extends StatelessWidget {
         break;
       case 'godown master':
         Get.to(() => GodownMasterScreen());
+        break;
+      case 'opening stock entry':
+        Get.to(() => OpeningStocksScreen());
         break;
       default:
     }
