@@ -15,6 +15,7 @@ import 'package:shivay_construction/features/item_sub_group_master/screens/item_
 import 'package:shivay_construction/features/item_master/screens/item_master_list_screen.dart';
 import 'package:shivay_construction/features/opening_stock_entry/screens/opening_stocks_screen.dart';
 import 'package:shivay_construction/features/party_masters/screens/party_master_list_screen.dart';
+import 'package:shivay_construction/features/purchase_order_entry/screens/purchase_order_list_screen.dart';
 import 'package:shivay_construction/features/site_master/screens/site_master_list_screen.dart';
 import 'package:shivay_construction/features/user_settings/models/user_access_dm.dart';
 import 'package:shivay_construction/features/user_settings/screens/unauthorised_users_screen.dart';
@@ -450,6 +451,7 @@ class AppDrawer extends StatelessWidget {
         Get.to(() => IndentsScreen());
         break;
       case 'purchase order entry':
+        Get.to(() => PurchaseOrderListScreen());
         break;
       case 'GRN entry':
         break;
