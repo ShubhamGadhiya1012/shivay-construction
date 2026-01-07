@@ -138,6 +138,9 @@ class _ItemMasterListScreenState extends State<ItemMasterListScreen> {
                               onEdit: () {
                                 Get.to(() => ItemMasterScreen(item: item));
                               },
+                              onDelete: () async {
+                                await _controller.deleteItem(item.iCode);
+                              },
                             );
                           },
                         ),

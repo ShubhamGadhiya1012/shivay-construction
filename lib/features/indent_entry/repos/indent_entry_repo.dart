@@ -8,8 +8,7 @@ class IndentEntryRepo {
     required String invNo,
     required String date,
     required String gdCode,
-    required String fromDate,
-    required String toDate,
+
     required String siteCode,
     required List<Map<String, dynamic>> itemData,
     required List<PlatformFile> newFiles,
@@ -22,8 +21,6 @@ class IndentEntryRepo {
         'Invno': invNo,
         'Date': date,
         'GDCode': gdCode,
-        'FromDate': fromDate,
-        'ToDate': toDate,
         'SiteCode': siteCode,
       };
 

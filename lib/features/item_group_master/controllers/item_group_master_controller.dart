@@ -45,6 +45,30 @@ class ItemGroupMasterController extends GetxController {
     }
   }
 
+  Future<void> deleteItemGroup(String igCode) async {
+    isLoading.value = true;
+    try {
+      final response = await ItemGroupMasterRepo.deleteItemGroup(
+        code: igCode,
+        typeMast: 'Group',
+      );
+
+      if (response != null && response.containsKey('message')) {
+        String message = response['message'];
+        await getItemGroups();
+        showSuccessSnackbar('Success', message);
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> addUpdateItemGroup({
     required String igCode,
     required String igName,

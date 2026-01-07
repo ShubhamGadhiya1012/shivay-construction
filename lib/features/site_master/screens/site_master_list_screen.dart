@@ -138,6 +138,11 @@ class _SiteMasterListScreenState extends State<SiteMasterListScreen> {
                               onEdit: () {
                                 Get.to(() => SiteMasterScreen(site: site));
                               },
+                              onDelete: () async {
+                                await _controller.deleteSiteMaster(
+                                  site.siteCode,
+                                );
+                              },
                             );
                           },
                         ),

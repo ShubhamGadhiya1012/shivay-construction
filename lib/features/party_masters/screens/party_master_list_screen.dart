@@ -138,6 +138,11 @@ class _PartyMasterListScreenState extends State<PartyMasterListScreen> {
                               onEdit: () {
                                 Get.to(() => PartyMasterScreen(party: party));
                               },
+                              onDelete: () async {
+                                await _controller.deletePartyMaster(
+                                  party.pCode,
+                                );
+                              },
                             );
                           },
                         ),

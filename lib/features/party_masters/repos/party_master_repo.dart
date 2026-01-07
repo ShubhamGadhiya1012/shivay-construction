@@ -5,6 +5,29 @@ import 'package:shivay_construction/services/api_service.dart';
 import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
 class PartyMasterRepo {
+  static Future<dynamic> deletePartyMaster({
+    required String code,
+    required String typeMast,
+  }) async {
+    String? token = await SecureStorageHelper.read('token');
+
+    final Map<String, dynamic> requestBody = {
+      "Code": code,
+      "TypeMast": typeMast,
+    };
+
+    try {
+      final response = await ApiService.postRequest(
+        endpoint: '/Master/deleteMaster',
+        requestBody: requestBody,
+        token: token,
+      );
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   static Future<List<LocationDm>> getLocations() async {
     String? token = await SecureStorageHelper.read('token');
 

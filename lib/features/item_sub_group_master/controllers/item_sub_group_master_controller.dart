@@ -50,6 +50,30 @@ class ItemSubGroupMasterController extends GetxController {
     }
   }
 
+  Future<void> deleteItemSubGroup(String icCode) async {
+    isLoading.value = true;
+    try {
+      final response = await ItemSubGroupMasterRepo.deleteItemSubGroup(
+        code: icCode,
+        typeMast: 'SubGroup',
+      );
+
+      if (response != null && response.containsKey('message')) {
+        String message = response['message'];
+        await getItemSubGroups();
+        showSuccessSnackbar('Success', message);
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> addUpdateItemSubGroup({
     required String icCode,
     required String icName,

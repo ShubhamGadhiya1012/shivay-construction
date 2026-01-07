@@ -75,80 +75,15 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  widget.order.invNo,
-                                  style: TextStyles.kBoldOutfit(
-                                    fontSize: tablet
-                                        ? FontSizes.k20FontSize
-                                        : FontSizes.k18FontSize,
-                                    color: kColorPrimary,
-                                  ),
-                                ),
-                              ),
-
-                              Material(
-                                color: kColorPrimary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(
-                                  tablet ? 10 : 8,
-                                ),
-                                child: InkWell(
-                                  onTap: () async {
-                                    await widget.controller
-                                        .getOrderDetailsForCard(
-                                          widget.order.invNo,
-                                        );
-
-                                    Get.to(
-                                      () => PurchaseOrderScreen(
-                                        order: widget.order,
-                                        orderDetails: widget
-                                            .controller
-                                            .orderDetails
-                                            .toList(),
-                                      ),
-                                    );
-                                  },
-                                  borderRadius: BorderRadius.circular(
-                                    tablet ? 10 : 8,
-                                  ),
-                                  child: Container(
-                                    padding: tablet
-                                        ? AppPaddings.combined(
-                                            horizontal: 12,
-                                            vertical: 8,
-                                          )
-                                        : AppPaddings.combined(
-                                            horizontal: 10,
-                                            vertical: 6,
-                                          ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.edit_rounded,
-                                          size: tablet ? 18 : 16,
-                                          color: kColorPrimary,
-                                        ),
-                                        AppSpaces.h6,
-                                        Text(
-                                          'Edit',
-                                          style: TextStyles.kSemiBoldOutfit(
-                                            fontSize: tablet
-                                                ? FontSizes.k15FontSize
-                                                : FontSizes.k14FontSize,
-                                            color: kColorPrimary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          Text(
+                            widget.order.invNo,
+                            style: TextStyles.kBoldOutfit(
+                              fontSize: tablet
+                                  ? FontSizes.k20FontSize
+                                  : FontSizes.k18FontSize,
+                              color: kColorPrimary,
+                            ),
                           ),
-
                           AppSpaces.v4,
                           Text(
                             'Date: ${convertyyyyMMddToddMMyyyy(widget.order.date)}',
@@ -163,6 +98,56 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                       ),
                     ),
                     tablet ? AppSpaces.h12 : AppSpaces.h8,
+                    Material(
+                      color: kColorPrimary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                      child: InkWell(
+                        onTap: () async {
+                          await widget.controller.getOrderDetailsForCard(
+                            widget.order.invNo,
+                          );
+                          Get.to(
+                            () => PurchaseOrderScreen(
+                              order: widget.order,
+                              orderDetails: widget.controller.orderDetails
+                                  .toList(),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                        child: Container(
+                          padding: tablet
+                              ? AppPaddings.combined(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                )
+                              : AppPaddings.combined(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.edit_rounded,
+                                size: tablet ? 18 : 16,
+                                color: kColorPrimary,
+                              ),
+                              AppSpaces.h6,
+                              Text(
+                                'Edit',
+                                style: TextStyles.kSemiBoldOutfit(
+                                  fontSize: tablet
+                                      ? FontSizes.k15FontSize
+                                      : FontSizes.k14FontSize,
+                                  color: kColorPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    tablet ? AppSpaces.h8 : AppSpaces.h8,
                     AnimatedRotation(
                       turns: isExpanded ? 0.5 : 0,
                       duration: const Duration(milliseconds: 300),
@@ -210,7 +195,6 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                     tablet: tablet,
                   ),
                 ],
-
                 AnimatedCrossFade(
                   firstChild: const SizedBox.shrink(),
                   secondChild: Column(
@@ -226,14 +210,12 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                         'Order Items',
                         style: TextStyles.kSemiBoldOutfit(
                           fontSize: tablet
-                              ? FontSizes.k16FontSize
-                              : FontSizes.k14FontSize,
+                              ? FontSizes.k18FontSize
+                              : FontSizes.k16FontSize,
                           color: kColorTextPrimary,
                         ),
                       ),
-                      tablet ? AppSpaces.v8 : AppSpaces.v6,
-
-                      // Inside the AnimatedCrossFade secondChild, replace the Obx section:
+                      tablet ? AppSpaces.v12 : AppSpaces.v8,
                       Obx(() {
                         if (widget.controller.orderDetails.isEmpty) {
                           return Center(

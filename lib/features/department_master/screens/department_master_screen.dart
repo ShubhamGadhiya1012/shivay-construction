@@ -110,6 +110,11 @@ class DepartmentMasterScreen extends StatelessWidget {
                                 dCode: department.dCode,
                                 initialName: department.dName,
                               ),
+                              onDelete: () async {
+                                await _controller.deleteDepartment(
+                                  department.dCode,
+                                );
+                              },
                             );
                           },
                         ),

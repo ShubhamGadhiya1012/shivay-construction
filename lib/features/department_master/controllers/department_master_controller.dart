@@ -45,6 +45,30 @@ class DepartmentMasterController extends GetxController {
     }
   }
 
+  Future<void> deleteDepartment(String dCode) async {
+    isLoading.value = true;
+    try {
+      final response = await DepartmentMasterRepo.deleteDepartment(
+        code: dCode,
+        typeMast: 'Department',
+      );
+
+      if (response != null && response.containsKey('message')) {
+        String message = response['message'];
+        await getDepartments();
+        showSuccessSnackbar('Success', message);
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> addUpdateDepartment({
     required String dCode,
     required String dName,

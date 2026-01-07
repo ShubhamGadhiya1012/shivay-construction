@@ -21,8 +21,7 @@ class IndentEntryController extends GetxController {
   final indentItemFormKey = GlobalKey<FormState>();
 
   var dateController = TextEditingController();
-  var fromDateController = TextEditingController();
-  var toDateController = TextEditingController();
+
   var siteNameController = TextEditingController();
 
   var godowns = <GodownMasterDm>[].obs;
@@ -299,8 +298,6 @@ class IndentEntryController extends GetxController {
         invNo: isEditMode.value ? currentInvNo.value : '',
         date: _convertToApiDateFormat(dateController.text),
         gdCode: selectedGodownCode.value,
-        fromDate: _convertToApiDateFormat(fromDateController.text),
-        toDate: _convertToApiDateFormat(toDateController.text),
         siteCode: selectedSiteCode.value,
         itemData: itemsToSend.toList(),
         newFiles: attachmentFiles.toList(),
@@ -328,8 +325,7 @@ class IndentEntryController extends GetxController {
   void clearAll() {
     currentInvNo.value = '';
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
-    fromDateController.clear();
-    toDateController.clear();
+
     siteNameController.clear();
 
     selectedGodownName.value = '';

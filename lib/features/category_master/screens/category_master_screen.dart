@@ -110,6 +110,11 @@ class CategoryMasterScreen extends StatelessWidget {
                                 cCode: category.cCode,
                                 initialName: category.cName,
                               ),
+                              onDelete: () async {
+                                await _controller.deleteCategory(
+                                  category.cCode,
+                                );
+                              },
                             );
                           },
                         ),

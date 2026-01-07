@@ -43,4 +43,28 @@ class ItemMasterListController extends GetxController {
       );
     }
   }
+
+  Future<void> deleteItem(String iCode) async {
+    isLoading.value = true;
+    try {
+      final response = await ItemMasterListRepo.deleteItem(
+        code: iCode,
+        typeMast: 'Item',
+      );
+
+      if (response != null && response.containsKey('message')) {
+        String message = response['message'];
+        await getItems();
+        showSuccessSnackbar('Success', message);
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

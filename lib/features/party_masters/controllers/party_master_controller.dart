@@ -193,6 +193,8 @@ class PartyMasterController extends GetxController {
     }
   }
 
+ 
+
   void clearAll() {
     accountNameController.clear();
     printNameController.clear();
