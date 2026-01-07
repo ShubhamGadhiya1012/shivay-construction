@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_detail_dm.dart';
 import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_list_dm.dart';
 import 'package:shivay_construction/features/purchase_order_entry/repos/purchase_order_list_repo.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
@@ -80,7 +81,9 @@ class PurchaseOrderListController extends GetxController {
 
   Future<void> getOrderDetailsForCard(String invNo) async {
     try {
-      final details = await PurchaseOrderListRepo.getPurchaseOrderDetails(invNo : invNo);
+      final details = await PurchaseOrderListRepo.getPurchaseOrderDetails(
+        invNo: invNo,
+      );
       orderDetails.assignAll(details);
     } catch (e) {
       orderDetails.clear();

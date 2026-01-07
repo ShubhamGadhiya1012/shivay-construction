@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
-import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_dm.dart';
+import 'package:shivay_construction/features/purchase_order_entry/models/auth_indent_item_dm.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/helpers/date_format_helper.dart';

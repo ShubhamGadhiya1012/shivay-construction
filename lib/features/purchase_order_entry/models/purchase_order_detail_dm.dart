@@ -4,7 +4,7 @@ class PurchaseOrderDetailDm {
   final String iName;
   final String? unit;
   final double authorizedQty;
-  final double indentQty;
+  final double orderQty;
 
   PurchaseOrderDetailDm({
     required this.srNo,
@@ -12,7 +12,7 @@ class PurchaseOrderDetailDm {
     required this.iName,
     this.unit,
     required this.authorizedQty,
-    required this.indentQty,
+    required this.orderQty,
   });
 
   factory PurchaseOrderDetailDm.fromJson(Map<String, dynamic> json) {
@@ -22,7 +22,7 @@ class PurchaseOrderDetailDm {
       iName: json['INAME'] ?? '',
       unit: json['Unit'],
       authorizedQty: (json['AuthorizedQty'] as num?)?.toDouble() ?? 0.0,
-      indentQty: (json['IndentQty'] as num?)?.toDouble() ?? 0.0,
+      orderQty: (json['OrderQty'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

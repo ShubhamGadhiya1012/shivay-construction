@@ -9,7 +9,7 @@ import 'package:shivay_construction/features/godown_master/repos/godown_master_r
 import 'package:shivay_construction/features/party_masters/models/party_master_dm.dart';
 import 'package:shivay_construction/features/party_masters/repos/party_master_list_repo.dart';
 import 'package:shivay_construction/features/purchase_order_entry/controllers/purchase_order_list_controller.dart';
-import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_dm.dart';
+import 'package:shivay_construction/features/purchase_order_entry/models/auth_indent_item_dm.dart';
 import 'package:shivay_construction/features/purchase_order_entry/repos/purchase_order_repo.dart';
 import 'package:shivay_construction/features/site_master/models/site_master_dm.dart';
 import 'package:shivay_construction/features/site_master/repos/site_master_list_repo.dart';
@@ -216,6 +216,11 @@ class PurchaseOrderController extends GetxController {
         gdCode: selectedGodownCode.value,
       );
       authIndentItems.assignAll(fetchedItems);
+
+      expandedItemIndices.clear();
+      for (int i = 0; i < fetchedItems.length; i++) {
+        expandedItemIndices.add(i);
+      }
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
@@ -290,8 +295,6 @@ class PurchaseOrderController extends GetxController {
 
     return selectedData;
   }
-
-
 
   final PurchaseOrderListController purchaseOrderListController =
       Get.find<PurchaseOrderListController>();
