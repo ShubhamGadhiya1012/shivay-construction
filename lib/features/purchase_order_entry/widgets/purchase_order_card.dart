@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/purchase_order_entry/controllers/purchase_order_list_controller.dart';
 import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_list_dm.dart';
+import 'package:shivay_construction/features/purchase_order_entry/screens/purchase_order_screen.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
@@ -74,15 +75,80 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            widget.order.invNo,
-                            style: TextStyles.kBoldOutfit(
-                              fontSize: tablet
-                                  ? FontSizes.k20FontSize
-                                  : FontSizes.k18FontSize,
-                              color: kColorPrimary,
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  widget.order.invNo,
+                                  style: TextStyles.kBoldOutfit(
+                                    fontSize: tablet
+                                        ? FontSizes.k20FontSize
+                                        : FontSizes.k18FontSize,
+                                    color: kColorPrimary,
+                                  ),
+                                ),
+                              ),
+
+                              Material(
+                                color: kColorPrimary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(
+                                  tablet ? 10 : 8,
+                                ),
+                                child: InkWell(
+                                  onTap: () async {
+                                    await widget.controller
+                                        .getOrderDetailsForCard(
+                                          widget.order.invNo,
+                                        );
+
+                                    Get.to(
+                                      () => PurchaseOrderScreen(
+                                        order: widget.order,
+                                        orderDetails: widget
+                                            .controller
+                                            .orderDetails
+                                            .toList(),
+                                      ),
+                                    );
+                                  },
+                                  borderRadius: BorderRadius.circular(
+                                    tablet ? 10 : 8,
+                                  ),
+                                  child: Container(
+                                    padding: tablet
+                                        ? AppPaddings.combined(
+                                            horizontal: 12,
+                                            vertical: 8,
+                                          )
+                                        : AppPaddings.combined(
+                                            horizontal: 10,
+                                            vertical: 6,
+                                          ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.edit_rounded,
+                                          size: tablet ? 18 : 16,
+                                          color: kColorPrimary,
+                                        ),
+                                        AppSpaces.h6,
+                                        Text(
+                                          'Edit',
+                                          style: TextStyles.kSemiBoldOutfit(
+                                            fontSize: tablet
+                                                ? FontSizes.k15FontSize
+                                                : FontSizes.k14FontSize,
+                                            color: kColorPrimary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
+
                           AppSpaces.v4,
                           Text(
                             'Date: ${convertyyyyMMddToddMMyyyy(widget.order.date)}',

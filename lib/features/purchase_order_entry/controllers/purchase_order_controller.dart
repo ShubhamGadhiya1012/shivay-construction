@@ -221,9 +221,13 @@ class PurchaseOrderController extends GetxController {
     for (var selectedItem in selectedPurchaseItems) {
       for (var item in authIndentItems) {
         if (item.iCode == selectedItem['ICode']) {
+          // Store iName in selectedItem if not present
+          if (selectedItem['iName'] == null || selectedItem['iName'].isEmpty) {
+            selectedItem['iName'] = item.iName;
+          }
+
           for (var indent in item.indents) {
-            if (indent.indentNo == selectedItem['IndentNo'] &&
-                indent.indentSrNo == selectedItem['IndentSrNo']) {
+            if (indent.indentNo == selectedItem['IndentNo']) {
               indent.isSelected = true;
             }
           }
@@ -231,6 +235,7 @@ class PurchaseOrderController extends GetxController {
       }
     }
     authIndentItems.refresh();
+    selectedPurchaseItems.refresh();
 
     bool anySelected = authIndentItems.any(
       (item) => item.indents.any((indent) => indent.isSelected),
@@ -242,6 +247,14 @@ class PurchaseOrderController extends GetxController {
     final newSelectedItems = getSelectedIndentsData();
 
     for (var newItem in newSelectedItems) {
+      // Find the item name
+      for (var authItem in authIndentItems) {
+        if (authItem.iCode == newItem['ICode']) {
+          newItem['iName'] = authItem.iName;
+          break;
+        }
+      }
+
       bool exists = selectedPurchaseItems.any(
         (item) =>
             item['IndentNo'] == newItem['IndentNo'] &&
