@@ -403,21 +403,6 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
                             }),
 
                             tablet ? AppSpaces.v20 : AppSpaces.v14,
-                            AppButton(
-                              buttonHeight: tablet ? 50 : 45,
-                              buttonColor: kColorWhite,
-                              borderColor: kColorPrimary,
-                              title: 'View Site Wise Stock',
-                              titleColor: kColorPrimary,
-                              titleSize: tablet
-                                  ? FontSizes.k15FontSize
-                                  : FontSizes.k14FontSize,
-
-                              onPressed: () {
-                                Get.to(() => SiteWiseStockScreen());
-                              },
-                            ),
-                            tablet ? AppSpaces.v20 : AppSpaces.v14,
 
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
@@ -454,6 +439,16 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
                                         },
                                         onDelete: () =>
                                             _showDeleteConfirmation(index),
+                                        onViewStock: () {
+                                          Get.to(
+                                            () => SiteWiseStockScreen(
+                                              iCode:
+                                                  item['ICode'] ??
+                                                  item['icode'] ??
+                                                  '',
+                                            ),
+                                          );
+                                        },
                                       ),
                                     );
                                   },

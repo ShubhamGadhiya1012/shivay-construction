@@ -15,11 +15,13 @@ class IndentItemCard extends StatelessWidget {
     required this.item,
     required this.onEdit,
     required this.onDelete,
+    required this.onViewStock,
   });
 
   final Map<String, dynamic> item;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback? onViewStock;
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +77,33 @@ class IndentItemCard extends StatelessWidget {
               ),
               Row(
                 children: [
+                  if (onViewStock != null) ...[
+                    Material(
+                      color: kColorGreen.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(tablet ? 8 : 6),
+                      child: InkWell(
+                        onTap: onViewStock,
+                        borderRadius: BorderRadius.circular(tablet ? 8 : 6),
+                        child: Container(
+                          padding: tablet
+                              ? AppPaddings.combined(
+                                  horizontal: 10,
+                                  vertical: 10,
+                                )
+                              : AppPaddings.combined(
+                                  horizontal: 8,
+                                  vertical: 8,
+                                ),
+                          child: Icon(
+                            Icons.visibility_rounded,
+                            size: tablet ? 20 : 18,
+                            color: kColorGreen,
+                          ),
+                        ),
+                      ),
+                    ),
+                    tablet ? AppSpaces.h12 : AppSpaces.h8,
+                  ],
                   Material(
                     color: kColorPrimary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(tablet ? 8 : 6),
