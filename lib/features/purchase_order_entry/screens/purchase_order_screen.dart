@@ -18,7 +18,7 @@ import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
 class PurchaseOrderScreen extends StatefulWidget {
-  const PurchaseOrderScreen({super.key,});
+  const PurchaseOrderScreen({super.key});
 
   @override
   State<PurchaseOrderScreen> createState() => _PurchaseOrderScreenState();
@@ -86,10 +86,7 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
   }
 
   void _handleBackPress() {
-    if (_controller.currentStep.value == 1 &&
-        _controller.isSelectionMode.value) {
-      _controller.deselectAllIndents();
-    } else if (_controller.currentStep.value == 1) {
+    if (_controller.currentStep.value == 1) {
       _controller.previousStep();
     } else {
       Get.back();
@@ -167,6 +164,114 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                       hintText: 'Remarks',
                       maxLines: 3,
                     ),
+
+                    tablet ? AppSpaces.v20 : AppSpaces.v14,
+                    Obx(
+                      () => Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Items (${_controller.selectedPurchaseItems.length})',
+                            style: TextStyles.kMediumOutfit(
+                              fontSize: tablet
+                                  ? FontSizes.k16FontSize
+                                  : FontSizes.k14FontSize,
+                              color: kColorTextPrimary,
+                            ),
+                          ),
+                          AppButton(
+                            buttonWidth: tablet
+                                ? 0.415.screenWidth
+                                : 0.45.screenWidth,
+                            buttonHeight: tablet ? 40 : 35,
+                            buttonColor: kColorPrimary,
+                            title: '+ Add',
+                            titleSize: tablet
+                                ? FontSizes.k14FontSize
+                                : FontSizes.k12FontSize,
+                            onPressed: () =>
+                                _controller.openItemSelectionScreen(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    tablet ? AppSpaces.v10 : AppSpaces.v6,
+
+                    Obx(() {
+                      if (_controller.selectedPurchaseItems.isNotEmpty) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: kColorLightGrey),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: ListView.separated(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _controller.selectedPurchaseItems.length,
+                            separatorBuilder: (_, __) => Divider(
+                              height: 1,
+                              color: kColorLightGrey,
+                              indent: 16,
+                              endIndent: 16,
+                            ),
+                            itemBuilder: (context, index) {
+                              final item =
+                                  _controller.selectedPurchaseItems[index];
+
+                              String itemName = item['ICode'];
+                              if (_controller.authIndentItems.isNotEmpty) {
+                                for (var authItem
+                                    in _controller.authIndentItems) {
+                                  if (authItem.iCode == item['ICode']) {
+                                    itemName = authItem.iName;
+                                    break;
+                                  }
+                                }
+                              }
+
+                              return ListTile(
+                                dense: true,
+                                leading: Icon(
+                                  Icons.inventory_2_outlined,
+                                  color: kColorPrimary,
+                                  size: tablet ? 24 : 20,
+                                ),
+                                title: Text(
+                                  itemName,
+                                  style: TextStyles.kMediumOutfit(
+                                    fontSize: tablet
+                                        ? FontSizes.k14FontSize
+                                        : FontSizes.k12FontSize,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                subtitle: Text(
+                                  'Indent: ${item['IndentNo']} | Qty: ${item['Qty']}',
+                                  style: TextStyles.kRegularOutfit(
+                                    fontSize: tablet
+                                        ? FontSizes.k12FontSize
+                                        : FontSizes.k10FontSize,
+                                    color: kColorDarkGrey,
+                                  ),
+                                ),
+                                trailing: GestureDetector(
+                                  onTap: () =>
+                                      _controller.removeSelectedItem(index),
+                                  child: Icon(
+                                    Icons.close,
+                                    color: kColorRed,
+                                    size: tablet ? 20 : 18,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }),
+
                     tablet ? AppSpaces.v20 : AppSpaces.v14,
                     Obx(
                       () => Row(
@@ -345,12 +450,23 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                 ),
               ),
             ),
-            AppButton(
-              title: 'Next',
-              buttonHeight: tablet ? 54 : 48,
-              onPressed: () => _controller.nextStep(),
-            ),
-            tablet ? AppSpaces.v10 : AppSpaces.v8,
+
+            Obx(() {
+              if (_controller.selectedPurchaseItems.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              return Column(
+                children: [
+                  AppButton(
+                    title: 'Submit',
+                    buttonHeight: tablet ? 54 : 48,
+                    onPressed: () => _controller.savePurchaseOrder(),
+                  ),
+                  tablet ? AppSpaces.v10 : AppSpaces.v8,
+                ],
+              );
+            }),
           ],
         ),
       ),
@@ -534,45 +650,26 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
 
             return Column(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => _controller.previousStep(),
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: kColorLightGrey, width: 1.5),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              tablet ? 12 : 10,
-                            ),
-                          ),
-                          padding: AppPaddings.combined(
-                            vertical: tablet ? 16 : 14,
-                            horizontal: 0,
-                          ),
-                        ),
-                        child: Text(
-                          'Back',
-                          style: TextStyles.kMediumOutfit(
-                            color: kColorDarkGrey,
-                            fontSize: tablet
-                                ? FontSizes.k16FontSize
-                                : FontSizes.k14FontSize,
-                          ),
-                        ),
-                      ),
-                    ),
-                    tablet ? AppSpaces.h16 : AppSpaces.h12,
-                    Expanded(
-                      child: AppButton(
-                        title: 'Submit',
+                Obx(() {
+                  bool hasSelection = _controller.authIndentItems.any(
+                    (item) => item.indents.any((indent) => indent.isSelected),
+                  );
+
+                  if (_controller.authIndentItems.isEmpty || !hasSelection) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return Column(
+                    children: [
+                      AppButton(
+                        title: 'Save',
                         buttonHeight: tablet ? 54 : 48,
-                        onPressed: () => _controller.savePurchaseOrder(),
+                        onPressed: () => _controller.saveSelectedItems(),
                       ),
-                    ),
-                  ],
-                ),
-                tablet ? AppSpaces.v10 : AppSpaces.v8,
+                      tablet ? AppSpaces.v10 : AppSpaces.v8,
+                    ],
+                  );
+                }),
               ],
             );
           }),

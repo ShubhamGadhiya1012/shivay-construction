@@ -48,6 +48,7 @@ class PurchaseOrderController extends GetxController {
   var authIndentItems = <AuthIndentItemDm>[].obs;
   var isSelectionMode = false.obs;
   var expandedItemIndices = <int>[].obs;
+  var selectedPurchaseItems = <Map<String, dynamic>>[].obs;
 
   Future<void> getSites() async {
     try {
@@ -78,8 +79,18 @@ class PurchaseOrderController extends GetxController {
   void onGodownSelected(String? godownName) {
     selectedGodownName.value = godownName!;
     var selectedGodownObj = godowns.firstWhere((gd) => gd.gdName == godownName);
+
+    bool isGodownChanging =
+        selectedGodownCode.value.isNotEmpty &&
+        selectedGodownCode.value != selectedGodownObj.gdCode;
+
     selectedGodownCode.value = selectedGodownObj.gdCode;
     selectedSiteCode.value = selectedGodownObj.siteCode;
+
+    if (isGodownChanging && selectedPurchaseItems.isNotEmpty) {
+      selectedPurchaseItems.clear();
+      authIndentItems.clear();
+    }
 
     if (selectedGodownObj.siteCode.isNotEmpty) {
       final site = sites.firstWhereOrNull(
@@ -193,12 +204,10 @@ class PurchaseOrderController extends GetxController {
     return '${parts[2]}-${parts[1]}-${parts[0]}';
   }
 
-  void nextStep() {
-    if (currentStep.value == 0) {
-      if (purchaseOrderFormKey.currentState!.validate()) {
-        currentStep.value = 1;
-        getAuthIndentItems();
-      }
+  void openItemSelectionScreen() {
+    if (purchaseOrderFormKey.currentState!.validate()) {
+      currentStep.value = 1;
+      getAuthIndentItems();
     }
   }
 
@@ -206,6 +215,61 @@ class PurchaseOrderController extends GetxController {
     if (currentStep.value == 1) {
       currentStep.value = 0;
     }
+  }
+
+  void preselectExistingItems() {
+    for (var selectedItem in selectedPurchaseItems) {
+      for (var item in authIndentItems) {
+        if (item.iCode == selectedItem['ICode']) {
+          for (var indent in item.indents) {
+            if (indent.indentNo == selectedItem['IndentNo'] &&
+                indent.indentSrNo == selectedItem['IndentSrNo']) {
+              indent.isSelected = true;
+            }
+          }
+        }
+      }
+    }
+    authIndentItems.refresh();
+
+    bool anySelected = authIndentItems.any(
+      (item) => item.indents.any((indent) => indent.isSelected),
+    );
+    isSelectionMode.value = anySelected;
+  }
+
+  void saveSelectedItems() {
+    final newSelectedItems = getSelectedIndentsData();
+
+    for (var newItem in newSelectedItems) {
+      bool exists = selectedPurchaseItems.any(
+        (item) =>
+            item['IndentNo'] == newItem['IndentNo'] &&
+            item['IndentSrNo'] == newItem['IndentSrNo'],
+      );
+
+      if (!exists) {
+        selectedPurchaseItems.add(newItem);
+      }
+    }
+
+    for (int i = 0; i < selectedPurchaseItems.length; i++) {
+      selectedPurchaseItems[i]['SrNo'] = i + 1;
+    }
+
+    currentStep.value = 0;
+    deselectAllIndents();
+    selectedPurchaseItems.refresh();
+  }
+
+  void removeSelectedItem(int index) {
+    selectedPurchaseItems.removeAt(index);
+
+    for (int i = 0; i < selectedPurchaseItems.length; i++) {
+      selectedPurchaseItems[i]['SrNo'] = i + 1;
+    }
+
+    selectedPurchaseItems.refresh();
   }
 
   Future<void> getAuthIndentItems() async {
@@ -221,6 +285,8 @@ class PurchaseOrderController extends GetxController {
       for (int i = 0; i < fetchedItems.length; i++) {
         expandedItemIndices.add(i);
       }
+
+      preselectExistingItems();
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
@@ -303,10 +369,8 @@ class PurchaseOrderController extends GetxController {
     isLoading.value = true;
 
     try {
-      final selectedItems = getSelectedIndentsData();
-
-      if (selectedItems.isEmpty) {
-        showErrorSnackbar('Error', 'Please select at least one indent');
+      if (selectedPurchaseItems.isEmpty) {
+        showErrorSnackbar('Error', 'Please add at least one item');
         return;
       }
 
@@ -317,7 +381,7 @@ class PurchaseOrderController extends GetxController {
         pCode: selectedPartyCode.value,
         remarks: remarksController.text.trim(),
         siteCode: selectedSiteCode.value,
-        itemData: selectedItems,
+        itemData: selectedPurchaseItems.toList(),
         newFiles: attachmentFiles.toList(),
         existingAttachments: existingAttachmentUrls.toList(),
       );
@@ -355,6 +419,7 @@ class PurchaseOrderController extends GetxController {
     attachmentFiles.clear();
     existingAttachmentUrls.clear();
     authIndentItems.clear();
+    selectedPurchaseItems.clear();
 
     currentStep.value = 0;
     isEditMode.value = false;

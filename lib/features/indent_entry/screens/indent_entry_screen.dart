@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +5,7 @@ import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/indent_entry/controllers/indent_entry_controller.dart';
 import 'package:shivay_construction/features/indent_entry/models/indent_dm.dart';
 import 'package:shivay_construction/features/indent_entry/models/indent_detail_dm.dart';
+import 'package:shivay_construction/features/indent_entry/screens/site_wise_stock_screen.dart';
 import 'package:shivay_construction/features/indent_entry/widgets/indent_item_card.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
@@ -402,7 +401,24 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
                               }
                               return const SizedBox.shrink();
                             }),
+
                             tablet ? AppSpaces.v20 : AppSpaces.v14,
+                            AppButton(
+                              buttonHeight: tablet ? 50 : 45,
+                              buttonColor: kColorWhite,
+                              borderColor: kColorPrimary,
+                              title: 'View Site Wise Stock',
+                              titleColor: kColorPrimary,
+                              titleSize: tablet
+                                  ? FontSizes.k15FontSize
+                                  : FontSizes.k14FontSize,
+
+                              onPressed: () {
+                                Get.to(() => SiteWiseStockScreen());
+                              },
+                            ),
+                            tablet ? AppSpaces.v20 : AppSpaces.v14,
+
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
