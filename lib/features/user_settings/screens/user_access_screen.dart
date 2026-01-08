@@ -20,11 +20,15 @@ class UserAccessScreen extends StatefulWidget {
     required this.fullName,
     required this.userId,
     required this.appAccess,
+    required this.indentAuth,
+    required this.poAuth,
   });
 
   final String fullName;
   final int userId;
   bool appAccess;
+  bool indentAuth;
+  bool poAuth;
 
   @override
   State<UserAccessScreen> createState() => _UserAccessScreenState();
@@ -107,6 +111,8 @@ class _UserAccessScreenState extends State<UserAccessScreen> {
                               await _controller.setAppAccess(
                                 userId: widget.userId,
                                 appAccess: value,
+                                indentAuth: widget.indentAuth,
+                                poAuth: widget.poAuth,
                               );
                               setState(() {
                                 widget.appAccess = value;
@@ -117,6 +123,103 @@ class _UserAccessScreenState extends State<UserAccessScreen> {
                       ),
                     ),
                     AppSpaces.v10,
+                    AppCard(
+                      onTap: () {},
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Indent Authorise Access',
+                                style: TextStyles.kSemiBoldOutfit(
+                                  fontSize: tablet
+                                      ? FontSizes.k24FontSize
+                                      : FontSizes.k18FontSize,
+                                ),
+                              ),
+                              Text(
+                                'Allow user to authorise Indent',
+                                style: TextStyles.kRegularOutfit(
+                                  fontSize: tablet
+                                      ? FontSizes.k20FontSize
+                                      : FontSizes.k16FontSize,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Switch(
+                            value: widget.indentAuth,
+                            activeThumbColor: kColorWhite,
+                            inactiveThumbColor: kColorWhite,
+                            inactiveTrackColor: kColorGrey,
+                            activeTrackColor: kColorSecondary,
+                            onChanged: (value) async {
+                              await _controller.setAppAccess(
+                                userId: widget.userId,
+                                appAccess: widget.appAccess,
+                                indentAuth: value,
+                                poAuth: widget.poAuth,
+                              );
+                              setState(() {
+                                widget.indentAuth = value;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    AppSpaces.v10,
+                    AppCard(
+                      onTap: () {},
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'PO Authorise Access',
+                                style: TextStyles.kSemiBoldOutfit(
+                                  fontSize: tablet
+                                      ? FontSizes.k24FontSize
+                                      : FontSizes.k18FontSize,
+                                ),
+                              ),
+                              Text(
+                                'Allow user to authorise PO',
+                                style: TextStyles.kRegularOutfit(
+                                  fontSize: tablet
+                                      ? FontSizes.k20FontSize
+                                      : FontSizes.k16FontSize,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Switch(
+                            value: widget.poAuth,
+                            activeThumbColor: kColorWhite,
+                            inactiveThumbColor: kColorWhite,
+                            inactiveTrackColor: kColorGrey,
+                            activeTrackColor: kColorSecondary,
+                            onChanged: (value) async {
+                              await _controller.setAppAccess(
+                                userId: widget.userId,
+                                appAccess: widget.appAccess,
+                                indentAuth: widget.indentAuth,
+                                poAuth: value,
+                              );
+                              setState(() {
+                                widget.poAuth = value;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    AppSpaces.v10,
+
                     Visibility(
                       visible: widget.appAccess,
                       child: Column(

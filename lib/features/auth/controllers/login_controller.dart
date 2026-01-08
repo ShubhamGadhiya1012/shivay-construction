@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/features/auth/models/company_dm.dart';
@@ -48,11 +51,24 @@ class LoginController extends GetxController {
       return;
     }
 
+    String? fcmToken;
+    if (Platform.isAndroid) {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+
+      if (fcmToken == null) {
+        showErrorSnackbar('Login Failed', 'Unable to fetch FCM Token.');
+        isLoading.value = false;
+        return;
+      }
+    } else {
+      fcmToken = '';
+    }
+
     try {
       final fetchedCompanies = await LoginRepo.loginUser(
         mobileNo: mobileNumberController.text,
         password: passwordController.text,
-        fcmToken: '',
+        fcmToken: fcmToken,
         deviceId: deviceId,
       );
 

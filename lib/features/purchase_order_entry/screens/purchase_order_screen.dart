@@ -3,10 +3,13 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/purchase_order_entry/controllers/purchase_order_controller.dart';
+import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_detail_dm.dart';
+import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_list_dm.dart';
 import 'package:shivay_construction/features/purchase_order_entry/widgets/auth_indent_item_card.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/extensions/app_size_extensions.dart';
+import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
@@ -18,8 +21,9 @@ import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
 class PurchaseOrderScreen extends StatefulWidget {
-  const PurchaseOrderScreen({super.key});
-
+  const PurchaseOrderScreen({super.key, this.order, this.orderDetails});
+  final PurchaseOrderListDm? order;
+  final List<PurchaseOrderDetailDm>? orderDetails;
   @override
   State<PurchaseOrderScreen> createState() => _PurchaseOrderScreenState();
 }
@@ -42,6 +46,49 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
 
     await _controller.getGodowns();
     await _controller.getParties();
+
+    if (widget.order != null && widget.orderDetails != null) {
+      _loadEditData();
+    }
+  }
+
+  void _loadEditData() {
+    final order = widget.order!;
+    final details = widget.orderDetails!;
+
+    _controller.isEditMode.value = true;
+    _controller.currentInvNo.value = order.invNo;
+    _controller.dateController.text = convertyyyyMMddToddMMyyyy(order.date);
+    _controller.remarksController.text = order.remarks;
+
+    _controller.selectedGodownCode.value = order.gdCode;
+    _controller.selectedGodownName.value = order.gdName;
+    _controller.selectedSiteCode.value = order.siteCode;
+    _controller.siteNameController.text = order.siteName;
+
+    _controller.selectedPartyCode.value = order.pCode;
+    _controller.selectedPartyName.value = order.pName;
+
+    if (order.attachments.isNotEmpty) {
+      _controller.existingAttachmentUrls.clear();
+      _controller.existingAttachmentUrls.addAll(order.attachments.split(','));
+    }
+
+    _controller.selectedPurchaseItems.clear();
+    int srNo = 1;
+    for (var item in details) {
+      for (var indent in item.indents) {
+        _controller.selectedPurchaseItems.add({
+          'SrNo': srNo++,
+          'ICode': item.iCode,
+          'iName': item.iName,
+          'Unit': indent.unit,
+          'Qty': indent.orderQty,
+          'IndentNo': indent.indentInvNo,
+          'IndentSrNo': indent.indentSrNo,
+        });
+      }
+    }
   }
 
   @override
@@ -62,7 +109,9 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
             },
             child: Scaffold(
               appBar: AppAppbar(
-                title: 'New Purchase Order',
+                title: widget.order != null
+                    ? 'Edit Purchase Order'
+                    : 'New Purchase Order',
                 leading: IconButton(
                   onPressed: () => _handleBackPress(),
                   icon: Icon(
@@ -219,12 +268,10 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                               final item =
                                   _controller.selectedPurchaseItems[index];
 
-                              String itemName = item['ICode'];
                               if (_controller.authIndentItems.isNotEmpty) {
                                 for (var authItem
                                     in _controller.authIndentItems) {
                                   if (authItem.iCode == item['ICode']) {
-                                    itemName = authItem.iName;
                                     break;
                                   }
                                 }
@@ -238,7 +285,7 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                   size: tablet ? 24 : 20,
                                 ),
                                 title: Text(
-                                  itemName,
+                                  item['iName'] ?? item['ICode'] ?? '',
                                   style: TextStyles.kMediumOutfit(
                                     fontSize: tablet
                                         ? FontSizes.k14FontSize

@@ -60,12 +60,7 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
       _controller.isEditMode.value = true;
       _controller.currentInvNo.value = indent.invNo;
       _controller.dateController.text = _convertyyyyMMddToddMMyyyy(indent.date);
-      _controller.fromDateController.text = _convertyyyyMMddToddMMyyyy(
-        indent.fromDate,
-      );
-      _controller.toDateController.text = _convertyyyyMMddToddMMyyyy(
-        indent.toDate,
-      );
+
       _controller.selectedGodownCode.value = indent.gdCode;
       _controller.selectedGodownName.value = indent.gdName;
       _controller.selectedSiteCode.value = indent.siteCode;
@@ -150,34 +145,6 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
                                   value == null || value.isEmpty
                                   ? 'Please select date'
                                   : null,
-                            ),
-                            tablet ? AppSpaces.v16 : AppSpaces.v10,
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: AppDatePickerTextFormField(
-                                    dateController:
-                                        _controller.fromDateController,
-                                    hintText: 'From Date *',
-                                    validator: (value) =>
-                                        value == null || value.isEmpty
-                                        ? 'Please select from date'
-                                        : null,
-                                  ),
-                                ),
-                                tablet ? AppSpaces.h16 : AppSpaces.h10,
-                                Expanded(
-                                  child: AppDatePickerTextFormField(
-                                    dateController:
-                                        _controller.toDateController,
-                                    hintText: 'To Date *',
-                                    validator: (value) =>
-                                        value == null || value.isEmpty
-                                        ? 'Please select to date'
-                                        : null,
-                                  ),
-                                ),
-                              ],
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
                             Obx(

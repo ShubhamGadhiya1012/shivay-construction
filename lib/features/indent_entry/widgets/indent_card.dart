@@ -179,29 +179,6 @@ class _IndentCardState extends State<IndentCard> {
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
                 Row(
                   children: [
-                    Expanded(
-                      child: _buildInfoRow(
-                        label: 'From Date',
-                        value: convertyyyyMMddToddMMyyyy(
-                          widget.indent.fromDate,
-                        ),
-                        tablet: tablet,
-                      ),
-                    ),
-                    tablet ? AppSpaces.h16 : AppSpaces.h12,
-                    Expanded(
-                      child: _buildInfoRow(
-                        label: 'To Date',
-                        value: convertyyyyMMddToddMMyyyy(widget.indent.toDate),
-                        tablet: tablet,
-                      ),
-                    ),
-                  ],
-                ),
-                tablet ? AppSpaces.v12 : AppSpaces.v10,
-
-                Row(
-                  children: [
                     Container(
                       padding: tablet
                           ? AppPaddings.combined(horizontal: 12, vertical: 6)
@@ -229,9 +206,11 @@ class _IndentCardState extends State<IndentCard> {
                         ),
                       ),
                     ),
-                    if (!widget.indent.authorize) ...[
+                    if (!widget.indent.authorize &&
+                        widget.controller.canAuthorizeIndent.value) ...[
                       const Spacer(),
-                      Expanded(
+                      SizedBox(
+                        width: tablet ? 140 : 120,
                         child: AppButton(
                           title: 'Authorize',
                           buttonHeight: tablet ? 40 : 36,

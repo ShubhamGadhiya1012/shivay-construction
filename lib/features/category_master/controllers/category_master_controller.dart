@@ -45,6 +45,30 @@ class CategoryMasterController extends GetxController {
     }
   }
 
+  Future<void> deleteCategory(String cCode) async {
+    isLoading.value = true;
+    try {
+      final response = await CategoryMasterRepo.deleteCategory(
+        code: cCode,
+        typeMast: 'Category',
+      );
+
+      if (response != null && response.containsKey('message')) {
+        String message = response['message'];
+        await getCategories();
+        showSuccessSnackbar('Success', message);
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> addUpdateCategory({
     required String cCode,
     required String cName,

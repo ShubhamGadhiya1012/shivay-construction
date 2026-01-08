@@ -4,6 +4,7 @@ import 'package:shivay_construction/features/indent_entry/models/indent_dm.dart'
 import 'package:shivay_construction/features/indent_entry/models/indent_detail_dm.dart';
 import 'package:shivay_construction/features/indent_entry/repos/indents_repo.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
+import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
 class IndentsController extends GetxController {
   var isLoading = false.obs;
@@ -20,6 +21,8 @@ class IndentsController extends GetxController {
   var indents = <IndentDm>[].obs;
   var indentDetails = <IndentDetailDm>[].obs;
 
+  var canAuthorizeIndent = false.obs;
+
   final filters = {
     'ALL': 'ALL',
     'PENDING': 'Pending',
@@ -30,8 +33,22 @@ class IndentsController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+    await _loadAuthPermissions();
     await getIndents();
+
     debounceSearchQuery();
+  }
+
+  Future<void> _loadAuthPermissions() async {
+    isLoading.value = true;
+    try {
+      String? indentAuthStr = await SecureStorageHelper.read('indentAuth');
+      canAuthorizeIndent.value = indentAuthStr == 'true';
+    } catch (e) {
+      canAuthorizeIndent.value = false;
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void debounceSearchQuery() {

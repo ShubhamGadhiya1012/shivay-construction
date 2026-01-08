@@ -75,6 +75,30 @@ class GodownMasterController extends GetxController {
     return site?.siteCode ?? '';
   }
 
+  Future<void> deleteGodown(String gdCode) async {
+    isLoading.value = true;
+    try {
+      final response = await GodownMasterRepo.deleteGodown(
+        code: gdCode,
+        typeMast: 'Godown',
+      );
+
+      if (response != null && response.containsKey('message')) {
+        String message = response['message'];
+        await getGodowns();
+        showSuccessSnackbar('Success', message);
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> addUpdateGodown({
     required String gdCode,
     required String gdName,

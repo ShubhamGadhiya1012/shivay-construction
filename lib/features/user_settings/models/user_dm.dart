@@ -2,6 +2,8 @@ class UserDm {
   final int userId;
   final String fullName;
   final bool appAccess;
+  final bool indentAuth;
+  final bool poAuth;
   final String mobileNo;
   final int userType;
   final String seCodes;
@@ -12,6 +14,8 @@ class UserDm {
     required this.userId,
     required this.fullName,
     required this.appAccess,
+    required this.indentAuth,
+    required this.poAuth,
     required this.mobileNo,
     required this.userType,
     required this.seCodes,
@@ -24,6 +28,8 @@ class UserDm {
       userId: json['UserId'],
       fullName: json['FULLNAME'],
       appAccess: json['AppAccess'],
+      indentAuth: json['IndentAuth'] ?? false,
+      poAuth: json['POAuth'] ?? false,
       mobileNo: json['MOBILENO'],
       userType: json['USERTYPE'],
       seCodes: json['SECODEs'],

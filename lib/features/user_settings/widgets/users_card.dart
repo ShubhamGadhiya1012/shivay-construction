@@ -65,6 +65,8 @@ class UsersCard extends StatelessWidget {
               fullName: user.fullName,
               userId: user.userId,
               appAccess: user.appAccess,
+              indentAuth: user.indentAuth,
+              poAuth: user.poAuth,
             ),
           );
         } else if (fromWhere == 'M') {

@@ -1,8 +1,7 @@
 class IndentDm {
   final String invNo;
   final String date;
-  final String fromDate;
-  final String toDate;
+
   final String gdCode;
   final String gdName;
   final String siteCode;
@@ -13,8 +12,7 @@ class IndentDm {
   IndentDm({
     required this.invNo,
     required this.date,
-    required this.fromDate,
-    required this.toDate,
+  
     required this.gdCode,
     required this.gdName,
     required this.siteCode,
@@ -27,8 +25,7 @@ class IndentDm {
     return IndentDm(
       invNo: json['InvNo'] ?? '',
       date: json['Date'] ?? '',
-      fromDate: json['FromDate'] ?? '',
-      toDate: json['ToDate'] ?? '',
+    
       gdCode: json['GDCode'] ?? '',
       gdName: json['GDName'] ?? '',
       siteCode: json['SiteCode'] ?? '',

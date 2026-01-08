@@ -48,4 +48,27 @@ class ItemGroupMasterRepo {
       rethrow;
     }
   }
+
+  static Future<dynamic> deleteItemGroup({
+    required String code,
+    required String typeMast,
+  }) async {
+    String? token = await SecureStorageHelper.read('token');
+
+    final Map<String, dynamic> requestBody = {
+      "Code": code,
+      "TypeMast": typeMast,
+    };
+
+    try {
+      final response = await ApiService.postRequest(
+        endpoint: '/Master/deleteMaster',
+        requestBody: requestBody,
+        token: token,
+      );
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

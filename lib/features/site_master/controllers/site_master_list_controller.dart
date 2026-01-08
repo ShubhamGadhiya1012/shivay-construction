@@ -44,4 +44,28 @@ class SiteMasterListController extends GetxController {
       );
     }
   }
+
+  Future<void> deleteSiteMaster(String siteCode) async {
+    isLoading.value = true;
+    try {
+      final response = await SiteMasterListRepo.deleteSiteMaster(
+        code: siteCode,
+        typeMast: 'Site',
+      );
+
+      if (response != null && response.containsKey('message')) {
+        String message = response['message'];
+        await getSites();
+        showSuccessSnackbar('Success', message);
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

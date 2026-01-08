@@ -29,12 +29,15 @@ class UserAccessRepo {
   static Future<dynamic> setAppAccess({
     required int userId,
     required bool appAccess,
+    required bool indentAuth, // Add this
+    required bool poAuth,
   }) async {
     String? token = await SecureStorageHelper.read('token');
 
     final Map<String, dynamic> requestBody = {
       'UserId': userId,
-      'Access': appAccess,
+      'Access': appAccess, 'IndentAuth': indentAuth, // Add this
+      'POAuth': poAuth,
     };
 
     try {

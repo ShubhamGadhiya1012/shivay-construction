@@ -115,6 +115,9 @@ class GodownMasterScreen extends StatelessWidget {
                                 initialName: godown.gdName,
                                 initialSiteCode: godown.siteCode,
                               ),
+                              onDelete: () async {
+                                await _controller.deleteGodown(godown.gdCode);
+                              },
                             );
                           },
                         ),

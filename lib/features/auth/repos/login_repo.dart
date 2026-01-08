@@ -14,7 +14,7 @@ class LoginRepo {
       'FCMToken': fcmToken,
       'DeviceID': deviceId,
     };
-
+    print('Login Request Body: $requestBody');
     try {
       var response = await ApiService.postRequest(
         endpoint: '/Auth/login',

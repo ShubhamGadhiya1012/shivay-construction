@@ -110,6 +110,11 @@ class ItemGroupMasterScreen extends StatelessWidget {
                                 igCode: itemGroup.igCode,
                                 initialName: itemGroup.igName,
                               ),
+                              onDelete: () async {
+                                await _controller.deleteItemGroup(
+                                  itemGroup.igCode,
+                                );
+                              },
                             );
                           },
                         ),

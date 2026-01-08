@@ -8,8 +8,7 @@ class IndentEntryRepo {
     required String invNo,
     required String date,
     required String gdCode,
-    required String fromDate,
-    required String toDate,
+
     required String siteCode,
     required List<Map<String, dynamic>> itemData,
     required List<PlatformFile> newFiles,
@@ -22,8 +21,6 @@ class IndentEntryRepo {
         'Invno': invNo,
         'Date': date,
         'GDCode': gdCode,
-        'FromDate': fromDate,
-        'ToDate': toDate,
         'SiteCode': siteCode,
       };
 
@@ -63,19 +60,19 @@ class IndentEntryRepo {
         }
       }
 
-      // print('---- INDENT ENTRY PAYLOAD (FIELDS) ----');
-      // fields.forEach((key, value) {
-      //   print('$key : $value');
-      // });
+      print('---- INDENT ENTRY PAYLOAD (FIELDS) ----');
+      fields.forEach((key, value) {
+        print('$key : $value');
+      });
 
-      // print('---- INDENT ENTRY PAYLOAD (FILES) ----');
-      // for (var file in multipartFiles) {
-      //   print('File field: ${file.field}');
-      //   print('File name : ${file.filename}');
-      //   print('File size : ${file.length}');
-      // }
+      print('---- INDENT ENTRY PAYLOAD (FILES) ----');
+      for (var file in multipartFiles) {
+        print('File field: ${file.field}');
+        print('File name : ${file.filename}');
+        print('File size : ${file.length}');
+      }
 
-      // print('--------------------------------------');
+      print('--------------------------------------');
 
       final response = await ApiService.postFormData(
         endpoint: '/Indent/indentEntry',

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1244065804",
+    "project_id": "shivay-construction",
+    "storage_bucket": "shivay-construction.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1244065804:android:1c3c4bb1445c3639a67e29",
+        "android_client_info": {
+          "package_name": "com.jinee.shivay_construction"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDb5umsAk8xikoV7MovgxItpZEjUhYdIxE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
