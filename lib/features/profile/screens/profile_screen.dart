@@ -6,11 +6,13 @@ import 'package:shivay_construction/features/profile/controllers/profile_control
 import 'package:shivay_construction/features/profile/widgets/profile_list_tile.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
+import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
 import 'package:shivay_construction/widgets/app_appbar.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({super.key});
@@ -187,7 +189,9 @@ class ProfileScreen extends StatelessWidget {
                             ProfileListTile(
                               leading: Icons.system_update,
                               title: 'Check For Updates',
-                              onTap: () {},
+                              onTap: () async {
+                                await redirectToPlayStore();
+                              },
                             ),
                             Divider(
                               indent: tablet ? 40 : 20,
@@ -229,5 +233,17 @@ class ProfileScreen extends StatelessWidget {
         Obx(() => AppLoadingOverlay(isLoading: _controller.isLoading.value)),
       ],
     );
+  }
+
+  Future<void> redirectToPlayStore() async {
+    const playStoreUrl =
+        'https://play.google.com/store/apps/details?id=com.jinee.shivay_construction';
+
+    final uri = Uri.parse(playStoreUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      showErrorSnackbar('Error', 'Could not launch the Play Store.');
+    }
   }
 }

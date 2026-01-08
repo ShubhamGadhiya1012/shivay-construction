@@ -15,6 +15,7 @@ import 'package:shivay_construction/utils/helpers/version_helper.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/widgets/app_text_button.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeController extends GetxController {
   var isLoading = false.obs;
@@ -76,6 +77,18 @@ class HomeController extends GetxController {
     );
   }
 
+  Future<void> redirectToPlayStore() async {
+    const playStoreUrl =
+        'https://play.google.com/store/apps/details?id=com.jinee.shivay_construction';
+
+    final uri = Uri.parse(playStoreUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      showErrorSnackbar('Error', 'Could not launch the Play Store.');
+    }
+  }
+
   Future<void> checkAppVersion() async {
     isLoading.value = true;
     String? deviceId = await DeviceHelper().getDeviceId();
@@ -130,7 +143,9 @@ class HomeController extends GetxController {
               ),
               actions: [
                 AppTextButton(
-                  onPressed: () async {},
+                  onPressed: () async {
+                    await redirectToPlayStore();
+                  },
                   title: 'Update',
                   fontSize: tablet
                       ? FontSizes.k24FontSize
