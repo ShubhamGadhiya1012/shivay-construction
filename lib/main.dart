@@ -10,11 +10,8 @@ import 'package:shivay_construction/features/auth/screens/splash_screen.dart';
 import 'package:shivay_construction/utils/helpers/fcm_helper.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-/// Background message handler for Firebase Cloud Messaging
-/// This function is called when the app receives a notification while in the background
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Initialize Firebase for background message handling
   await Firebase.initializeApp(
     options: const FirebaseOptions(
       apiKey: 'AIzaSyDb5umsAk8xikoV7MovgxItpZEjUhYdIxE',
@@ -25,15 +22,12 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     ),
   );
 
-  // Handle the background message
   await FCMHelper.firebaseMessagingBackgroundHandler(message);
 }
 
 Future<void> main() async {
-  // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase for Android
   if (Platform.isAndroid) {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
@@ -45,17 +39,13 @@ Future<void> main() async {
       ),
     );
 
-    // Register background message handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    // Initialize Firebase Cloud Messaging
     await FCMHelper.initialize();
   }
 
-  // Set device orientation to portrait only
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  // Run the app
   runApp(const MyApp());
 }
 

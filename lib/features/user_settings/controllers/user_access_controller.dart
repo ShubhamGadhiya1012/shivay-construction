@@ -12,7 +12,8 @@ class UserAccessController extends GetxController {
 
   var menuAccess = <MenuAccessDm>[].obs;
   var ledgerDate = LedgerDateDm(ledgerStart: '', ledgerEnd: '').obs;
-
+  var indentAuth = false.obs;
+  var poAuth = false.obs;
   var ledgerStartDateController = TextEditingController();
   var ledgerEndDateController = TextEditingController();
 
@@ -42,6 +43,8 @@ class UserAccessController extends GetxController {
   Future<void> setAppAccess({
     required int userId,
     required bool appAccess,
+    required bool indentAuth, // Add this
+    required bool poAuth,
   }) async {
     isLoading.value = true;
 
@@ -49,6 +52,8 @@ class UserAccessController extends GetxController {
       var response = await UserAccessRepo.setAppAccess(
         userId: userId,
         appAccess: appAccess,
+        indentAuth: indentAuth, // Add this
+        poAuth: poAuth,
       );
 
       if (response != null && response.containsKey('message')) {

@@ -18,7 +18,6 @@ import 'package:shivay_construction/widgets/app_text_button.dart';
 
 class HomeController extends GetxController {
   var isLoading = false.obs;
-
   var company = ''.obs;
   var menuAccess = <MenuAccessDm>[].obs;
 
