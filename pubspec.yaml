@@ -51,6 +51,8 @@ dependencies:
   flutter_svg: ^2.2.3
   file_picker: ^10.3.8
   image_picker: ^1.2.1
+  uuid: ^4.3.3
+  shared_preferences: ^2.2.2
 
 
 dev_dependencies:
