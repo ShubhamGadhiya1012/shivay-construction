@@ -17,6 +17,7 @@ import 'package:shivay_construction/features/opening_stock_entry/screens/opening
 import 'package:shivay_construction/features/party_masters/screens/party_master_list_screen.dart';
 import 'package:shivay_construction/features/purchase_order_entry/screens/purchase_order_list_screen.dart';
 import 'package:shivay_construction/features/site_master/screens/site_master_list_screen.dart';
+import 'package:shivay_construction/features/site_transfer/screens/site_transfer_screen.dart';
 import 'package:shivay_construction/features/user_settings/models/user_access_dm.dart';
 import 'package:shivay_construction/features/user_settings/screens/unauthorised_users_screen.dart';
 import 'package:shivay_construction/features/user_settings/screens/users_screen.dart';
@@ -456,6 +457,7 @@ class AppDrawer extends StatelessWidget {
       case 'GRN entry':
         break;
       case 'site transfer entry':
+        Get.to(() => SiteTransferScreen());
         break;
       case 'repair entry':
         break;
