@@ -1,4 +1,4 @@
-// widgets/site_transfer_item_card.dart
+// widgets/repair_item_card.dart
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
@@ -9,8 +9,8 @@ import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
 
-class SiteTransferItemCard extends StatelessWidget {
-  const SiteTransferItemCard({
+class RepairItemCard extends StatelessWidget {
+  const RepairItemCard({
     super.key,
     required this.item,
     required this.onEdit,
@@ -130,7 +130,7 @@ class SiteTransferItemCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _buildDetailColumn(
-                    label: 'Transfer Qty',
+                    label: 'Repair Qty',
                     value: (item['Qty'] ?? 0.0).toStringAsFixed(2),
                     tablet: tablet,
                   ),

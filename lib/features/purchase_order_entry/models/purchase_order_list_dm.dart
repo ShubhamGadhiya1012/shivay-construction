@@ -9,6 +9,7 @@ class PurchaseOrderListDm {
   final String gdCode;
   final String gdName;
   final String attachments;
+  final bool authorize;
 
   PurchaseOrderListDm({
     required this.invNo,
@@ -21,6 +22,7 @@ class PurchaseOrderListDm {
     required this.gdCode,
     required this.gdName,
     required this.attachments,
+    required this.authorize,
   });
 
   factory PurchaseOrderListDm.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class PurchaseOrderListDm {
       gdCode: json['GDCode'] ?? '',
       gdName: json['GDName'] ?? '',
       attachments: json['Attachments'] ?? '',
+      authorize: json['Authorize'] ?? false,
     );
   }
 }

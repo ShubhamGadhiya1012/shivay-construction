@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -258,7 +260,7 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: _controller.selectedPurchaseItems.length,
-                            separatorBuilder: (_, __) => Divider(
+                            separatorBuilder: (_, _) => Divider(
                               height: 1,
                               color: kColorLightGrey,
                               indent: 16,
@@ -362,7 +364,7 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: _controller.attachmentFiles.length,
-                            separatorBuilder: (_, __) => Divider(
+                            separatorBuilder: (_, _) => Divider(
                               height: 1,
                               color: kColorLightGrey,
                               indent: 16,
@@ -437,7 +439,7 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemCount:
                                     _controller.existingAttachmentUrls.length,
-                                separatorBuilder: (_, __) => Divider(
+                                separatorBuilder: (_, _) => Divider(
                                   height: 1,
                                   color: kColorLightGrey,
                                   indent: 16,

@@ -4,6 +4,7 @@ import 'package:shivay_construction/features/purchase_order_entry/models/purchas
 import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_list_dm.dart';
 import 'package:shivay_construction/features/purchase_order_entry/repos/purchase_order_list_repo.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
+import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
 class PurchaseOrderListController extends GetxController {
   var isLoading = false.obs;
@@ -22,9 +23,12 @@ class PurchaseOrderListController extends GetxController {
   final filters = {'ALL': 'ALL', 'PENDING': 'Pending', 'COMPLETE': 'Complete'};
   var selectedFilter = 'ALL'.obs;
 
+  var canAuthorizePO = false.obs;
+
   @override
   void onInit() async {
     super.onInit();
+    await _loadAuthPermissions();
     await getPurchaseOrders();
     debounceSearchQuery();
   }
@@ -35,6 +39,42 @@ class PurchaseOrderListController extends GetxController {
       (_) => getPurchaseOrders(),
       time: const Duration(milliseconds: 300),
     );
+  }
+
+  Future<void> _loadAuthPermissions() async {
+    isLoading.value = true;
+    try {
+      String? poAuthStr = await SecureStorageHelper.read('poAuth');
+      canAuthorizePO.value = poAuthStr == 'true';
+    } catch (e) {
+      canAuthorizePO.value = false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> authorizePurchaseOrder({required String invNo}) async {
+    isLoading.value = true;
+    try {
+      var response = await PurchaseOrderListRepo.authorizePurchaseOrder(
+        invNo: invNo,
+      );
+
+      if (response != null && response.containsKey('message')) {
+        String message = response['message'];
+        Get.back();
+        await getPurchaseOrders();
+        showSuccessSnackbar('Success', message);
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void onFilterSelected(String filterKey) {
@@ -89,6 +129,4 @@ class PurchaseOrderListController extends GetxController {
       orderDetails.clear();
     }
   }
-
-  
 }

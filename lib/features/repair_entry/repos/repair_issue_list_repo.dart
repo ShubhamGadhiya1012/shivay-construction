@@ -1,20 +1,20 @@
-import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_detail_dm.dart';
-import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_list_dm.dart';
+import 'package:shivay_construction/features/repair_entry/models/repair_issue_dm.dart';
+import 'package:shivay_construction/features/repair_entry/models/repair_issue_detail_dm.dart';
 import 'package:shivay_construction/services/api_service.dart';
 import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
-class PurchaseOrderListRepo {
-  static Future<List<PurchaseOrderListDm>> getPurchaseOrders({
+class RepairIssueListRepo {
+  static Future<List<RepairIssueDm>> getRepairIssues({
     int pageNumber = 1,
     int pageSize = 10,
     String searchText = '',
-    String status = 'ALL',
+    String status = 'All',
   }) async {
     String? token = await SecureStorageHelper.read('token');
 
     try {
       final response = await ApiService.getRequest(
-        endpoint: '/Order/getOrder',
+        endpoint: '/Transfer/getIssueRepair',
         queryParams: {
           'PageNumber': pageNumber.toString(),
           'PageSize': pageSize.toString(),
@@ -30,7 +30,7 @@ class PurchaseOrderListRepo {
 
       if (response['data'] != null) {
         return (response['data'] as List<dynamic>)
-            .map((item) => PurchaseOrderListDm.fromJson(item))
+            .map((item) => RepairIssueDm.fromJson(item))
             .toList();
       }
 
@@ -40,14 +40,14 @@ class PurchaseOrderListRepo {
     }
   }
 
-  static Future<List<PurchaseOrderDetailDm>> getPurchaseOrderDetails({
+  static Future<List<RepairIssueDetailDm>> getRepairIssueDetails({
     required String invNo,
   }) async {
     String? token = await SecureStorageHelper.read('token');
 
     try {
       final response = await ApiService.getRequest(
-        endpoint: '/Order/getOrderDtl',
+        endpoint: '/Transfer/getIssueRepairDtl',
         queryParams: {'Invno': invNo},
         token: token,
       );
@@ -58,27 +58,11 @@ class PurchaseOrderListRepo {
 
       if (response['data'] != null) {
         return (response['data'] as List<dynamic>)
-            .map((item) => PurchaseOrderDetailDm.fromJson(item))
+            .map((item) => RepairIssueDetailDm.fromJson(item))
             .toList();
       }
 
       return [];
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  static Future<dynamic> authorizePurchaseOrder({required String invNo}) async {
-    String? token = await SecureStorageHelper.read('token');
-    // print(invNo);
-    try {
-      final response = await ApiService.getRequest(
-        endpoint: '/Order/authPO',
-        queryParams: {'Invno': invNo},
-        token: token,
-      );
-
-      return response;
     } catch (e) {
       rethrow;
     }

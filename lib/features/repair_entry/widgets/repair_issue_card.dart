@@ -1,13 +1,12 @@
-// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+// widgets/repair_issue_card.dart
+// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
-import 'package:shivay_construction/features/indent_entry/controllers/indents_controller.dart';
-import 'package:shivay_construction/features/indent_entry/models/indent_detail_dm.dart';
-import 'package:shivay_construction/features/indent_entry/models/indent_dm.dart';
-import 'package:shivay_construction/features/indent_entry/screens/indent_entry_screen.dart';
-import 'package:shivay_construction/features/indent_entry/screens/site_wise_stock_screen.dart';
+import 'package:shivay_construction/features/repair_entry/controllers/repair_issue_list_controller.dart';
+import 'package:shivay_construction/features/repair_entry/models/repair_issue_dm.dart';
+import 'package:shivay_construction/features/repair_entry/screens/repair_entry_screen.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
@@ -15,19 +14,24 @@ import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
 import 'package:shivay_construction/widgets/app_button.dart';
+import 'package:shivay_construction/widgets/app_date_picker_text_form_field.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
-class IndentCard extends StatefulWidget {
-  const IndentCard({super.key, required this.indent, required this.controller});
+class RepairIssueCard extends StatefulWidget {
+  const RepairIssueCard({
+    super.key,
+    required this.issue,
+    required this.controller,
+  });
 
-  final IndentDm indent;
-  final IndentsController controller;
+  final RepairIssueDm issue;
+  final RepairIssueListController controller;
 
   @override
-  State<IndentCard> createState() => _IndentCardState();
+  State<RepairIssueCard> createState() => _RepairIssueCardState();
 }
 
-class _IndentCardState extends State<IndentCard> {
+class _RepairIssueCardState extends State<RepairIssueCard> {
   bool isExpanded = false;
 
   @override
@@ -55,8 +59,8 @@ class _IndentCardState extends State<IndentCard> {
         child: InkWell(
           onTap: () async {
             if (!isExpanded) {
-              await widget.controller.getIndentDetails(
-                invNo: widget.indent.invNo,
+              await widget.controller.getIssueDetails(
+                invNo: widget.issue.invNo,
               );
             }
             setState(() {
@@ -78,7 +82,7 @@ class _IndentCardState extends State<IndentCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.indent.invNo,
+                            widget.issue.invNo,
                             style: TextStyles.kBoldOutfit(
                               fontSize: tablet
                                   ? FontSizes.k20FontSize
@@ -88,7 +92,7 @@ class _IndentCardState extends State<IndentCard> {
                           ),
                           AppSpaces.v4,
                           Text(
-                            'Date: ${convertyyyyMMddToddMMyyyy(widget.indent.date)}',
+                            'Date: ${convertyyyyMMddToddMMyyyy(widget.issue.issueDate)}',
                             style: TextStyles.kRegularOutfit(
                               fontSize: tablet
                                   ? FontSizes.k14FontSize
@@ -100,20 +104,19 @@ class _IndentCardState extends State<IndentCard> {
                       ),
                     ),
                     tablet ? AppSpaces.h12 : AppSpaces.h8,
-                    if (!widget.indent.authorize)
+                    if (widget.issue.status == 'Pending')
                       Material(
                         color: kColorPrimary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(tablet ? 10 : 8),
                         child: InkWell(
                           onTap: () async {
-                            await widget.controller.getIndentDetails(
-                              invNo: widget.indent.invNo,
+                            await widget.controller.getIssueDetails(
+                              invNo: widget.issue.invNo,
                             );
                             Get.to(
-                              () => IndentEntryScreen(
-                                isEdit: true,
-                                indent: widget.indent,
-                                indentDetails: widget.controller.indentDetails
+                              () => RepairEntryScreen(
+                                issue: widget.issue,
+                                issueDetails: widget.controller.issueDetails
                                     .toList(),
                               ),
                             );
@@ -151,7 +154,7 @@ class _IndentCardState extends State<IndentCard> {
                           ),
                         ),
                       ),
-                    if (!widget.indent.authorize) AppSpaces.h8,
+                    if (widget.issue.status == 'Pending') AppSpaces.h8,
                     AnimatedRotation(
                       turns: isExpanded ? 0.5 : 0,
                       duration: const Duration(milliseconds: 300),
@@ -167,16 +170,44 @@ class _IndentCardState extends State<IndentCard> {
                 Divider(height: 1, color: kColorLightGrey.withOpacity(0.5)),
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
                 _buildInfoRow(
-                  label: 'Godown',
-                  value: widget.indent.gdName,
+                  label: 'Party',
+                  value: widget.issue.pName,
                   tablet: tablet,
                 ),
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
                 _buildInfoRow(
-                  label: 'Site',
-                  value: widget.indent.siteName,
+                  label: 'Description',
+                  value: widget.issue.description,
                   tablet: tablet,
                 ),
+                tablet ? AppSpaces.v12 : AppSpaces.v10,
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildInfoRow(
+                        label: 'Godown',
+                        value: widget.issue.gdName,
+                        tablet: tablet,
+                      ),
+                    ),
+                    tablet ? AppSpaces.h12 : AppSpaces.h10,
+                    Expanded(
+                      child: _buildInfoRow(
+                        label: 'Site',
+                        value: widget.issue.siteName,
+                        tablet: tablet,
+                      ),
+                    ),
+                  ],
+                ),
+                if (widget.issue.remarks.isNotEmpty) ...[
+                  tablet ? AppSpaces.v12 : AppSpaces.v10,
+                  _buildInfoRow(
+                    label: 'Remarks',
+                    value: widget.issue.remarks,
+                    tablet: tablet,
+                  ),
+                ],
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
                 Row(
                   children: [
@@ -185,38 +216,46 @@ class _IndentCardState extends State<IndentCard> {
                           ? AppPaddings.combined(horizontal: 12, vertical: 6)
                           : AppPaddings.combined(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: widget.indent.authorize
+                        color: widget.issue.status == 'Completed'
                             ? kColorGreen.withOpacity(0.1)
                             : kColorSecondary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                          color: widget.indent.authorize
+                          color: widget.issue.status == 'Completed'
                               ? kColorGreen.withOpacity(0.3)
                               : kColorSecondary.withOpacity(0.3),
                         ),
                       ),
                       child: Text(
-                        widget.indent.authorize ? 'Authorized' : 'Pending',
+                        widget.issue.status,
                         style: TextStyles.kMediumOutfit(
                           fontSize: tablet
                               ? FontSizes.k14FontSize
                               : FontSizes.k12FontSize,
-                          color: widget.indent.authorize
+                          color: widget.issue.status == 'Completed'
                               ? kColorGreen
                               : kColorSecondary,
                         ),
                       ),
                     ),
-                    if (!widget.indent.authorize &&
-                        widget.controller.canAuthorizeIndent.value) ...[
+                    if (widget.issue.status == 'Pending' ||
+                        widget.issue.status == 'Partial') ...[
                       const Spacer(),
                       SizedBox(
                         width: tablet ? 140 : 120,
                         child: AppButton(
-                          title: 'Authorize',
+                          title: 'Receive',
                           buttonHeight: tablet ? 40 : 36,
-                          onPressed: () {
-                            _showAuthorizeDialog(context);
+                          buttonColor: kColorGreen,
+                          onPressed: () async {
+                            await widget.controller.getIssueDetails(
+                              invNo: widget.issue.invNo,
+                            );
+                            widget.controller.prepareReceiveDialog(
+                              widget.issue,
+                            );
+                            // ignore: use_build_context_synchronously
+                            _showReceiveDialog(context);
                           },
                         ),
                       ),
@@ -235,7 +274,7 @@ class _IndentCardState extends State<IndentCard> {
                       ),
                       tablet ? AppSpaces.v16 : AppSpaces.v12,
                       Text(
-                        'Items',
+                        'Repair Items',
                         style: TextStyles.kSemiBoldOutfit(
                           fontSize: tablet
                               ? FontSizes.k18FontSize
@@ -245,7 +284,7 @@ class _IndentCardState extends State<IndentCard> {
                       ),
                       tablet ? AppSpaces.v12 : AppSpaces.v8,
                       Obx(() {
-                        if (widget.controller.indentDetails.isEmpty) {
+                        if (widget.controller.issueDetails.isEmpty) {
                           return Center(
                             child: Padding(
                               padding: AppPaddings.pv12,
@@ -262,15 +301,13 @@ class _IndentCardState extends State<IndentCard> {
                           );
                         }
 
-                        // Replace the existing item ListView.builder section (around line 280-350) with this:
-
                         return ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount: widget.controller.indentDetails.length,
+                          itemCount: widget.controller.issueDetails.length,
                           itemBuilder: (context, index) {
                             final detail =
-                                widget.controller.indentDetails[index];
+                                widget.controller.issueDetails[index];
                             return Container(
                               margin: AppPaddings.custom(bottom: 8),
                               padding: tablet
@@ -286,121 +323,44 @@ class _IndentCardState extends State<IndentCard> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          detail.iName,
-                                          style: TextStyles.kSemiBoldOutfit(
-                                            fontSize: tablet
-                                                ? FontSizes.k16FontSize
-                                                : FontSizes.k14FontSize,
-                                            color: kColorPrimary,
-                                          ),
-                                        ),
-                                      ),
-                                      AppSpaces.h8,
-                                      Material(
-                                        color: kColorGreen.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(
-                                          tablet ? 8 : 6,
-                                        ),
-                                        child: InkWell(
-                                          onTap: () {
-                                            Get.to(
-                                              () => SiteWiseStockScreen(
-                                                iCode: detail.iCode,
-                                              ),
-                                            );
-                                          },
-                                          borderRadius: BorderRadius.circular(
-                                            tablet ? 8 : 6,
-                                          ),
-                                          child: Container(
-                                            padding: tablet
-                                                ? AppPaddings.combined(
-                                                    horizontal: 10,
-                                                    vertical: 8,
-                                                  )
-                                                : AppPaddings.combined(
-                                                    horizontal: 8,
-                                                    vertical: 6,
-                                                  ),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.visibility_rounded,
-                                                  size: tablet ? 18 : 16,
-                                                  color: kColorGreen,
-                                                ),
-                                                AppSpaces.h4,
-                                                Text(
-                                                  'Stock',
-                                                  style:
-                                                      TextStyles.kSemiBoldOutfit(
-                                                        fontSize: tablet
-                                                            ? FontSizes
-                                                                  .k14FontSize
-                                                            : FontSizes
-                                                                  .k12FontSize,
-                                                        color: kColorGreen,
-                                                      ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                  Text(
+                                    detail.iName,
+                                    style: TextStyles.kSemiBoldOutfit(
+                                      fontSize: tablet
+                                          ? FontSizes.k16FontSize
+                                          : FontSizes.k14FontSize,
+                                      color: kColorPrimary,
+                                    ),
                                   ),
                                   AppSpaces.v8,
                                   Row(
                                     children: [
                                       Expanded(
                                         child: _buildDetailRow(
-                                          label: 'Unit',
-                                          value: detail.unit,
+                                          label: 'Issued Qty',
+                                          value: detail.issuedQty
+                                              .toStringAsFixed(2),
                                           tablet: tablet,
                                         ),
                                       ),
                                       AppSpaces.h12,
                                       Expanded(
                                         child: _buildDetailRow(
-                                          label: 'Indent Qty',
-                                          value: detail.indentQty
+                                          label: 'Received Qty',
+                                          value: detail.receivedQty
                                               .toStringAsFixed(2),
                                           tablet: tablet,
+                                          valueColor: kColorGreen,
                                         ),
                                       ),
                                     ],
                                   ),
                                   AppSpaces.v8,
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _buildDetailRow(
-                                          label: 'Req. Date',
-                                          value: convertyyyyMMddToddMMyyyy(
-                                            detail.reqDate,
-                                          ),
-                                          tablet: tablet,
-                                        ),
-                                      ),
-                                      if (widget.indent.authorize) ...[
-                                        AppSpaces.h12,
-                                        Expanded(
-                                          child: _buildDetailRow(
-                                            label: 'Authorized Qty',
-                                            value: detail.authorizedQty
-                                                .toStringAsFixed(2),
-                                            tablet: tablet,
-                                            valueColor: kColorGreen,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
+                                  _buildDetailRow(
+                                    label: 'Balance Qty',
+                                    value: detail.balanceQty.toStringAsFixed(2),
+                                    tablet: tablet,
+                                    valueColor: kColorSecondary,
                                   ),
                                 ],
                               ),
@@ -478,23 +438,9 @@ class _IndentCardState extends State<IndentCard> {
     );
   }
 
-  void _showAuthorizeDialog(BuildContext context) async {
+  void _showReceiveDialog(BuildContext context) {
     final bool tablet = AppScreenUtils.isTablet(context);
-
-    await widget.controller.getIndentDetails(invNo: widget.indent.invNo);
-
-    final authorizeControllers = <int, TextEditingController>{};
     final formKey = GlobalKey<FormState>();
-
-    final currentIndentDetails = List<IndentDetailDm>.from(
-      widget.controller.indentDetails,
-    );
-
-    for (var detail in currentIndentDetails) {
-      authorizeControllers[detail.srNo] = TextEditingController(
-        text: detail.indentQty.toStringAsFixed(2),
-      );
-    }
 
     showDialog(
       context: context,
@@ -540,7 +486,7 @@ class _IndentCardState extends State<IndentCard> {
                     tablet ? AppSpaces.h12 : AppSpaces.h10,
                     Expanded(
                       child: Text(
-                        'Authorize Indent',
+                        'Receive Repair',
                         style: TextStyles.kSemiBoldOutfit(
                           fontSize: tablet
                               ? FontSizes.k22FontSize
@@ -557,73 +503,144 @@ class _IndentCardState extends State<IndentCard> {
                   key: formKey,
                   child: SingleChildScrollView(
                     padding: tablet ? AppPaddings.p24 : AppPaddings.p20,
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: currentIndentDetails.length,
-                      itemBuilder: (context, index) {
-                        final detail = currentIndentDetails[index];
-                        return Container(
-                          margin: AppPaddings.custom(bottom: 12),
-                          padding: tablet ? AppPaddings.p16 : AppPaddings.p12,
-                          decoration: BoxDecoration(
-                            color: kColorPrimary.withOpacity(0.05),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: kColorPrimary.withOpacity(0.2),
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                detail.iName,
-                                style: TextStyles.kSemiBoldOutfit(
-                                  fontSize: tablet
-                                      ? FontSizes.k16FontSize
-                                      : FontSizes.k14FontSize,
-                                  color: kColorPrimary,
-                                ),
+                    child: Obx(
+                      () => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: tablet ? AppPaddings.p12 : AppPaddings.p10,
+                            decoration: BoxDecoration(
+                              color: kColorPrimary.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: kColorPrimary.withOpacity(0.2),
                               ),
-                              AppSpaces.v8,
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      'Indent Qty: ${detail.indentQty.toStringAsFixed(2)} ${detail.unit}',
-                                      style: TextStyles.kRegularOutfit(
-                                        fontSize: tablet
-                                            ? FontSizes.k14FontSize
-                                            : FontSizes.k12FontSize,
-                                        color: kColorDarkGrey,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildDetailRow(
+                                        label: 'Site',
+                                        value: widget.issue.siteName,
+                                        tablet: tablet,
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              AppSpaces.v12,
-                              AppTextFormField(
-                                controller: authorizeControllers[detail.srNo]!,
-                                hintText: 'Authorized Qty *',
-                                keyboardType: TextInputType.number,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter authorized qty';
-                                  }
-                                  final qty = double.tryParse(value);
-                                  if (qty == null || qty <= 0) {
-                                    return 'Please enter valid qty';
-                                  }
-                                  if (qty > detail.indentQty) {
-                                    return 'Cannot exceed indent qty';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ],
+                                    AppSpaces.h12,
+                                    Expanded(
+                                      child: _buildDetailRow(
+                                        label: 'Godown',
+                                        value: widget.issue.gdName,
+                                        tablet: tablet,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        );
-                      },
+                          tablet ? AppSpaces.v16 : AppSpaces.v12,
+                          AppDatePickerTextFormField(
+                            dateController: widget.controller.dateController,
+                            hintText: 'Date *',
+                            validator: (value) => value == null || value.isEmpty
+                                ? 'Please select date'
+                                : null,
+                          ),
+                          tablet ? AppSpaces.v16 : AppSpaces.v12,
+                          AppTextFormField(
+                            controller: widget.controller.remarksController,
+                            hintText: 'Remarks',
+                            maxLines: 2,
+                          ),
+                          tablet ? AppSpaces.v16 : AppSpaces.v12,
+                          Text(
+                            'Items to Receive',
+                            style: TextStyles.kSemiBoldOutfit(
+                              fontSize: tablet
+                                  ? FontSizes.k16FontSize
+                                  : FontSizes.k14FontSize,
+                              color: kColorTextPrimary,
+                            ),
+                          ),
+                          tablet ? AppSpaces.v12 : AppSpaces.v8,
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: widget.controller.issueDetails.length,
+                            itemBuilder: (context, index) {
+                              final detail =
+                                  widget.controller.issueDetails[index];
+                              return Container(
+                                margin: AppPaddings.custom(bottom: 12),
+                                padding: tablet
+                                    ? AppPaddings.p16
+                                    : AppPaddings.p12,
+                                decoration: BoxDecoration(
+                                  color: kColorPrimary.withOpacity(0.05),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: kColorPrimary.withOpacity(0.2),
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      detail.iName,
+                                      style: TextStyles.kSemiBoldOutfit(
+                                        fontSize: tablet
+                                            ? FontSizes.k16FontSize
+                                            : FontSizes.k14FontSize,
+                                        color: kColorPrimary,
+                                      ),
+                                    ),
+                                    AppSpaces.v8,
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            'Balance: ${detail.balanceQty.toStringAsFixed(2)}',
+                                            style: TextStyles.kMediumOutfit(
+                                              fontSize: tablet
+                                                  ? FontSizes.k14FontSize
+                                                  : FontSizes.k12FontSize,
+                                              color: kColorSecondary,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    AppSpaces.v12,
+                                    AppTextFormField(
+                                      controller: widget
+                                          .controller
+                                          .receiveControllers[detail.srNo]!,
+                                      hintText: 'Received Qty *',
+                                      keyboardType: TextInputType.number,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter received qty';
+                                        }
+                                        final qty = double.tryParse(value);
+                                        if (qty == null || qty <= 0) {
+                                          return 'Please enter valid qty';
+                                        }
+                                        if (qty > detail.balanceQty) {
+                                          return 'Cannot exceed balance qty';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -634,7 +651,10 @@ class _IndentCardState extends State<IndentCard> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(),
+                        onPressed: () {
+                          widget.controller.clearReceiveForm();
+                          Get.back();
+                        },
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: kColorLightGrey, width: 1.5),
                           shape: RoundedRectangleBorder(
@@ -660,37 +680,29 @@ class _IndentCardState extends State<IndentCard> {
                     ),
                     tablet ? AppSpaces.h16 : AppSpaces.h12,
                     Expanded(
-                      child: AppButton(
-                        title: 'Authorize',
-                        buttonColor: kColorGreen,
-                        titleColor: kColorWhite,
-                        titleSize: tablet
-                            ? FontSizes.k16FontSize
-                            : FontSizes.k14FontSize,
-                        buttonHeight: tablet ? 54 : 48,
-                        onPressed: () {
-                          if (formKey.currentState!.validate()) {
-                            final itemAuthData = <Map<String, dynamic>>[];
-
-                            for (var detail in currentIndentDetails) {
-                              final controller =
-                                  authorizeControllers[detail.srNo];
-                              if (controller != null) {
-                                itemAuthData.add({
-                                  "SrNo": detail.srNo,
-                                  "ICode": detail.iCode,
-                                  "Qty": double.parse(controller.text),
-                                });
+                      child: Obx(() {
+                        final isLoading = widget.controller.isLoading.value;
+                        return Opacity(
+                          opacity: isLoading ? 0.6 : 1.0,
+                          child: AppButton(
+                            title: 'Receive',
+                            buttonColor: kColorGreen,
+                            titleColor: kColorWhite,
+                            titleSize: tablet
+                                ? FontSizes.k16FontSize
+                                : FontSizes.k14FontSize,
+                            buttonHeight: tablet ? 54 : 48,
+                            onPressed: () {
+                              if (!isLoading) {
+                                widget.controller.saveReceiveRepair(
+                                  issue: widget.issue,
+                                  formKey: formKey,
+                                );
                               }
-                            }
-
-                            widget.controller.authorizeIndent(
-                              invNo: widget.indent.invNo,
-                              itemAuthData: itemAuthData,
-                            );
-                          }
-                        },
-                      ),
+                            },
+                          ),
+                        );
+                      }),
                     ),
                   ],
                 ),

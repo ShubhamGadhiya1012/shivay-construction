@@ -1,15 +1,18 @@
-// screens/site_transfer_screen.dart
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
-import 'package:shivay_construction/features/site_transfer/controllers/site_transfer_controller.dart';
-import 'package:shivay_construction/features/site_transfer/widgets/site_transfer_item_card.dart';
+import 'package:shivay_construction/features/repair_entry/controllers/repair_entry_controller.dart';
+import 'package:shivay_construction/features/repair_entry/models/repair_issue_dm.dart';
+import 'package:shivay_construction/features/repair_entry/models/repair_issue_detail_dm.dart';
+import 'package:shivay_construction/features/repair_entry/widgets/repair_item_card.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 import 'package:shivay_construction/utils/extensions/app_size_extensions.dart';
+import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
@@ -20,15 +23,71 @@ import 'package:shivay_construction/widgets/app_dropdown.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
-class SiteTransferScreen extends StatefulWidget {
-  const SiteTransferScreen({super.key});
+class RepairEntryScreen extends StatefulWidget {
+  const RepairEntryScreen({super.key, this.issue, this.issueDetails});
+
+  final RepairIssueDm? issue;
+  final List<RepairIssueDetailDm>? issueDetails;
 
   @override
-  State<SiteTransferScreen> createState() => _SiteTransferScreenState();
+  State<RepairEntryScreen> createState() => _RepairEntryScreenState();
 }
 
-class _SiteTransferScreenState extends State<SiteTransferScreen> {
-  final SiteTransferController _controller = Get.put(SiteTransferController());
+class _RepairEntryScreenState extends State<RepairEntryScreen> {
+  final RepairEntryController _controller = Get.put(RepairEntryController());
+
+  @override
+  void initState() {
+    super.initState();
+    _initialize();
+  }
+
+  void _initialize() async {
+    _controller.dateController.text = DateFormat(
+      'dd-MM-yyyy',
+    ).format(DateTime.now());
+
+    if (widget.issue != null && widget.issueDetails != null) {
+      await _loadEditData();
+    }
+  }
+
+  Future<void> _loadEditData() async {
+    final issue = widget.issue!;
+    final details = widget.issueDetails!;
+
+    _controller.isEditMode.value = true;
+    _controller.currentInvNo.value = issue.invNo;
+    _controller.dateController.text = convertyyyyMMddToddMMyyyy(
+      issue.issueDate,
+    );
+    _controller.descriptionController.text = issue.description;
+    _controller.remarksController.text = issue.remarks;
+
+    _controller.selectedPartyCode.value = issue.pCode;
+    _controller.selectedPartyName.value = issue.pName;
+
+    _controller.selectedFromGodownCode.value = issue.gdCode;
+    _controller.selectedFromGodownName.value = issue.gdName;
+    _controller.selectedFromSiteCode.value = issue.site;
+    _controller.fromSiteNameController.text = issue.siteName;
+
+    _controller.canAddItem.value = true;
+    await _controller.getStockItems();
+
+    _controller.itemsToSend.clear();
+    int srNo = 1;
+    for (var item in details) {
+      _controller.itemsToSend.add({
+        'SrNo': srNo++,
+        'ICode': item.iCode,
+        'iname': item.iName,
+        'unit': 'Nos',
+        'Qty': item.issuedQty,
+        'availableQty': item.issuedQty,
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +101,9 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
           },
           child: Scaffold(
             appBar: AppAppbar(
-              title: 'Site Transfer',
+              title: widget.issue != null
+                  ? 'Edit Repair Issue'
+                  : 'New Repair Issue',
               leading: IconButton(
                 onPressed: () => Get.back(),
                 icon: Icon(
@@ -57,7 +118,7 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                   ? AppPaddings.combined(horizontal: 24, vertical: 12)
                   : AppPaddings.p12,
               child: Form(
-                key: _controller.transferFormKey,
+                key: _controller.repairFormKey,
                 child: Column(
                   children: [
                     Expanded(
@@ -74,9 +135,32 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                                   ? 'Please select date'
                                   : null,
                             ),
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
+                            Obx(
+                              () => AppDropdown(
+                                items: _controller.partyNames,
+                                hintText: 'Party *',
+                                onChanged: _controller.onPartySelected,
+                                selectedItem:
+                                    _controller
+                                        .selectedPartyName
+                                        .value
+                                        .isNotEmpty
+                                    ? _controller.selectedPartyName.value
+                                    : null,
+                                validatorText: 'Please select a party',
+                              ),
+                            ),
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
+                            AppTextFormField(
+                              controller: _controller.descriptionController,
+                              hintText: 'Description *',
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Please enter description'
+                                  : null,
+                            ),
                             tablet ? AppSpaces.v20 : AppSpaces.v14,
-
-                            // FROM SECTION
                             Text(
                               'From',
                               style: TextStyles.kSemiBoldOutfit(
@@ -118,62 +202,13 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                                 fillColor: kColorLightGrey,
                               );
                             }),
-
-                            tablet ? AppSpaces.v20 : AppSpaces.v14,
-
-                            // TO SECTION
-                            Text(
-                              'To',
-                              style: TextStyles.kSemiBoldOutfit(
-                                fontSize: tablet
-                                    ? FontSizes.k18FontSize
-                                    : FontSizes.k16FontSize,
-                                color: kColorTextPrimary,
-                              ),
-                            ),
-                            tablet ? AppSpaces.v12 : AppSpaces.v8,
-                            Obx(
-                              () => AppDropdown(
-                                items: _controller.godownNames,
-                                hintText: 'To Godown *',
-                                onChanged: _controller.onToGodownSelected,
-                                selectedItem:
-                                    _controller
-                                        .selectedToGodownName
-                                        .value
-                                        .isNotEmpty
-                                    ? _controller.selectedToGodownName.value
-                                    : null,
-                                validatorText: 'Please select to godown',
-                              ),
-                            ),
-                            tablet ? AppSpaces.v12 : AppSpaces.v8,
-                            Obx(() {
-                              if (_controller
-                                  .selectedToGodownCode
-                                  .value
-                                  .isEmpty) {
-                                return const SizedBox.shrink();
-                              }
-
-                              return AppTextFormField(
-                                controller: _controller.toSiteNameController,
-                                hintText: 'To Site',
-                                enabled: false,
-                                fillColor: kColorLightGrey,
-                              );
-                            }),
-
                             tablet ? AppSpaces.v16 : AppSpaces.v12,
                             AppTextFormField(
                               controller: _controller.remarksController,
                               hintText: 'Remarks',
                               maxLines: 3,
                             ),
-
                             tablet ? AppSpaces.v20 : AppSpaces.v14,
-
-                            // ADD ITEM BUTTON
                             Obx(
                               () => Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
@@ -206,8 +241,6 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                               ),
                             ),
                             tablet ? AppSpaces.v26 : AppSpaces.v20,
-
-                            // ITEMS LIST
                             Obx(() {
                               if (_controller.itemsToSend.isNotEmpty) {
                                 return ListView.builder(
@@ -219,7 +252,7 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
 
                                     return Padding(
                                       padding: AppPaddings.custom(bottom: 8),
-                                      child: SiteTransferItemCard(
+                                      child: RepairItemCard(
                                         item: item,
                                         onEdit: () {
                                           _controller.prepareEditItem(index);
@@ -244,13 +277,13 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                         return Column(
                           children: [
                             AppButton(
-                              title: 'Save Transfer',
+                              title: 'Save',
                               buttonHeight: tablet ? 54 : 48,
                               onPressed: () {
-                                if (_controller.transferFormKey.currentState!
+                                if (_controller.repairFormKey.currentState!
                                     .validate()) {
                                   if (_controller.itemsToSend.isNotEmpty) {
-                                    _controller.saveSiteTransfer();
+                                    _controller.saveRepairIssue();
                                   } else {
                                     showErrorSnackbar(
                                       'Oops!',
@@ -376,7 +409,6 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                         ),
                       ),
                       tablet ? AppSpaces.v16 : AppSpaces.v12,
-
                       Obx(() {
                         if (_controller.selectedItemCode.value.isEmpty) {
                           return const SizedBox.shrink();
@@ -417,13 +449,12 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                         );
                       }),
                       tablet ? AppSpaces.v16 : AppSpaces.v12,
-
                       Row(
                         children: [
                           Expanded(
                             child: AppTextFormField(
                               controller: _controller.qtyController,
-                              hintText: 'Transfer Qty *',
+                              hintText: 'Repair Qty *',
                               keyboardType: TextInputType.number,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -615,8 +646,7 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                         children: [
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: () =>
-                                  Navigator.of(dialogContext).pop(),
+                              onPressed: () => Get.back(),
                               style: OutlinedButton.styleFrom(
                                 side: BorderSide(
                                   color: kColorLightGrey,
@@ -654,7 +684,7 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                                   : FontSizes.k14FontSize,
                               buttonHeight: tablet ? 54 : 48,
                               onPressed: () {
-                                Navigator.of(dialogContext).pop();
+                                Get.back();
                                 _controller.deleteItem(index);
                               },
                             ),

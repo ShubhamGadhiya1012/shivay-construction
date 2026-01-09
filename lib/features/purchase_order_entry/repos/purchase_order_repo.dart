@@ -10,8 +10,8 @@ class PurchaseOrderRepo {
     required String gdCode,
   }) async {
     String? token = await SecureStorageHelper.read('token');
-    print(siteCode);
-    print(gdCode);
+    // print(siteCode);
+    // print(gdCode);
     try {
       final response = await ApiService.getRequest(
         endpoint: '/Order/getAuthIndentItems',
@@ -94,20 +94,20 @@ class PurchaseOrderRepo {
         }
       }
 
-      print('------ PURCHASE ORDER PAYLOAD ------');
-      fields.forEach((key, value) {
-        print('$key : $value');
-      });
+      // print('------ PURCHASE ORDER PAYLOAD ------');
+      // fields.forEach((key, value) {
+      //   print('$key : $value');
+      // });
 
-      print('------ ATTACHMENTS ------');
-      for (var file in newFiles) {
-        print({
-          'name': file.name,
-          'path': file.path,
-          'size': file.size,
-          'hasBytes': file.bytes != null,
-        });
-      }
+      // print('------ ATTACHMENTS ------');
+      // for (var file in newFiles) {
+      //   print({
+      //     'name': file.name,
+      //     'path': file.path,
+      //     'size': file.size,
+      //     'hasBytes': file.bytes != null,
+      //   });
+      // }
       final response = await ApiService.postFormData(
         endpoint: '/Order/orderEntry',
         fields: fields,
@@ -115,7 +115,7 @@ class PurchaseOrderRepo {
         token: token,
       );
 
-      print(response);
+    //  print(response);
 
       return response;
     } catch (e) {
