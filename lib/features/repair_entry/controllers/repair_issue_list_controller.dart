@@ -1,4 +1,3 @@
-// controllers/repair_issue_list_controller.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -27,7 +26,6 @@ class RepairIssueListController extends GetxController {
   final filters = {'All': 'All', 'PENDING': 'Pending', 'COMPLETE': 'Complete'};
   var selectedFilter = 'All'.obs;
 
-  // For receive dialog
   var dateController = TextEditingController();
   var remarksController = TextEditingController();
   Map<int, TextEditingController> receiveControllers = {};
@@ -113,19 +111,18 @@ class RepairIssueListController extends GetxController {
   }
 
   void prepareReceiveDialog(RepairIssueDm issue) {
-    // Clear previous controllers
     for (var controller in receiveControllers.values) {
       controller.dispose();
     }
     receiveControllers.clear();
 
-    // Reset date and remarks
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
     remarksController.clear();
 
-    // Create controllers for each item
     for (var detail in issueDetails) {
-      receiveControllers[detail.srNo] = TextEditingController();
+      if (detail.balanceQty > 0) {
+        receiveControllers[detail.srNo] = TextEditingController();
+      }
     }
   }
 
@@ -141,13 +138,15 @@ class RepairIssueListController extends GetxController {
       final itemData = <Map<String, dynamic>>[];
 
       for (var detail in issueDetails) {
-        final controller = receiveControllers[detail.srNo];
-        if (controller != null && controller.text.isNotEmpty) {
-          itemData.add({
-            "SrNo": detail.srNo,
-            "iCode": detail.iCode,
-            "qty": double.parse(controller.text),
-          });
+        if (detail.balanceQty > 0) {
+          final controller = receiveControllers[detail.srNo];
+          if (controller != null && controller.text.isNotEmpty) {
+            itemData.add({
+              "SrNo": detail.srNo,
+              "iCode": detail.iCode,
+              "qty": double.parse(controller.text),
+            });
+          }
         }
       }
 

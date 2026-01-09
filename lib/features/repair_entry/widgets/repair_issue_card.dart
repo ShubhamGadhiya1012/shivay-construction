@@ -566,15 +566,26 @@ class _RepairIssueCardState extends State<RepairIssueCard> {
                             ),
                           ),
                           tablet ? AppSpaces.v12 : AppSpaces.v8,
+                          // Find this ListView.builder in the dialog (around line 380)
                           ListView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount: widget.controller.issueDetails.length,
+                            itemCount: widget.controller.issueDetails
+                                .where((detail) => detail.balanceQty > 0)
+                                .length, // CHANGE THIS LINE
                             itemBuilder: (context, index) {
+                              // ADD THESE 2 LINES
+                              final filteredDetails = widget
+                                  .controller
+                                  .issueDetails
+                                  .where((detail) => detail.balanceQty > 0)
+                                  .toList();
                               final detail =
-                                  widget.controller.issueDetails[index];
+                                  filteredDetails[index]; // CHANGE THIS LINE
+
                               return Container(
                                 margin: AppPaddings.custom(bottom: 12),
+                                // ... rest of the code remains same
                                 padding: tablet
                                     ? AppPaddings.p16
                                     : AppPaddings.p12,
@@ -625,7 +636,7 @@ class _RepairIssueCardState extends State<RepairIssueCard> {
                                           return 'Please enter received qty';
                                         }
                                         final qty = double.tryParse(value);
-                                        if (qty == null || qty <= 0) {
+                                        if (qty == null || qty < 0) {
                                           return 'Please enter valid qty';
                                         }
                                         if (qty > detail.balanceQty) {

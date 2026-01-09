@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/constants/image_constants.dart';
+import 'package:shivay_construction/features/grn_entry/screens/grns_screen.dart';
 import 'package:shivay_construction/features/home/controllers/home_controller.dart';
 import 'package:shivay_construction/features/home/widgets/version_and_developer_info.dart';
 import 'package:shivay_construction/features/category_master/screens/category_master_screen.dart';
@@ -455,7 +456,8 @@ class AppDrawer extends StatelessWidget {
       case 'purchase order entry':
         Get.to(() => PurchaseOrderListScreen());
         break;
-      case 'GRN entry':
+      case 'grn entry':
+        Get.to(() => GrnsScreen());
         break;
       case 'site transfer entry':
         Get.to(() => SiteTransferScreen());
