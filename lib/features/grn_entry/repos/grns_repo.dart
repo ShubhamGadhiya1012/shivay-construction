@@ -68,11 +68,10 @@ class GrnsRepo {
 
   static Future<dynamic> deleteGrn({required String invNo}) async {
     String? token = await SecureStorageHelper.read('token');
-
     try {
-      final response = await ApiService.getRequest(
+      final response = await ApiService.postRequest(
         endpoint: '/GRN/deleteGRN',
-        queryParams: {'Invno': invNo},
+        requestBody: {'Invno': invNo},
         token: token,
       );
       return response;

@@ -24,13 +24,19 @@ class PurchaseOrderListController extends GetxController {
   var selectedFilter = 'ALL'.obs;
 
   var canAuthorizePO = false.obs;
-
+  var isAdmin = false.obs;
   @override
   void onInit() async {
     super.onInit();
+    await checkAdminStatus();
     await _loadAuthPermissions();
     await getPurchaseOrders();
     debounceSearchQuery();
+  }
+
+  Future<void> checkAdminStatus() async {
+    String? userType = await SecureStorageHelper.read('userType');
+    isAdmin.value = userType == '0';
   }
 
   void debounceSearchQuery() {
@@ -127,6 +133,31 @@ class PurchaseOrderListController extends GetxController {
       orderDetails.assignAll(details);
     } catch (e) {
       orderDetails.clear();
+    }
+  }
+
+  Future<void> deletePurchaseOrder({required String invNo}) async {
+    try {
+      isLoading.value = true;
+
+      final response = await PurchaseOrderListRepo.deletePurchaseOrder(
+        invNo: invNo,
+      );
+
+      if (response != null && response.containsKey('message')) {
+        String message = response['message'];
+
+        await getPurchaseOrders();
+        showSuccessSnackbar('Success', message);
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
+    } finally {
+      isLoading.value = false;
     }
   }
 }

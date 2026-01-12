@@ -45,8 +45,6 @@ class UsersController extends GetxController {
       case 0:
         return 'Admin';
       case 1:
-        return 'Salesman';
-      case 2:
         return 'User';
       default:
         return 'Unknown role';

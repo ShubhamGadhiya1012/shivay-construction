@@ -95,11 +95,19 @@ class GrnsController extends GetxController {
   Future<void> deleteGrn(String invNo) async {
     try {
       isLoading.value = true;
-      await GrnsRepo.deleteGrn(invNo: invNo);
-      showSuccessSnackbar('Success', 'GRN deleted successfully');
-      await getGrns();
+      final response = await GrnsRepo.deleteGrn(invNo: invNo);
+
+      if (response != null && response.containsKey('message')) {
+        String message = response['message'];
+        await getGrns();
+        showSuccessSnackbar('Success', message);
+      }
     } catch (e) {
-      showErrorSnackbar('Error', e.toString());
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
     } finally {
       isLoading.value = false;
     }

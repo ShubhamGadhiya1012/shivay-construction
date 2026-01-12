@@ -83,4 +83,20 @@ class PurchaseOrderListRepo {
       rethrow;
     }
   }
+
+  static Future<dynamic> deletePurchaseOrder({required String invNo}) async {
+    String? token = await SecureStorageHelper.read('token');
+
+    try {
+      final response = await ApiService.postRequest(
+        endpoint: '/Order/deleteOrder',
+        requestBody: {'Invno': invNo.toString()},
+        token: token,
+      );
+
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
