@@ -114,7 +114,7 @@ class GrnSelectedItemCard extends StatelessWidget {
                         tablet: tablet,
                       ),
                     ),
-                    AppSpaces.h12,
+
                     Expanded(
                       child: _buildDetailColumn(
                         label: 'PO Qty',
@@ -122,11 +122,6 @@ class GrnSelectedItemCard extends StatelessWidget {
                         tablet: tablet,
                       ),
                     ),
-                  ],
-                ),
-                tablet ? AppSpaces.v10 : AppSpaces.v8,
-                Row(
-                  children: [
                     Expanded(
                       child: _buildDetailColumn(
                         label: 'GRN Qty',
@@ -134,15 +129,6 @@ class GrnSelectedItemCard extends StatelessWidget {
                             '${(poData['grnQty'] ?? 0.0).toStringAsFixed(2)} ${poData['unit']}',
                         tablet: tablet,
                         valueColor: kColorGreen,
-                      ),
-                    ),
-                    AppSpaces.h12,
-                    Expanded(
-                      child: _buildDetailColumn(
-                        label: 'Pending',
-                        value: (poData['pendingQty'] ?? 0.0).toStringAsFixed(2),
-                        tablet: tablet,
-                        valueColor: kColorSecondary,
                       ),
                     ),
                   ],

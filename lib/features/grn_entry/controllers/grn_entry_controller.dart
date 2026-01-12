@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:shivay_construction/features/godown_master/models/godown_master_dm.dart';
 import 'package:shivay_construction/features/godown_master/repos/godown_master_repo.dart';
 import 'package:shivay_construction/features/grn_entry/controllers/grns_controller.dart';
+import 'package:shivay_construction/features/grn_entry/models/grn_detail_dm.dart';
 import 'package:shivay_construction/features/grn_entry/models/po_auth_item_dm.dart';
 import 'package:shivay_construction/features/grn_entry/repos/grn_entry_repo.dart';
 import 'package:shivay_construction/features/grn_entry/repos/po_auth_items_repo.dart';
@@ -14,6 +15,7 @@ import 'package:shivay_construction/features/party_masters/models/party_master_d
 import 'package:shivay_construction/features/party_masters/repos/party_master_list_repo.dart';
 import 'package:shivay_construction/features/site_master/models/site_master_dm.dart';
 import 'package:shivay_construction/features/site_master/repos/site_master_list_repo.dart';
+import 'package:shivay_construction/services/api_service.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -49,7 +51,7 @@ class GrnEntryController extends GetxController {
   var currentInvNo = ''.obs;
 
   var isItemSelectionMode = false.obs;
-  var isInSelectionMode = false.obs; // New: Track selection mode
+  var isInSelectionMode = false.obs;
 
   @override
   void onInit() {
@@ -63,7 +65,6 @@ class GrnEntryController extends GetxController {
     remarksController.dispose();
     siteNameController.dispose();
 
-    // Dispose all qty controllers
     for (var controller in qtyControllers.values) {
       controller.dispose();
     }
@@ -136,7 +137,7 @@ class GrnEntryController extends GetxController {
 
     selectedPoOrders.clear();
     poAuthItems.clear();
-    isInSelectionMode.value = false; // Reset selection mode
+    isInSelectionMode.value = false;
     _disposeQtyControllers();
   }
 
@@ -154,16 +155,17 @@ class GrnEntryController extends GetxController {
       );
       poAuthItems.assignAll(fetchedItems);
       isItemSelectionMode.value = true;
-      isInSelectionMode.value =
-          false; // Reset selection mode when entering item selection
+      isInSelectionMode.value = false;
 
-      // Initialize controllers for all orders
       for (var item in fetchedItems) {
         for (var order in item.orders) {
           final key = '${order.poInvNo}_${order.poSrNo}';
-          qtyControllers[key] = TextEditingController(
-            text: order.pendingQty.toStringAsFixed(2),
-          );
+
+          if (!qtyControllers.containsKey(key)) {
+            qtyControllers[key] = TextEditingController(
+              text: order.pendingQty.toStringAsFixed(2),
+            );
+          }
         }
       }
     } catch (e) {
@@ -173,13 +175,44 @@ class GrnEntryController extends GetxController {
     }
   }
 
-  // Modified: Now handles selection mode tracking
+  void populateSelectedItemsFromGrnDetails(List<GrnDetailDm> details) {
+    isLoading.value = true;
+
+    try {
+      selectedPoOrders.clear();
+      _disposeQtyControllers();
+
+      for (var detail in details) {
+        final key = '${detail.poInvNo}_${detail.poSrnNo.toInt()}';
+
+        qtyControllers[key] = TextEditingController(
+          text: detail.qty.toStringAsFixed(2),
+        );
+
+        selectedPoOrders[key] = {
+          'iCode': detail.iCode,
+          'iName': detail.iName,
+          'unit': detail.unit,
+          'poInvNo': detail.poInvNo,
+          'poSrNo': detail.poSrnNo.toInt(),
+          'poDate': detail.poDate,
+          'poQty': detail.poQty,
+          'pendingQty': detail.pendingQty,
+          'grnQty': detail.qty,
+        };
+      }
+    } catch (_) {
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   void togglePoOrderSelection(PoAuthItemDm item, PoOrderDm order) {
     final key = '${order.poInvNo}_${order.poSrNo}';
 
     if (selectedPoOrders.containsKey(key)) {
       selectedPoOrders.remove(key);
-      // Exit selection mode if no items selected
+
       if (selectedPoOrders.isEmpty) {
         isInSelectionMode.value = false;
       }
@@ -202,7 +235,6 @@ class GrnEntryController extends GetxController {
     }
   }
 
-  // New: Handle long press to activate selection mode
   void onPoOrderLongPress(PoAuthItemDm item, PoOrderDm order) {
     if (!isInSelectionMode.value) {
       isInSelectionMode.value = true;
@@ -225,10 +257,11 @@ class GrnEntryController extends GetxController {
 
   bool handleBackPress() {
     if (isItemSelectionMode.value) {
-      cancelItemSelection();
-      return false; // Don't pop the route
+      isItemSelectionMode.value = false;
+      isInSelectionMode.value = false;
+      return false;
     }
-    return true; // Allow pop
+    return true;
   }
 
   void confirmItemSelection() {
@@ -237,7 +270,6 @@ class GrnEntryController extends GetxController {
       return;
     }
 
-    // Validate all selected items have valid quantities
     bool hasError = false;
     for (var entry in selectedPoOrders.entries) {
       final grnQty = entry.value['grnQty'] as double;
@@ -261,20 +293,22 @@ class GrnEntryController extends GetxController {
 
     if (!hasError) {
       isItemSelectionMode.value = false;
-      isInSelectionMode.value = false; // Reset selection mode
+      isInSelectionMode.value = false;
     }
   }
 
   void cancelItemSelection() {
-    selectedPoOrders.clear();
+    if (!isEditMode.value) {
+      selectedPoOrders.clear();
+      _disposeQtyControllers();
+    }
     isItemSelectionMode.value = false;
-    isInSelectionMode.value = false; // Reset selection mode
-    _disposeQtyControllers();
+    isInSelectionMode.value = false;
   }
 
   void removeSelectedPo(String key) {
     selectedPoOrders.remove(key);
-    // Exit selection mode if we're in item selection and no items remain
+
     if (isItemSelectionMode.value && selectedPoOrders.isEmpty) {
       isInSelectionMode.value = false;
     }
@@ -348,8 +382,8 @@ class GrnEntryController extends GetxController {
   }
 
   Future<void> openAttachment(String fileUrl) async {
-    String url = 'http://192.168.0.145:5020/${fileUrl.replaceAll('\\', '/')}';
-
+    String url =
+        '${ApiService.kBaseUrl.replaceAll('/api', '')}/${fileUrl.replaceAll('\\', '/')}';
     try {
       final Uri uri = Uri.parse(url);
       if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
@@ -438,7 +472,7 @@ class GrnEntryController extends GetxController {
 
     isEditMode.value = false;
     isItemSelectionMode.value = false;
-    isInSelectionMode.value = false; // Reset selection mode
+    isInSelectionMode.value = false;
 
     _disposeQtyControllers();
   }

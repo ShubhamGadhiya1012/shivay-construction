@@ -164,16 +164,24 @@ class _GrnCardState extends State<GrnCard> {
                   tablet: tablet,
                 ),
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
-                _buildInfoRow(
-                  label: 'Godown',
-                  value: widget.grn.gdName,
-                  tablet: tablet,
-                ),
-                tablet ? AppSpaces.v12 : AppSpaces.v10,
-                _buildInfoRow(
-                  label: 'Site',
-                  value: widget.grn.siteName,
-                  tablet: tablet,
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildInfoRow(
+                        label: 'Godown',
+                        value: widget.grn.gdName,
+                        tablet: tablet,
+                      ),
+                    ),
+                    tablet ? AppSpaces.h12 : AppSpaces.h10,
+                    Expanded(
+                      child: _buildInfoRow(
+                        label: 'Site',
+                        value: widget.grn.siteName,
+                        tablet: tablet,
+                      ),
+                    ),
+                  ],
                 ),
                 if (widget.grn.remarks.isNotEmpty) ...[
                   tablet ? AppSpaces.v12 : AppSpaces.v10,
@@ -250,6 +258,16 @@ class _GrnCardState extends State<GrnCard> {
                                           ? FontSizes.k16FontSize
                                           : FontSizes.k14FontSize,
                                       color: kColorPrimary,
+                                    ),
+                                  ),
+                                  AppSpaces.v4,
+                                  Text(
+                                    'PO: ${detail.poInvNo}',
+                                    style: TextStyles.kRegularOutfit(
+                                      fontSize: tablet
+                                          ? FontSizes.k12FontSize
+                                          : FontSizes.k10FontSize,
+                                      color: kColorDarkGrey,
                                     ),
                                   ),
                                   AppSpaces.v8,

@@ -13,6 +13,7 @@ import 'package:shivay_construction/features/purchase_order_entry/models/auth_in
 import 'package:shivay_construction/features/purchase_order_entry/repos/purchase_order_repo.dart';
 import 'package:shivay_construction/features/site_master/models/site_master_dm.dart';
 import 'package:shivay_construction/features/site_master/repos/site_master_list_repo.dart';
+import 'package:shivay_construction/services/api_service.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -184,7 +185,8 @@ class PurchaseOrderController extends GetxController {
   }
 
   Future<void> openAttachment(String fileUrl) async {
-    String url = 'http://192.168.0.145:5020/${fileUrl.replaceAll('\\', '/')}';
+    String url =
+        '${ApiService.kBaseUrl.replaceAll('/api', '')}/${fileUrl.replaceAll('\\', '/')}';
 
     try {
       final Uri uri = Uri.parse(url);

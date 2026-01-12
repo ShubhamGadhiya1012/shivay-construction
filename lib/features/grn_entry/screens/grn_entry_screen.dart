@@ -11,6 +11,7 @@ import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 import 'package:shivay_construction/utils/extensions/app_size_extensions.dart';
+import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
@@ -59,7 +60,7 @@ class _GrnEntryScreenState extends State<GrnEntryScreen> {
 
       _controller.isEditMode.value = true;
       _controller.currentInvNo.value = grn.invNo;
-      _controller.dateController.text = _convertyyyyMMddToddMMyyyy(grn.date);
+      _controller.dateController.text = convertyyyyMMddToddMMyyyy(grn.date);
 
       _controller.selectedPartyCode.value = grn.pCode;
       _controller.selectedPartyName.value = grn.pName;
@@ -75,13 +76,11 @@ class _GrnEntryScreenState extends State<GrnEntryScreen> {
         _controller.existingAttachmentUrls.clear();
         _controller.existingAttachmentUrls.addAll(grn.attachments.split(','));
       }
-    }
-  }
 
-  String _convertyyyyMMddToddMMyyyy(String dateStr) {
-    if (dateStr.isEmpty) return '';
-    final parts = dateStr.split('-');
-    return '${parts[2]}-${parts[1]}-${parts[0]}';
+      if (widget.grnDetails != null && widget.grnDetails!.isNotEmpty) {
+        _controller.populateSelectedItemsFromGrnDetails(widget.grnDetails!);
+      }
+    }
   }
 
   @override
