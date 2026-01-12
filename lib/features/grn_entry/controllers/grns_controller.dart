@@ -4,6 +4,7 @@ import 'package:shivay_construction/features/grn_entry/models/grn_dm.dart';
 import 'package:shivay_construction/features/grn_entry/models/grn_detail_dm.dart';
 import 'package:shivay_construction/features/grn_entry/repos/grns_repo.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
+import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
 class GrnsController extends GetxController {
   var isLoading = false.obs;
@@ -19,10 +20,12 @@ class GrnsController extends GetxController {
 
   var grns = <GrnDm>[].obs;
   var grnDetails = <GrnDetailDm>[].obs;
+  var isAdmin = false.obs;
 
   @override
   void onInit() async {
     super.onInit();
+    await checkAdminStatus();
     await getGrns();
     debounceSearchQuery();
   }
@@ -33,6 +36,11 @@ class GrnsController extends GetxController {
       (_) => getGrns(),
       time: const Duration(milliseconds: 300),
     );
+  }
+
+  Future<void> checkAdminStatus() async {
+    String? userType = await SecureStorageHelper.read('userType');
+    isAdmin.value = userType == '0';
   }
 
   Future<void> getGrns({bool loadMore = false}) async {
@@ -74,11 +82,22 @@ class GrnsController extends GetxController {
   Future<void> getGrnDetails({required String invNo}) async {
     isLoading.value = true;
     try {
-      final fetchedGrnDetails = await GrnsRepo.getGrnDetails(
-        invNo: invNo,
-      );
+      final fetchedGrnDetails = await GrnsRepo.getGrnDetails(invNo: invNo);
 
       grnDetails.assignAll(fetchedGrnDetails);
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> deleteGrn(String invNo) async {
+    try {
+      isLoading.value = true;
+      await GrnsRepo.deleteGrn(invNo: invNo);
+      showSuccessSnackbar('Success', 'GRN deleted successfully');
+      await getGrns();
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
