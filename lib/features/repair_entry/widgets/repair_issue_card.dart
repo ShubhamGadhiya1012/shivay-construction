@@ -7,6 +7,7 @@ import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/repair_entry/controllers/repair_issue_list_controller.dart';
 import 'package:shivay_construction/features/repair_entry/models/repair_issue_dm.dart';
 import 'package:shivay_construction/features/repair_entry/screens/repair_entry_screen.dart';
+import 'package:shivay_construction/features/repair_entry/screens/repair_issue_pdf_screen.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
@@ -104,6 +105,40 @@ class _RepairIssueCardState extends State<RepairIssueCard> {
                       ),
                     ),
                     tablet ? AppSpaces.h12 : AppSpaces.h8,
+                    Material(
+                      color: kColorSecondary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                      child: InkWell(
+                        onTap: () async {
+                          await widget.controller.getIssueDetails(
+                            invNo: widget.issue.invNo,
+                          );
+                          RepairIssuePdfScreen.generateRepairIssuePdf(
+                            issue: widget.issue,
+                            issueDetails: widget.controller.issueDetails
+                                .toList(),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                        child: Container(
+                          padding: tablet
+                              ? AppPaddings.combined(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                )
+                              : AppPaddings.combined(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                          child: Icon(
+                            Icons.picture_as_pdf_rounded,
+                            size: tablet ? 18 : 16,
+                            color: kColorSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    AppSpaces.h8,
                     if (widget.issue.status == 'Pending')
                       Material(
                         color: kColorPrimary.withOpacity(0.1),
@@ -138,16 +173,6 @@ class _RepairIssueCardState extends State<RepairIssueCard> {
                                   Icons.edit_rounded,
                                   size: tablet ? 18 : 16,
                                   color: kColorPrimary,
-                                ),
-                                AppSpaces.h6,
-                                Text(
-                                  'Edit',
-                                  style: TextStyles.kSemiBoldOutfit(
-                                    fontSize: tablet
-                                        ? FontSizes.k15FontSize
-                                        : FontSizes.k14FontSize,
-                                    color: kColorPrimary,
-                                  ),
                                 ),
                               ],
                             ),
