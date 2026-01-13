@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
+import 'package:shivay_construction/features/purchase_order_entry/controllers/purchase_order_controller.dart';
 import 'package:shivay_construction/features/purchase_order_entry/models/auth_indent_item_dm.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
@@ -9,6 +10,7 @@ import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
+import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
 class AuthIndentItemCard extends StatelessWidget {
   const AuthIndentItemCard({
@@ -19,6 +21,7 @@ class AuthIndentItemCard extends StatelessWidget {
     required this.onTap,
     required this.onIndentTap,
     required this.onIndentLongPress,
+    required this.controller,
   });
 
   final AuthIndentItemDm item;
@@ -27,6 +30,7 @@ class AuthIndentItemCard extends StatelessWidget {
   final VoidCallback onTap;
   final Function(int) onIndentTap;
   final Function(int) onIndentLongPress;
+  final PurchaseOrderController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -111,12 +115,18 @@ class AuthIndentItemCard extends StatelessWidget {
                         ),
                       ),
                       tablet ? AppSpaces.v12 : AppSpaces.v8,
+                      // REPLACE the ListView.builder (that builds indent items) with:
                       ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: item.indents.length,
                         itemBuilder: (context, index) {
                           final indent = item.indents[index];
+                          final key = '${indent.indentNo}_${indent.indentSrNo}';
+                          final qtyController = controller.qtyControllers[key];
+                          final priceController =
+                              controller.priceControllers[key];
+
                           return GestureDetector(
                             onTap: () => onIndentTap(index),
                             onLongPress: () => onIndentLongPress(index),
@@ -137,72 +147,164 @@ class AuthIndentItemCard extends StatelessWidget {
                                   width: indent.isSelected ? 2 : 1,
                                 ),
                               ),
-                              child: Row(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (isSelectionMode) ...[
-                                    Icon(
-                                      indent.isSelected
-                                          ? Icons.check_circle
-                                          : Icons.circle_outlined,
-                                      color: indent.isSelected
-                                          ? kColorPrimary
-                                          : kColorDarkGrey,
-                                      size: tablet ? 24 : 20,
-                                    ),
-                                    tablet ? AppSpaces.h12 : AppSpaces.h8,
-                                  ],
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                  Row(
+                                    children: [
+                                      if (isSelectionMode) ...[
+                                        Icon(
+                                          indent.isSelected
+                                              ? Icons.check_circle
+                                              : Icons.circle_outlined,
+                                          color: indent.isSelected
+                                              ? kColorPrimary
+                                              : kColorDarkGrey,
+                                          size: tablet ? 24 : 20,
+                                        ),
+                                        tablet ? AppSpaces.h12 : AppSpaces.h8,
+                                      ],
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Expanded(
-                                              child: Text(
-                                                indent.indentNo,
-                                                style:
-                                                    TextStyles.kSemiBoldOutfit(
-                                                      fontSize: tablet
-                                                          ? FontSizes
-                                                                .k16FontSize
-                                                          : FontSizes
-                                                                .k14FontSize,
-                                                      color: kColorPrimary,
-                                                    ),
+                                            Text(
+                                              indent.indentNo,
+                                              style: TextStyles.kSemiBoldOutfit(
+                                                fontSize: tablet
+                                                    ? FontSizes.k16FontSize
+                                                    : FontSizes.k14FontSize,
+                                                color: kColorPrimary,
                                               ),
+                                            ),
+                                            AppSpaces.v4,
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    'Date: ${convertyyyyMMddToddMMyyyy(indent.date)}',
+                                                    style:
+                                                        TextStyles.kRegularOutfit(
+                                                          fontSize: tablet
+                                                              ? FontSizes
+                                                                    .k12FontSize
+                                                              : FontSizes
+                                                                    .k10FontSize,
+                                                          color: kColorDarkGrey,
+                                                        ),
+                                                  ),
+                                                ),
+                                                if (indent.isSelected &&
+                                                    qtyController != null &&
+                                                    priceController != null)
+                                                  Expanded(
+                                                    child: Text(
+                                                      'Authorized Qty: ${indent.indentQty.toStringAsFixed(2)}',
+                                                      style: TextStyles.kRegularOutfit(
+                                                        fontSize: tablet
+                                                            ? FontSizes
+                                                                  .k12FontSize
+                                                            : FontSizes
+                                                                  .k10FontSize,
+                                                        color: kColorDarkGrey,
+                                                      ),
+                                                    ),
+                                                  ),
+                                              ],
                                             ),
                                           ],
                                         ),
-                                        AppSpaces.v8,
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: _buildDetailRow(
-                                                label: 'Authorized Qty',
-                                                value: indent.authoriseQty
-                                                    .toStringAsFixed(2),
-                                                tablet: tablet,
+                                      ),
+                                    ],
+                                  ),
+
+                                  if (indent.isSelected &&
+                                      qtyController != null &&
+                                      priceController != null) ...[
+                                    tablet ? AppSpaces.v12 : AppSpaces.v10,
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Quantity *',
+                                                style: TextStyles.kMediumOutfit(
+                                                  fontSize: tablet
+                                                      ? FontSizes.k14FontSize
+                                                      : FontSizes.k12FontSize,
+                                                  color: kColorTextPrimary,
+                                                ),
                                               ),
-                                            ),
-                                            AppSpaces.h12,
-                                            Expanded(
-                                              child: _buildDetailRow(
-                                                label: 'Date',
-                                                value:
-                                                    convertyyyyMMddToddMMyyyy(
-                                                      indent.date,
-                                                    ),
-                                                tablet: tablet,
+                                              tablet
+                                                  ? AppSpaces.v6
+                                                  : AppSpaces.v4,
+                                              GestureDetector(
+                                                onTap: () {},
+                                                child: AbsorbPointer(
+                                                  absorbing: false,
+                                                  child: AppTextFormField(
+                                                    controller: qtyController,
+                                                    hintText: 'Enter Quantity',
+                                                    keyboardType:
+                                                        TextInputType.number,
+                                                    floatingLabelRequired:
+                                                        false,
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
+                                        ),
+                                        tablet ? AppSpaces.h12 : AppSpaces.h10,
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Price *',
+                                                style: TextStyles.kMediumOutfit(
+                                                  fontSize: tablet
+                                                      ? FontSizes.k14FontSize
+                                                      : FontSizes.k12FontSize,
+                                                  color: kColorTextPrimary,
+                                                ),
+                                              ),
+                                              tablet
+                                                  ? AppSpaces.v6
+                                                  : AppSpaces.v4,
+                                              GestureDetector(
+                                                onTap: () {},
+                                                child: AbsorbPointer(
+                                                  absorbing: false,
+                                                  child: AppTextFormField(
+                                                    controller: priceController,
+                                                    hintText: 'Enter Price',
+                                                    keyboardType:
+                                                        TextInputType.number,
+                                                    floatingLabelRequired:
+                                                        false,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ],
                                     ),
-                                  ),
+                                  ] else ...[
+                                    tablet ? AppSpaces.v8 : AppSpaces.v6,
+                                    _buildDetailRow(
+                                      label: 'Authorized Qty',
+                                      value: indent.authoriseQty
+                                          .toStringAsFixed(2),
+                                      tablet: tablet,
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),

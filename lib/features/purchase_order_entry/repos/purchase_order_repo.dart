@@ -61,6 +61,7 @@ class PurchaseOrderRepo {
         fields['ItemData[$i].ICode'] = itemData[i]['ICode'];
         fields['ItemData[$i].Unit'] = itemData[i]['Unit'];
         fields['ItemData[$i].Qty'] = itemData[i]['Qty'].toString();
+        fields['ItemData[$i].Rate'] = (itemData[i]['Price'] ?? 0.0).toString();
         fields['ItemData[$i].IndentNo'] = itemData[i]['IndentNo'];
         fields['ItemData[$i].IndentSrNo'] = itemData[i]['IndentSrNo']
             .toString();
@@ -94,20 +95,20 @@ class PurchaseOrderRepo {
         }
       }
 
-      // print('------ PURCHASE ORDER PAYLOAD ------');
-      // fields.forEach((key, value) {
-      //   print('$key : $value');
-      // });
+      print('------ PURCHASE ORDER PAYLOAD ------');
+      fields.forEach((key, value) {
+        print('$key : $value');
+      });
 
-      // print('------ ATTACHMENTS ------');
-      // for (var file in newFiles) {
-      //   print({
-      //     'name': file.name,
-      //     'path': file.path,
-      //     'size': file.size,
-      //     'hasBytes': file.bytes != null,
-      //   });
-      // }
+      print('------ ATTACHMENTS ------');
+      for (var file in newFiles) {
+        print({
+          'name': file.name,
+          'path': file.path,
+          'size': file.size,
+          'hasBytes': file.bytes != null,
+        });
+      }
       final response = await ApiService.postFormData(
         endpoint: '/Order/orderEntry',
         fields: fields,
@@ -115,7 +116,7 @@ class PurchaseOrderRepo {
         token: token,
       );
 
-    //  print(response);
+      //  print(response);
 
       return response;
     } catch (e) {

@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -86,9 +84,27 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
           'iName': item.iName,
           'Unit': indent.unit,
           'Qty': indent.orderQty,
+          'Price': indent.price ?? 0.0,
           'IndentNo': indent.indentInvNo,
           'IndentSrNo': indent.indentSrNo,
         });
+      }
+    }
+
+    // Initialize controllers for edit mode
+    for (var item in _controller.selectedPurchaseItems) {
+      final key = '${item['IndentNo']}_${item['IndentSrNo']}';
+
+      if (!_controller.qtyControllers.containsKey(key)) {
+        _controller.qtyControllers[key] = TextEditingController(
+          text: item['Qty'].toStringAsFixed(2),
+        );
+      }
+
+      if (!_controller.priceControllers.containsKey(key)) {
+        _controller.priceControllers[key] = TextEditingController(
+          text: (item['Price'] ?? 0.0).toStringAsFixed(2),
+        );
       }
     }
   }
@@ -444,48 +460,167 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                               final item =
                                   _controller.selectedPurchaseItems[index];
 
-                              if (_controller.authIndentItems.isNotEmpty) {
-                                for (var authItem
-                                    in _controller.authIndentItems) {
-                                  if (authItem.iCode == item['ICode']) {
-                                    break;
-                                  }
-                                }
-                              }
+                              final key =
+                                  '${item['IndentNo']}_${item['IndentSrNo']}';
+                              final qtyController =
+                                  _controller.qtyControllers[key];
+                              final priceController =
+                                  _controller.priceControllers[key];
 
-                              return ListTile(
-                                dense: true,
-                                leading: Icon(
-                                  Icons.inventory_2_outlined,
-                                  color: kColorPrimary,
-                                  size: tablet ? 24 : 20,
-                                ),
-                                title: Text(
-                                  item['iName'] ?? item['ICode'] ?? '',
-                                  style: TextStyles.kMediumOutfit(
-                                    fontSize: tablet
-                                        ? FontSizes.k14FontSize
-                                        : FontSizes.k12FontSize,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                subtitle: Text(
-                                  'Indent: ${item['IndentNo']} | Qty: ${item['Qty']}',
-                                  style: TextStyles.kRegularOutfit(
-                                    fontSize: tablet
-                                        ? FontSizes.k12FontSize
-                                        : FontSizes.k10FontSize,
-                                    color: kColorDarkGrey,
-                                  ),
-                                ),
-                                trailing: GestureDetector(
-                                  onTap: () =>
-                                      _controller.removeSelectedItem(index),
-                                  child: Icon(
-                                    Icons.close,
-                                    color: kColorRed,
-                                    size: tablet ? 20 : 18,
-                                  ),
+                              return Padding(
+                                padding: tablet
+                                    ? AppPaddings.combined(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      )
+                                    : AppPaddings.combined(
+                                        horizontal: 14,
+                                        vertical: 10,
+                                      ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.inventory_2_outlined,
+                                          color: kColorPrimary,
+                                          size: tablet ? 24 : 20,
+                                        ),
+                                        tablet ? AppSpaces.h10 : AppSpaces.h8,
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                item['iName'] ??
+                                                    item['ICode'] ??
+                                                    '',
+                                                style: TextStyles.kMediumOutfit(
+                                                  fontSize: tablet
+                                                      ? FontSizes.k14FontSize
+                                                      : FontSizes.k12FontSize,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              AppSpaces.v2,
+                                              Text(
+                                                'Indent: ${item['IndentNo']}',
+                                                style:
+                                                    TextStyles.kRegularOutfit(
+                                                      fontSize: tablet
+                                                          ? FontSizes
+                                                                .k12FontSize
+                                                          : FontSizes
+                                                                .k10FontSize,
+                                                      color: kColorDarkGrey,
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () => _controller
+                                              .removeSelectedItem(index),
+                                          child: Icon(
+                                            Icons.delete_rounded,
+                                            color: kColorRed,
+                                            size: tablet ? 20 : 18,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Quantity',
+                                                style:
+                                                    TextStyles.kRegularOutfit(
+                                                      fontSize: tablet
+                                                          ? FontSizes
+                                                                .k12FontSize
+                                                          : FontSizes
+                                                                .k10FontSize,
+                                                      color: kColorDarkGrey,
+                                                    ),
+                                              ),
+                                              AppSpaces.v4,
+                                              if (qtyController != null)
+                                                AppTextFormField(
+                                                  controller: qtyController,
+                                                  hintText: 'Quantity',
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  floatingLabelRequired: false,
+                                                  onChanged: (value) {
+                                                    final qty =
+                                                        double.tryParse(
+                                                          value,
+                                                        ) ??
+                                                        item['Qty'];
+                                                    _controller
+                                                        .updateSelectedItemQty(
+                                                          index,
+                                                          qty,
+                                                        );
+                                                  },
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                        tablet ? AppSpaces.h12 : AppSpaces.h10,
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Price',
+                                                style:
+                                                    TextStyles.kRegularOutfit(
+                                                      fontSize: tablet
+                                                          ? FontSizes
+                                                                .k12FontSize
+                                                          : FontSizes
+                                                                .k10FontSize,
+                                                      color: kColorDarkGrey,
+                                                    ),
+                                              ),
+                                              AppSpaces.v4,
+                                              if (priceController != null)
+                                                AppTextFormField(
+                                                  controller: priceController,
+                                                  hintText: 'Price',
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  floatingLabelRequired: false,
+                                                  onChanged: (value) {
+                                                    final price =
+                                                        double.tryParse(
+                                                          value,
+                                                        ) ??
+                                                        0.0;
+                                                    _controller
+                                                        .updateSelectedItemPrice(
+                                                          index,
+                                                          price,
+                                                        );
+                                                  },
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               );
                             },
@@ -680,6 +815,7 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                       onIndentLongPress: (indentIndex) {
                         _controller.enableSelectionMode(index, indentIndex);
                       },
+                      controller: _controller,
                     );
                   });
                 },

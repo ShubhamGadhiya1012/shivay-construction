@@ -51,6 +51,9 @@ class PurchaseOrderController extends GetxController {
   var expandedItemIndices = <int>[].obs;
   var selectedPurchaseItems = <Map<String, dynamic>>[].obs;
 
+  var qtyControllers = <String, TextEditingController>{}.obs;
+  var priceControllers = <String, TextEditingController>{}.obs;
+
   Future<void> getSites() async {
     try {
       isLoading.value = true;
@@ -90,6 +93,7 @@ class PurchaseOrderController extends GetxController {
 
     if (isGodownChanging && selectedPurchaseItems.isNotEmpty) {
       selectedPurchaseItems.clear();
+      
       authIndentItems.clear();
     }
 
@@ -223,14 +227,22 @@ class PurchaseOrderController extends GetxController {
     for (var selectedItem in selectedPurchaseItems) {
       for (var item in authIndentItems) {
         if (item.iCode == selectedItem['ICode']) {
-          // Store iName in selectedItem if not present
           if (selectedItem['iName'] == null || selectedItem['iName'].isEmpty) {
             selectedItem['iName'] = item.iName;
           }
 
           for (var indent in item.indents) {
-            if (indent.indentNo == selectedItem['IndentNo']) {
+            if (indent.indentNo == selectedItem['IndentNo'] &&
+                indent.indentSrNo == selectedItem['IndentSrNo']) {
               indent.isSelected = true;
+
+              // Set controllers with existing values
+              final key = '${indent.indentNo}_${indent.indentSrNo}';
+              qtyControllers[key]?.text = selectedItem['Qty'].toStringAsFixed(
+                2,
+              );
+              priceControllers[key]?.text = (selectedItem['Price'] ?? 0.0)
+                  .toStringAsFixed(2);
             }
           }
         }
@@ -249,7 +261,6 @@ class PurchaseOrderController extends GetxController {
     final newSelectedItems = getSelectedIndentsData();
 
     for (var newItem in newSelectedItems) {
-      // Find the item name
       for (var authItem in authIndentItems) {
         if (authItem.iCode == newItem['ICode']) {
           newItem['iName'] = authItem.iName;
@@ -265,6 +276,17 @@ class PurchaseOrderController extends GetxController {
 
       if (!exists) {
         selectedPurchaseItems.add(newItem);
+      } else {
+        // Update existing item
+        int index = selectedPurchaseItems.indexWhere(
+          (item) =>
+              item['IndentNo'] == newItem['IndentNo'] &&
+              item['IndentSrNo'] == newItem['IndentSrNo'],
+        );
+        if (index != -1) {
+          selectedPurchaseItems[index]['Qty'] = newItem['Qty'];
+          selectedPurchaseItems[index]['Price'] = newItem['Price'];
+        }
       }
     }
 
@@ -299,6 +321,23 @@ class PurchaseOrderController extends GetxController {
       expandedItemIndices.clear();
       for (int i = 0; i < fetchedItems.length; i++) {
         expandedItemIndices.add(i);
+      }
+
+      // Initialize controllers for all indents
+      for (var item in fetchedItems) {
+        for (var indent in item.indents) {
+          final key = '${indent.indentNo}_${indent.indentSrNo}';
+
+          if (!qtyControllers.containsKey(key)) {
+            qtyControllers[key] = TextEditingController(
+              text: indent.authoriseQty.toStringAsFixed(2),
+            );
+          }
+
+          if (!priceControllers.containsKey(key)) {
+            priceControllers[key] = TextEditingController(text: '0.00');
+          }
+        }
       }
 
       preselectExistingItems();
@@ -354,6 +393,20 @@ class PurchaseOrderController extends GetxController {
     isSelectionMode.value = false;
   }
 
+  void updateSelectedItemQty(int index, double qty) {
+    if (index >= 0 && index < selectedPurchaseItems.length) {
+      selectedPurchaseItems[index]['Qty'] = qty;
+      selectedPurchaseItems.refresh();
+    }
+  }
+
+  void updateSelectedItemPrice(int index, double price) {
+    if (index >= 0 && index < selectedPurchaseItems.length) {
+      selectedPurchaseItems[index]['Price'] = price;
+      selectedPurchaseItems.refresh();
+    }
+  }
+
   List<Map<String, dynamic>> getSelectedIndentsData() {
     List<Map<String, dynamic>> selectedData = [];
     int srNo = 1;
@@ -361,11 +414,19 @@ class PurchaseOrderController extends GetxController {
     for (var item in authIndentItems) {
       for (var indent in item.indents) {
         if (indent.isSelected) {
+          final key = '${indent.indentNo}_${indent.indentSrNo}';
+          final qty =
+              double.tryParse(qtyControllers[key]?.text ?? '') ??
+              indent.authoriseQty;
+          final price =
+              double.tryParse(priceControllers[key]?.text ?? '') ?? 0.0;
+
           selectedData.add({
             'SrNo': srNo,
             'ICode': item.iCode,
             'Unit': 'Nos',
-            'Qty': indent.authoriseQty,
+            'Qty': qty,
+            'Price': price,
             'IndentNo': indent.indentNo,
             'IndentSrNo': indent.indentSrNo,
           });
@@ -435,6 +496,16 @@ class PurchaseOrderController extends GetxController {
     existingAttachmentUrls.clear();
     authIndentItems.clear();
     selectedPurchaseItems.clear();
+
+    // Dispose controllers
+    for (var controller in qtyControllers.values) {
+      controller.dispose();
+    }
+    for (var controller in priceControllers.values) {
+      controller.dispose();
+    }
+    qtyControllers.clear();
+    priceControllers.clear();
 
     currentStep.value = 0;
     isEditMode.value = false;
