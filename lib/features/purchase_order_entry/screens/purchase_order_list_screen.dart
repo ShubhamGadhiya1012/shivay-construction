@@ -143,6 +143,12 @@ class PurchaseOrderListScreen extends StatelessWidget {
                                   return PurchaseOrderCard(
                                     order: order,
                                     controller: _controller,
+                                    onDelete: () {
+                                      Get.back();
+                                      _controller.deletePurchaseOrder(
+                                        invNo: order.invNo,
+                                      );
+                                    },
                                   );
                                 } else {
                                   return Padding(

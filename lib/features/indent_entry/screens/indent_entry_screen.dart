@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -817,6 +819,13 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter qty';
+                                }
+                                final qty = double.tryParse(value);
+                                if (qty == null) {
+                                  return 'Please enter a valid number';
+                                }
+                                if (qty <= 0) {
+                                  return 'Qty must be greater than 0';
                                 }
                                 return null;
                               },

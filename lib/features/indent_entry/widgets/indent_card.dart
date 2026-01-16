@@ -7,6 +7,8 @@ import 'package:shivay_construction/features/indent_entry/controllers/indents_co
 import 'package:shivay_construction/features/indent_entry/models/indent_detail_dm.dart';
 import 'package:shivay_construction/features/indent_entry/models/indent_dm.dart';
 import 'package:shivay_construction/features/indent_entry/screens/indent_entry_screen.dart';
+import 'package:shivay_construction/features/indent_entry/screens/indent_pdf_screen.dart';
+import 'package:shivay_construction/features/indent_entry/screens/site_wise_stock_screen.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
@@ -99,6 +101,44 @@ class _IndentCardState extends State<IndentCard> {
                       ),
                     ),
                     tablet ? AppSpaces.h12 : AppSpaces.h8,
+                    Material(
+                      color: kColorSecondary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                      child: InkWell(
+                        onTap: () async {
+                          await widget.controller.getIndentDetails(
+                            invNo: widget.indent.invNo,
+                          );
+                          IndentPdfScreen.generateIndentPdf(
+                            indent: widget.indent,
+                            indentDetails: widget.controller.indentDetails
+                                .toList(),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                        child: Container(
+                          padding: tablet
+                              ? AppPaddings.combined(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                )
+                              : AppPaddings.combined(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.picture_as_pdf_rounded,
+                                size: tablet ? 18 : 16,
+                                color: kColorSecondary,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    AppSpaces.h8,
                     if (!widget.indent.authorize)
                       Material(
                         color: kColorPrimary.withOpacity(0.1),
@@ -134,16 +174,6 @@ class _IndentCardState extends State<IndentCard> {
                                   Icons.edit_rounded,
                                   size: tablet ? 18 : 16,
                                   color: kColorPrimary,
-                                ),
-                                AppSpaces.h6,
-                                Text(
-                                  'Edit',
-                                  style: TextStyles.kSemiBoldOutfit(
-                                    fontSize: tablet
-                                        ? FontSizes.k15FontSize
-                                        : FontSizes.k14FontSize,
-                                    color: kColorPrimary,
-                                  ),
                                 ),
                               ],
                             ),
@@ -261,6 +291,8 @@ class _IndentCardState extends State<IndentCard> {
                           );
                         }
 
+                        // Replace the existing item ListView.builder section (around line 280-350) with this:
+
                         return ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
@@ -295,6 +327,58 @@ class _IndentCardState extends State<IndentCard> {
                                                 ? FontSizes.k16FontSize
                                                 : FontSizes.k14FontSize,
                                             color: kColorPrimary,
+                                          ),
+                                        ),
+                                      ),
+                                      AppSpaces.h8,
+                                      Material(
+                                        color: kColorGreen.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(
+                                          tablet ? 8 : 6,
+                                        ),
+                                        child: InkWell(
+                                          onTap: () {
+                                            Get.to(
+                                              () => SiteWiseStockScreen(
+                                                iCode: detail.iCode,
+                                              ),
+                                            );
+                                          },
+                                          borderRadius: BorderRadius.circular(
+                                            tablet ? 8 : 6,
+                                          ),
+                                          child: Container(
+                                            padding: tablet
+                                                ? AppPaddings.combined(
+                                                    horizontal: 10,
+                                                    vertical: 8,
+                                                  )
+                                                : AppPaddings.combined(
+                                                    horizontal: 8,
+                                                    vertical: 6,
+                                                  ),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.visibility_rounded,
+                                                  size: tablet ? 18 : 16,
+                                                  color: kColorGreen,
+                                                ),
+                                                AppSpaces.h4,
+                                                Text(
+                                                  'Stock',
+                                                  style:
+                                                      TextStyles.kSemiBoldOutfit(
+                                                        fontSize: tablet
+                                                            ? FontSizes
+                                                                  .k14FontSize
+                                                            : FontSizes
+                                                                  .k12FontSize,
+                                                        color: kColorGreen,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),

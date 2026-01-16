@@ -39,7 +39,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   padding: AppPaddings.combined(
                     horizontal: tablet ? 20 : 14,
-                    vertical: tablet ? 14 : 10,
+                    vertical: tablet ? 7 : 5,
                   ),
                   decoration: BoxDecoration(
                     color: kColorPrimary.withOpacity(0.08),

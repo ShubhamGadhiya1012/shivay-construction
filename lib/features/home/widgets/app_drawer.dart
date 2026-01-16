@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/constants/image_constants.dart';
+import 'package:shivay_construction/features/grn_entry/screens/grns_screen.dart';
 import 'package:shivay_construction/features/home/controllers/home_controller.dart';
 import 'package:shivay_construction/features/home/widgets/version_and_developer_info.dart';
 import 'package:shivay_construction/features/category_master/screens/category_master_screen.dart';
@@ -16,7 +17,15 @@ import 'package:shivay_construction/features/item_master/screens/item_master_lis
 import 'package:shivay_construction/features/opening_stock_entry/screens/opening_stocks_screen.dart';
 import 'package:shivay_construction/features/party_masters/screens/party_master_list_screen.dart';
 import 'package:shivay_construction/features/purchase_order_entry/screens/purchase_order_list_screen.dart';
+import 'package:shivay_construction/features/repair_entry/screens/repair_issue_list_screen.dart';
+import 'package:shivay_construction/features/reports/screens/grn_report_screen.dart';
+import 'package:shivay_construction/features/reports/screens/indent_report_screen.dart';
+import 'package:shivay_construction/features/reports/screens/issue_repair_report_screen.dart';
+import 'package:shivay_construction/features/reports/screens/opening_stock_report_screen.dart';
+import 'package:shivay_construction/features/reports/screens/purchase_order_report_screen.dart';
+import 'package:shivay_construction/features/reports/screens/site_transfer_report_screen.dart';
 import 'package:shivay_construction/features/site_master/screens/site_master_list_screen.dart';
+import 'package:shivay_construction/features/site_transfer/screens/site_transfer_screen.dart';
 import 'package:shivay_construction/features/user_settings/models/user_access_dm.dart';
 import 'package:shivay_construction/features/user_settings/screens/unauthorised_users_screen.dart';
 import 'package:shivay_construction/features/user_settings/screens/users_screen.dart';
@@ -453,11 +462,32 @@ class AppDrawer extends StatelessWidget {
       case 'purchase order entry':
         Get.to(() => PurchaseOrderListScreen());
         break;
-      case 'GRN entry':
+      case 'grn entry':
+        Get.to(() => GrnsScreen());
         break;
       case 'site transfer entry':
+        Get.to(() => SiteTransferScreen());
         break;
       case 'repair entry':
+        Get.to(() => RepairIssueListScreen());
+        break;
+      case 'opening stock report':
+        Get.to(() => OpeningStockReportScreen());
+        break;
+      case 'indent report':
+        Get.to(() => IndentReportScreen());
+        break;
+      case 'purchase order report':
+        Get.to(() => PurchaseOrderReportScreen());
+        break;
+      case 'grn report':
+        Get.to(() => GrnReportScreen());
+        break;
+      case 'site transfer report':
+        Get.to(() => SiteTransferReportScreen());
+        break;
+      case 'issue repair report':
+        Get.to(() => IssueRepairReportScreen());
         break;
       default:
     }

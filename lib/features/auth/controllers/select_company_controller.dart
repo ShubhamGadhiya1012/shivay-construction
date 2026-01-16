@@ -71,8 +71,8 @@ class SelectCompanyController extends GetxController {
       );
 
       await SecureStorageHelper.write('poAuth', response['poAuth'].toString());
-      print(response['indentAuth']);
-      print(response['poAuth']);
+      // print(response['indentAuth']);
+      // print(response['poAuth']);
       await SecureStorageHelper.write(
         'userType',
         response['userType'].toString(),

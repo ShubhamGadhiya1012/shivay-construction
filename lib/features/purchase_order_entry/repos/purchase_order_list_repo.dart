@@ -67,4 +67,36 @@ class PurchaseOrderListRepo {
       rethrow;
     }
   }
+
+  static Future<dynamic> authorizePurchaseOrder({required String invNo}) async {
+    String? token = await SecureStorageHelper.read('token');
+    // print(invNo);
+    try {
+      final response = await ApiService.getRequest(
+        endpoint: '/Order/authPO',
+        queryParams: {'Invno': invNo},
+        token: token,
+      );
+
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<dynamic> deletePurchaseOrder({required String invNo}) async {
+    String? token = await SecureStorageHelper.read('token');
+
+    try {
+      final response = await ApiService.postRequest(
+        endpoint: '/Order/deleteOrder',
+        requestBody: {'Invno': invNo.toString()},
+        token: token,
+      );
+
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

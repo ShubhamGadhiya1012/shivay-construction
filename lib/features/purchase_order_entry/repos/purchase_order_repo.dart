@@ -10,8 +10,8 @@ class PurchaseOrderRepo {
     required String gdCode,
   }) async {
     String? token = await SecureStorageHelper.read('token');
-    print(siteCode);
-    print(gdCode);
+    // print(siteCode);
+    // print(gdCode);
     try {
       final response = await ApiService.getRequest(
         endpoint: '/Order/getAuthIndentItems',
@@ -61,6 +61,7 @@ class PurchaseOrderRepo {
         fields['ItemData[$i].ICode'] = itemData[i]['ICode'];
         fields['ItemData[$i].Unit'] = itemData[i]['Unit'];
         fields['ItemData[$i].Qty'] = itemData[i]['Qty'].toString();
+        fields['ItemData[$i].Rate'] = (itemData[i]['Price'] ?? 0.0).toString();
         fields['ItemData[$i].IndentNo'] = itemData[i]['IndentNo'];
         fields['ItemData[$i].IndentSrNo'] = itemData[i]['IndentSrNo']
             .toString();
@@ -115,7 +116,7 @@ class PurchaseOrderRepo {
         token: token,
       );
 
-      print(response);
+      //  print(response);
 
       return response;
     } catch (e) {
