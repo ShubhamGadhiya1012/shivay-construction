@@ -9,6 +9,7 @@ class GrnDetailDm {
   final String poDate;
   final double poQty;
   final double pendingQty;
+  final double rate;
 
   GrnDetailDm({
     required this.srNo,
@@ -21,6 +22,7 @@ class GrnDetailDm {
     required this.poQty,
     required this.poDate,
     required this.pendingQty,
+    required this.rate,
   });
 
   factory GrnDetailDm.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class GrnDetailDm {
       poSrnNo: (json['POSrNo'] as num?)?.toDouble() ?? 0.0,
       poQty: (json['POQty'] as num?)?.toDouble() ?? 0.0,
       pendingQty: (json['PendingQty'] as num?)?.toDouble() ?? 0.0,
+      rate: (json['Rate'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

@@ -124,6 +124,13 @@ class GrnSelectedItemCard extends StatelessWidget {
                     ),
                     Expanded(
                       child: _buildDetailColumn(
+                        label: 'Rate',
+                        value: (poData['rate'] ?? 0.0).toStringAsFixed(2),
+                        tablet: tablet,
+                      ),
+                    ),
+                    Expanded(
+                      child: _buildDetailColumn(
                         label: 'GRN Qty',
                         value:
                             '${(poData['grnQty'] ?? 0.0).toStringAsFixed(2)} ${poData['unit']}',

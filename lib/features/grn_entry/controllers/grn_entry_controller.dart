@@ -193,6 +193,7 @@ class GrnEntryController extends GetxController {
           'iCode': detail.iCode,
           'iName': detail.iName,
           'unit': detail.unit,
+          'rate': detail.rate, // Add this (assuming GrnDetailDm has rate)
           'poInvNo': detail.poInvNo,
           'poSrNo': detail.poSrnNo.toInt(),
           'poDate': detail.poDate,
@@ -225,6 +226,7 @@ class GrnEntryController extends GetxController {
         'iCode': item.iCode,
         'iName': item.iName,
         'unit': item.unit,
+        'rate': item.rate, // Add this
         'poInvNo': order.poInvNo,
         'poSrNo': order.poSrNo,
         'poDate': order.poDate,
@@ -418,6 +420,7 @@ class GrnEntryController extends GetxController {
           "ICode": poData['iCode'],
           "Unit": poData['unit'],
           "Qty": poData['grnQty'],
+          "Rate": poData['rate'],
           "POInvNo": poData['poInvNo'],
           "POSrNo": poData['poSrNo'],
         });

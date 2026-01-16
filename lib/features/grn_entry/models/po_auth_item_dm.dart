@@ -52,12 +52,14 @@ class PoAuthItemDm {
   final String iCode;
   final String iName;
   final String unit;
+  final double rate; // Add this
   final List<PoOrderDm> orders;
 
   PoAuthItemDm({
     required this.iCode,
     required this.iName,
     required this.unit,
+    required this.rate, // Add this
     required this.orders,
   });
 
@@ -66,6 +68,7 @@ class PoAuthItemDm {
       iCode: json['iCode'] ?? '',
       iName: json['iName'] ?? '',
       unit: json['unit'] ?? '',
+      rate: (json['rate'] as num?)?.toDouble() ?? 0.0, // Add this
       orders: json['orders'] != null
           ? (json['orders'] as List<dynamic>)
                 .map((order) => PoOrderDm.fromJson(order))

@@ -125,6 +125,14 @@ class PoOrderCard extends StatelessWidget {
                   AppSpaces.h8,
                   Expanded(
                     child: _buildInfoColumn(
+                      label: 'Rate',
+                      value: item.rate.toStringAsFixed(2), // Add this
+                      tablet: tablet,
+                    ),
+                  ),
+                  AppSpaces.h8,
+                  Expanded(
+                    child: _buildInfoColumn(
                       label: 'Received',
                       value: order.receivedQty.toStringAsFixed(2),
                       tablet: tablet,

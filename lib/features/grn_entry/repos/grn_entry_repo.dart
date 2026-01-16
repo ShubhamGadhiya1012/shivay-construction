@@ -32,6 +32,7 @@ class GrnEntryRepo {
         fields['ItemData[$i].ICode'] = itemData[i]['ICode'];
         fields['ItemData[$i].Unit'] = itemData[i]['Unit'];
         fields['ItemData[$i].Qty'] = itemData[i]['Qty'].toString();
+        fields['ItemData[$i].Rate'] = itemData[i]['Rate'].toString();
         fields['ItemData[$i].POInvNo'] = itemData[i]['POInvNo'] ?? '';
         fields['ItemData[$i].POSrNo'] = itemData[i]['POSrNo']?.toString() ?? '';
       }
