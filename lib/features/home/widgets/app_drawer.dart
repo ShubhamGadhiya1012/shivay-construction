@@ -26,6 +26,7 @@ import 'package:shivay_construction/features/reports/screens/purchase_order_repo
 import 'package:shivay_construction/features/reports/screens/site_transfer_report_screen.dart';
 import 'package:shivay_construction/features/site_master/screens/site_master_list_screen.dart';
 import 'package:shivay_construction/features/site_transfer/screens/site_transfer_screen.dart';
+import 'package:shivay_construction/features/stock_reports/screens/stock_report_screen.dart';
 import 'package:shivay_construction/features/user_settings/models/user_access_dm.dart';
 import 'package:shivay_construction/features/user_settings/screens/unauthorised_users_screen.dart';
 import 'package:shivay_construction/features/user_settings/screens/users_screen.dart';
@@ -404,6 +405,15 @@ class AppDrawer extends StatelessWidget {
           _navigateToSubMenu(firstAccessible);
         }
         break;
+      case 'stock reports':
+        if (menu.subMenu.isNotEmpty) {
+          final firstAccessible = menu.subMenu.firstWhere(
+            (sub) => sub.subMenuAccess,
+            orElse: () => menu.subMenu.first,
+          );
+          _navigateToSubMenu(firstAccessible);
+        }
+        break;
       case 'user settings':
         if (menu.subMenu.isNotEmpty) {
           final firstAccessible = menu.subMenu.firstWhere(
@@ -488,6 +498,83 @@ class AppDrawer extends StatelessWidget {
         break;
       case 'issue repair report':
         Get.to(() => IssueRepairReportScreen());
+        break;
+
+      case 'stock statement report':
+        Get.to(
+          () => const StockReportScreen(
+            reportName: 'STATEMENT',
+            reportTitle: 'Stock Statement Report',
+            rType: 'STATEMENT',
+            method: '',
+          ),
+        );
+        break;
+
+      case 'fifo - stock valuation':
+        Get.to(
+          () => const StockReportScreen(
+            reportName: 'FIFO',
+            reportTitle: 'FIFO - Stock Valuation',
+            rType: 'STATEMENT',
+            method: 'FIFO',
+          ),
+        );
+        break;
+
+      case 'lifo - stock valuation':
+        Get.to(
+          () => const StockReportScreen(
+            reportName: 'LIFO',
+            reportTitle: 'LIFO - Stock Valuation',
+            rType: 'STATEMENT',
+            method: 'LIFO',
+          ),
+        );
+        break;
+
+      case 'lp - stock valuation':
+        Get.to(
+          () => const StockReportScreen(
+            reportName: 'LP',
+            reportTitle: 'LP - Stock Valuation',
+            rType: 'STATEMENT',
+            method: 'LP',
+          ),
+        );
+        break;
+
+      case 'stock ledger':
+        Get.to(
+          () => const StockReportScreen(
+            reportName: 'LEDGER',
+            reportTitle: 'Stock Ledger',
+            rType: 'LEDGER',
+            method: '',
+          ),
+        );
+        break;
+
+      case 'group stock report':
+        Get.to(
+          () => const StockReportScreen(
+            reportName: 'GROUPSTOCK',
+            reportTitle: 'Group Stock Report',
+            rType: 'GROUPSTOCK',
+            method: '',
+          ),
+        );
+        break;
+
+      case 'site stock report':
+        Get.to(
+          () => const StockReportScreen(
+            reportName: 'SITESTOCK',
+            reportTitle: 'Site Stock Report',
+            rType: 'SITESTOCK',
+            method: '',
+          ),
+        );
         break;
       default:
     }
