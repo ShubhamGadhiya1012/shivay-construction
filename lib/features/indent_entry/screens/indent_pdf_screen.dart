@@ -142,12 +142,18 @@ class IndentPdfScreen {
                     ),
                     pw.SizedBox(height: 3),
                     pw.Text(
-                      'Status: ${indent.authorize ? "Authorized" : "Pending"}',
+                      'Status: ${indent.authorize
+                          ? "Authorized"
+                          : indent.closeIndent
+                          ? "Closed"
+                          : "Pending"}',
                       style: pw.TextStyle(
                         fontSize: 10,
                         fontWeight: pw.FontWeight.bold,
                         color: indent.authorize
                             ? PdfColor.fromHex('#4CAF50')
+                            : indent.closeIndent
+                            ? PdfColor.fromHex('#F44336')
                             : PdfColor.fromHex('#FF9800'),
                       ),
                     ),

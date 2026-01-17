@@ -34,7 +34,6 @@ class ItemMasterController extends GetxController {
   var itemSubGroupNames = <String>[].obs;
   var selectedItemSubGroup = ''.obs;
   var selectedItemSubGroupCode = ''.obs;
-
   var isEditMode = false.obs;
   var currentICode = ''.obs;
 

@@ -30,9 +30,7 @@ class IndentEntryController extends GetxController {
   var selectedGodownName = ''.obs;
   var selectedGodownCode = ''.obs;
   var selectedSiteCode = ''.obs;
-
   var sites = <SiteMasterDm>[].obs;
-
   var items = <ItemMasterDm>[].obs;
   var itemNames = <String>[].obs;
   var selectedItemName = ''.obs;
