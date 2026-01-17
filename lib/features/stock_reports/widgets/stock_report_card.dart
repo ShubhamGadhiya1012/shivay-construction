@@ -310,7 +310,7 @@ class StockReportCard extends StatelessWidget {
         children: [
           if (stockReport.igName?.isNotEmpty == true)
             Text(
-              stockReport.igName!,
+              'Group: ${stockReport.igName!}',
               style: TextStyles.kSemiBoldOutfit(
                 fontSize: tablet
                     ? FontSizes.k20FontSize
@@ -325,7 +325,7 @@ class StockReportCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   stockReport.iName ?? '',
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyles.kSemiBoldOutfit(
                     fontSize: tablet
@@ -350,10 +350,64 @@ class StockReportCard extends StatelessWidget {
             ],
           ),
           tablet ? AppSpaces.v12 : AppSpaces.v8,
-          AppTitleValueContainer(
-            title: 'Stock Qty',
-            value: stockReport.stockQty?.toStringAsFixed(2) ?? '0.00',
-            color: kColorGrey,
+          Row(
+            children: [
+              Expanded(
+                child: AppTitleValueContainer(
+                  title: 'Open Qty',
+                  value: stockReport.openQty?.toStringAsFixed(2) ?? '0.00',
+                  color: kColorGrey,
+                ),
+              ),
+              tablet ? AppSpaces.h12 : AppSpaces.h8,
+              Expanded(
+                child: AppTitleValueContainer(
+                  title: 'In Qty',
+                  value: stockReport.inQty?.toStringAsFixed(2) ?? '0.00',
+                  color: kColorGrey,
+                ),
+              ),
+            ],
+          ),
+          tablet ? AppSpaces.v12 : AppSpaces.v8,
+          Row(
+            children: [
+              Expanded(
+                child: AppTitleValueContainer(
+                  title: 'Out Qty',
+                  value: stockReport.outQty?.toStringAsFixed(2) ?? '0.00',
+                  color: kColorGrey,
+                ),
+              ),
+              tablet ? AppSpaces.h12 : AppSpaces.h8,
+              Expanded(
+                child: AppTitleValueContainer(
+                  title: 'Close Qty',
+                  value: stockReport.closeQty?.toStringAsFixed(2) ?? '0.00',
+                  color: kColorGrey,
+                ),
+              ),
+            ],
+          ),
+          tablet ? AppSpaces.v12 : AppSpaces.v8,
+          Row(
+            children: [
+              Expanded(
+                child: AppTitleValueContainer(
+                  title: 'Rate',
+                  value: formatIndianCurrency(stockReport.rate ?? 0),
+                  color: kColorGrey,
+                ),
+              ),
+              tablet ? AppSpaces.h12 : AppSpaces.h8,
+              Expanded(
+                child: AppTitleValueContainer(
+                  title: 'Close Value',
+                  value: formatIndianCurrency(stockReport.closeValue ?? 0),
+                  color: kColorGrey,
+                ),
+              ),
+            ],
           ),
         ],
       ),

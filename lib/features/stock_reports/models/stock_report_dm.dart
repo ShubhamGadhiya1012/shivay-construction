@@ -99,7 +99,8 @@ class StockReportDm {
 
   bool get isGrandTotal =>
       iCode?.toUpperCase() == 'TOTAL' ||
-      iName?.toUpperCase().contains('GRAND TOTAL') == true;
+      iName?.toUpperCase().contains('GRAND TOTAL') == true ||
+      iName?.toUpperCase() == 'GRAND TOTAL';
 
   bool get isOpeningClosing =>
       desc?.contains('Opening Stock') == true ||

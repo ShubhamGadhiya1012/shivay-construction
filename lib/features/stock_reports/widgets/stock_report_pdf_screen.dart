@@ -256,19 +256,33 @@ class StockReportPdfScreen {
         break;
 
       case 'GROUPSTOCK':
-        headers = ['Group', 'Item Name', 'Unit', 'Stock Qty'];
+        headers = [
+          'Group',
+          'Item Name',
+          'Unit',
+          'Open Qty',
+          'In Qty',
+          'Out Qty',
+          'Close Qty',
+          'Rate',
+          'Close Value',
+        ];
         rows = reportData
             .map(
               (item) => [
                 item.igName ?? '',
                 item.iName ?? '',
                 item.unit ?? '',
-                (item.stockQty ?? 0).toStringAsFixed(2),
+                (item.openQty ?? 0).toStringAsFixed(2),
+                (item.inQty ?? 0).toStringAsFixed(2),
+                (item.outQty ?? 0).toStringAsFixed(2),
+                (item.closeQty ?? 0).toStringAsFixed(2),
+                (item.rate ?? 0).toStringAsFixed(2),
+                (item.closeValue ?? 0).toStringAsFixed(2),
               ],
             )
             .toList();
         break;
-
       case 'SITESTOCK':
         headers = ['Site', 'Godown', 'Item Name', 'Unit', 'Stock Qty'];
         rows = reportData
@@ -325,6 +339,23 @@ class StockReportPdfScreen {
         (grandTotal.inQty ?? 0).toStringAsFixed(2),
         (grandTotal.outQty ?? 0).toStringAsFixed(2),
         (grandTotal.closeQty ?? 0).toStringAsFixed(2),
+      ];
+    } else if (reportName == 'GROUPSTOCK') {
+      headers = [
+        'GRAND TOTAL',
+        'Open Qty',
+        'In Qty',
+        'Out Qty',
+        'Close Qty',
+        'Close Value',
+      ];
+      values = [
+        'Total',
+        (grandTotal.openQty ?? 0).toStringAsFixed(2),
+        (grandTotal.inQty ?? 0).toStringAsFixed(2),
+        (grandTotal.outQty ?? 0).toStringAsFixed(2),
+        (grandTotal.closeQty ?? 0).toStringAsFixed(2),
+        (grandTotal.closeValue ?? 0).toStringAsFixed(2),
       ];
     } else {
       headers = ['GRAND TOTAL', 'Close Qty', 'Close Value'];

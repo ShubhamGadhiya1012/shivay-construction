@@ -105,6 +105,39 @@ class StockReportGrandTotalBottomSheet extends StatelessWidget {
           highlight: true,
         ),
       ]);
+    } else if (reportName == 'GROUPSTOCK') {
+      rows.addAll([
+        _summaryRow(
+          'Open Qty',
+          grandTotal.openQty?.toStringAsFixed(2) ?? '0.00',
+          tablet,
+        ),
+        _divider(tablet),
+        _summaryRow(
+          'In Qty',
+          grandTotal.inQty?.toStringAsFixed(2) ?? '0.00',
+          tablet,
+        ),
+        _divider(tablet),
+        _summaryRow(
+          'Out Qty',
+          grandTotal.outQty?.toStringAsFixed(2) ?? '0.00',
+          tablet,
+        ),
+        _divider(tablet),
+        _summaryRow(
+          'Close Qty',
+          grandTotal.closeQty?.toStringAsFixed(2) ?? '0.00',
+          tablet,
+        ),
+        _divider(tablet),
+        _summaryRow(
+          'Close Value',
+          formatIndianCurrency(grandTotal.closeValue ?? 0),
+          tablet,
+          highlight: true,
+        ),
+      ]);
     } else {
       // FIFO, LIFO, LP
       rows.addAll([
