@@ -210,7 +210,10 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       Spacer(),
                       Container(
-                        padding: EdgeInsets.symmetric(vertical: 16),
+                        padding: AppPaddings.combined(
+                          vertical: 16,
+                          horizontal: 0,
+                        ),
                         child: Obx(
                           () => Text(
                             'v${_controller.appVersion.value}',

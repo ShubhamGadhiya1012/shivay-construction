@@ -11,6 +11,8 @@ import 'package:shivay_construction/features/grn_entry/models/grn_detail_dm.dart
 import 'package:shivay_construction/features/grn_entry/models/po_auth_item_dm.dart';
 import 'package:shivay_construction/features/grn_entry/repos/grn_entry_repo.dart';
 import 'package:shivay_construction/features/grn_entry/repos/po_auth_items_repo.dart';
+import 'package:shivay_construction/features/item_master/models/item_master_dm.dart';
+import 'package:shivay_construction/features/item_master/repos/item_master_list_repo.dart';
 import 'package:shivay_construction/features/party_masters/models/party_master_dm.dart';
 import 'package:shivay_construction/features/party_masters/repos/party_master_list_repo.dart';
 import 'package:shivay_construction/features/site_master/models/site_master_dm.dart';
@@ -52,6 +54,21 @@ class GrnEntryController extends GetxController {
 
   var isItemSelectionMode = false.obs;
   var isInSelectionMode = false.obs;
+
+  var isDirectGrn = false.obs;
+  var directGrnItems = <Map<String, dynamic>>[].obs;
+  final directItemFormKey = GlobalKey<FormState>();
+
+  var items = <ItemMasterDm>[].obs;
+  var itemNames = <String>[].obs;
+  var selectedDirectItemName = ''.obs;
+  var selectedDirectItemCode = ''.obs;
+  var selectedDirectUnit = ''.obs;
+  var directRateController = TextEditingController();
+  var directQtyController = TextEditingController();
+
+  var isEditingDirectItem = false.obs;
+  var editingDirectItemIndex = (-1).obs;
 
   @override
   void onInit() {
@@ -404,26 +421,168 @@ class GrnEntryController extends GetxController {
     return '${parts[2]}-${parts[1]}-${parts[0]}';
   }
 
+  Future<void> getItems() async {
+    if (items.isNotEmpty) return;
+
+    try {
+      isLoading.value = true;
+      final fetchedItems = await ItemMasterListRepo.getItems();
+      items.assignAll(fetchedItems);
+      itemNames.assignAll(fetchedItems.map((item) => item.iName));
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ADD THIS METHOD
+  void onDirectItemSelected(String? itemName) {
+    selectedDirectItemName.value = itemName!;
+    var selectedItemObj = items.firstWhere((item) => item.iName == itemName);
+    selectedDirectItemCode.value = selectedItemObj.iCode;
+    selectedDirectUnit.value = selectedItemObj.unit;
+    directQtyController.clear();
+    directRateController.clear();
+  }
+
+  // ADD THIS METHOD
+  void prepareAddDirectItem() {
+    clearDirectItemForm();
+    isEditingDirectItem.value = false;
+    editingDirectItemIndex.value = -1;
+  }
+
+  // ADD THIS METHOD
+  void prepareEditDirectItem(int index) {
+    final item = directGrnItems[index];
+    selectedDirectItemName.value = item['iname'] ?? '';
+    selectedDirectItemCode.value = item['icode'] ?? '';
+    selectedDirectUnit.value = item['unit'] ?? '';
+    directQtyController.text = (item['qty'] ?? 0).toString();
+    directRateController.text = (item['rate'] ?? 0).toString();
+
+    isEditingDirectItem.value = true;
+    editingDirectItemIndex.value = index;
+  }
+
+  // ADD THIS METHOD
+  void clearDirectItemForm() {
+    selectedDirectItemName.value = '';
+    selectedDirectItemCode.value = '';
+    selectedDirectUnit.value = '';
+    directQtyController.clear();
+    directRateController.clear();
+  }
+
+  // ADD THIS METHOD
+  void addOrUpdateDirectItem() {
+    double qty = double.tryParse(directQtyController.text) ?? 0;
+    double rate = double.tryParse(directRateController.text) ?? 0;
+
+    if (!isEditingDirectItem.value) {
+      final isDuplicate = directGrnItems.any(
+        (item) => item['icode'] == selectedDirectItemCode.value,
+      );
+
+      if (isDuplicate) {
+        showErrorSnackbar('Duplicate Item', 'This item is already added.');
+        return;
+      }
+    }
+
+    Map<String, dynamic> itemData = {
+      "SrNo": isEditingDirectItem.value
+          ? directGrnItems[editingDirectItemIndex.value]["SrNo"]
+          : directGrnItems.length + 1,
+      "icode": selectedDirectItemCode.value,
+      "iname": selectedDirectItemName.value,
+      "unit": selectedDirectUnit.value,
+      "qty": qty,
+      "rate": rate,
+    };
+
+    if (isEditingDirectItem.value) {
+      directGrnItems[editingDirectItemIndex.value] = itemData;
+    } else {
+      directGrnItems.add(itemData);
+    }
+
+    _reassignDirectSrNo();
+    Get.back();
+  }
+
+  // ADD THIS METHOD
+  void deleteDirectItem(int index) {
+    if (index >= 0 && index < directGrnItems.length) {
+      directGrnItems.removeAt(index);
+      _reassignDirectSrNo();
+    }
+  }
+
+  // ADD THIS METHOD
+  void _reassignDirectSrNo() {
+    for (int i = 0; i < directGrnItems.length; i++) {
+      directGrnItems[i]["SrNo"] = i + 1;
+    }
+  }
+
+  // ADD THIS METHOD
+  void populateDirectItemsFromGrnDetails(List<GrnDetailDm> details) {
+    directGrnItems.clear();
+
+    for (var detail in details) {
+      directGrnItems.add({
+        "SrNo": detail.srNo,
+        "icode": detail.iCode,
+        "iname": detail.iName,
+        "unit": detail.unit,
+        "qty": detail.qty,
+        "rate": detail.rate,
+      });
+    }
+  }
+
   final GrnsController grnsController = Get.find<GrnsController>();
 
   Future<void> saveGrnEntry() async {
     isLoading.value = true;
 
     try {
-      final itemData = <Map<String, dynamic>>[];
-      int srNo = 1;
+      List<Map<String, dynamic>> itemData;
 
-      for (var entry in selectedPoOrders.entries) {
-        final poData = entry.value;
-        itemData.add({
-          "SrNo": srNo++,
-          "ICode": poData['iCode'],
-          "Unit": poData['unit'],
-          "Qty": poData['grnQty'],
-          "Rate": poData['rate'],
-          "POInvNo": poData['poInvNo'],
-          "POSrNo": poData['poSrNo'],
-        });
+      if (isDirectGrn.value) {
+        // Direct GRN
+        itemData = directGrnItems
+            .map(
+              (item) => {
+                "SrNo": item['SrNo'],
+                "ICode": item['icode'],
+                "Unit": item['unit'],
+                "Qty": item['qty'],
+                "Rate": item['rate'],
+                "POInvNo": "",
+                "POSrNo": "",
+              },
+            )
+            .toList();
+      } else {
+        // Against PO
+        itemData = [];
+        int srNo = 1;
+
+        for (var entry in selectedPoOrders.entries) {
+          final poData = entry.value;
+          itemData.add({
+            "SrNo": srNo++,
+            "ICode": poData['iCode'],
+            "Unit": poData['unit'],
+            "Qty": poData['grnQty'],
+            "Rate": poData['rate'],
+            "POInvNo": poData['poInvNo'],
+            "POSrNo": poData['poSrNo'],
+          });
+        }
       }
 
       var response = await GrnEntryRepo.saveGrnEntry(
@@ -433,6 +592,7 @@ class GrnEntryController extends GetxController {
         remarks: remarksController.text,
         pCode: selectedPartyCode.value,
         siteCode: selectedSiteCode.value,
+        type: isDirectGrn.value ? 'Direct' : 'Against', // ADD THIS
         itemData: itemData,
         newFiles: attachmentFiles.toList(),
         existingAttachments: existingAttachmentUrls.toList(),
@@ -470,10 +630,12 @@ class GrnEntryController extends GetxController {
 
     selectedPoOrders.clear();
     poAuthItems.clear();
+    directGrnItems.clear();
     attachmentFiles.clear();
     existingAttachmentUrls.clear();
 
     isEditMode.value = false;
+    isDirectGrn.value = false;
     isItemSelectionMode.value = false;
     isInSelectionMode.value = false;
 

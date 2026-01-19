@@ -16,18 +16,24 @@ import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
 import 'package:shivay_construction/widgets/app_button.dart';
 
 class GrnCard extends StatefulWidget {
-  const GrnCard({super.key, required this.grn, required this.controller});
+  const GrnCard({
+    super.key,
+    required this.grn,
+    required this.controller,
+    required this.isExpanded,
+    required this.onTap,
+  });
 
   final GrnDm grn;
   final GrnsController controller;
+  final bool isExpanded;
+  final VoidCallback onTap;
 
   @override
   State<GrnCard> createState() => _GrnCardState();
 }
 
 class _GrnCardState extends State<GrnCard> {
-  bool isExpanded = false;
-
   @override
   Widget build(BuildContext context) {
     final bool tablet = AppScreenUtils.isTablet(context);
@@ -52,12 +58,10 @@ class _GrnCardState extends State<GrnCard> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            if (!isExpanded) {
+            if (!widget.isExpanded) {
               await widget.controller.getGrnDetails(invNo: widget.grn.invNo);
             }
-            setState(() {
-              isExpanded = !isExpanded;
-            });
+            widget.onTap(); // Call parent's handler
           },
           borderRadius: BorderRadius.circular(tablet ? 14 : 12),
           child: Padding(
@@ -142,6 +146,7 @@ class _GrnCardState extends State<GrnCard> {
                               isEdit: true,
                               grn: widget.grn,
                               grnDetails: widget.controller.grnDetails.toList(),
+                              isDirect: widget.grn.type == 'Direct',
                             ),
                           );
                         },
@@ -225,7 +230,7 @@ class _GrnCardState extends State<GrnCard> {
                     ),
                     tablet ? AppSpaces.h12 : AppSpaces.h8,
                     AnimatedRotation(
-                      turns: isExpanded ? 0.5 : 0,
+                      turns: widget.isExpanded ? 0.5 : 0,
                       duration: const Duration(milliseconds: 300),
                       child: Icon(
                         Icons.keyboard_arrow_down_rounded,
@@ -235,12 +240,37 @@ class _GrnCardState extends State<GrnCard> {
                     ),
                   ],
                 ),
+
                 if (widget.grn.remarks.isNotEmpty) ...[
                   tablet ? AppSpaces.v12 : AppSpaces.v10,
                   _buildInfoRow(
                     label: 'Remarks',
                     value: widget.grn.remarks,
                     tablet: tablet,
+                  ),
+                ],
+                if (widget.grn.type == 'Direct') ...[
+                  tablet ? AppSpaces.v12 : AppSpaces.v10,
+                  Container(
+                    padding: tablet
+                        ? AppPaddings.combined(horizontal: 12, vertical: 6)
+                        : AppPaddings.combined(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: kColorSecondary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: kColorSecondary.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Text(
+                      'Direct GRN',
+                      style: TextStyles.kMediumOutfit(
+                        fontSize: tablet
+                            ? FontSizes.k14FontSize
+                            : FontSizes.k12FontSize,
+                        color: kColorSecondary,
+                      ),
+                    ),
                   ),
                 ],
                 AnimatedCrossFade(
@@ -312,16 +342,17 @@ class _GrnCardState extends State<GrnCard> {
                                       color: kColorPrimary,
                                     ),
                                   ),
-                                  AppSpaces.v4,
-                                  Text(
-                                    'PO: ${detail.poInvNo}',
-                                    style: TextStyles.kRegularOutfit(
-                                      fontSize: tablet
-                                          ? FontSizes.k12FontSize
-                                          : FontSizes.k10FontSize,
-                                      color: kColorDarkGrey,
+                                  if (detail.poInvNo.isNotEmpty) AppSpaces.v4,
+                                  if (detail.poInvNo.isNotEmpty)
+                                    Text(
+                                      'PO: ${detail.poInvNo}',
+                                      style: TextStyles.kRegularOutfit(
+                                        fontSize: tablet
+                                            ? FontSizes.k12FontSize
+                                            : FontSizes.k10FontSize,
+                                        color: kColorDarkGrey,
+                                      ),
                                     ),
-                                  ),
                                   AppSpaces.v8,
                                   Row(
                                     children: [
@@ -343,7 +374,7 @@ class _GrnCardState extends State<GrnCard> {
                       }),
                     ],
                   ),
-                  crossFadeState: isExpanded
+                  crossFadeState: widget.isExpanded
                       ? CrossFadeState.showSecond
                       : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 300),

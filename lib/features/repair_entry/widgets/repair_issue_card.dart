@@ -23,18 +23,20 @@ class RepairIssueCard extends StatefulWidget {
     super.key,
     required this.issue,
     required this.controller,
+    required this.isExpanded,
+    required this.onTap,
   });
 
   final RepairIssueDm issue;
   final RepairIssueListController controller;
+  final bool isExpanded;
+  final VoidCallback onTap;
 
   @override
   State<RepairIssueCard> createState() => _RepairIssueCardState();
 }
 
 class _RepairIssueCardState extends State<RepairIssueCard> {
-  bool isExpanded = false;
-
   @override
   Widget build(BuildContext context) {
     final bool tablet = AppScreenUtils.isTablet(context);
@@ -59,14 +61,12 @@ class _RepairIssueCardState extends State<RepairIssueCard> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            if (!isExpanded) {
+            if (!widget.isExpanded) {
               await widget.controller.getIssueDetails(
                 invNo: widget.issue.invNo,
               );
             }
-            setState(() {
-              isExpanded = !isExpanded;
-            });
+            widget.onTap(); // Call parent's handler
           },
           borderRadius: BorderRadius.circular(tablet ? 14 : 12),
           child: Padding(
@@ -181,7 +181,7 @@ class _RepairIssueCardState extends State<RepairIssueCard> {
                       ),
                     if (widget.issue.status == 'Pending') AppSpaces.h8,
                     AnimatedRotation(
-                      turns: isExpanded ? 0.5 : 0,
+                      turns: widget.isExpanded ? 0.5 : 0,
                       duration: const Duration(milliseconds: 300),
                       child: Icon(
                         Icons.keyboard_arrow_down_rounded,
@@ -395,7 +395,7 @@ class _RepairIssueCardState extends State<RepairIssueCard> {
                       }),
                     ],
                   ),
-                  crossFadeState: isExpanded
+                  crossFadeState: widget.isExpanded
                       ? CrossFadeState.showSecond
                       : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 300),

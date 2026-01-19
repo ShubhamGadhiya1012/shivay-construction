@@ -37,6 +37,7 @@ class GrnPdfScreen {
               primaryColor,
               titleColor,
               textPrimaryColor,
+              grn.type == 'Direct',
             ),
           ],
         ),
@@ -146,6 +147,17 @@ class GrnPdfScreen {
                         color: textPrimaryColor,
                       ),
                     ),
+                    pw.SizedBox(height: 3),
+                    pw.Text(
+                      'Type: ${grn.type} GRN',
+                      style: pw.TextStyle(
+                        fontSize: 10,
+                        fontWeight: pw.FontWeight.bold,
+                        color: grn.type == 'Direct'
+                            ? PdfColor.fromHex('#FF6B35')
+                            : titleColor,
+                      ),
+                    ),
                     if (grn.remarks.isNotEmpty) ...[
                       pw.SizedBox(height: 3),
                       pw.Text(
@@ -173,76 +185,147 @@ class GrnPdfScreen {
     PdfColor primaryColor,
     PdfColor titleColor,
     PdfColor textPrimaryColor,
+    bool isDirectGrn,
   ) {
-    final headers = ['Sr.', 'Item Name', 'PO No', 'Unit', 'Quantity'];
+    final headers = isDirectGrn
+        ? ['Sr.', 'Item Name', 'Unit', 'Rate', 'Quantity', 'Amount']
+        : ['Sr.', 'Item Name', 'PO No', 'Unit', 'Quantity'];
 
     final List<List<String>> rows = [];
     int srNo = 1;
+    double grandTotal = 0;
 
     for (var detail in grnDetails) {
-      rows.add([
-        srNo.toString(),
-        detail.iName,
-        detail.poInvNo,
-        detail.unit,
-        detail.qty.toStringAsFixed(2),
-      ]);
+      if (isDirectGrn) {
+        final amount = detail.qty * detail.rate;
+        grandTotal += amount;
+
+        rows.add([
+          srNo.toString(),
+          detail.iName,
+          detail.unit,
+          detail.rate.toStringAsFixed(2),
+          detail.qty.toStringAsFixed(2),
+          amount.toStringAsFixed(2),
+        ]);
+      } else {
+        rows.add([
+          srNo.toString(),
+          detail.iName,
+          detail.poInvNo,
+          detail.unit,
+          detail.qty.toStringAsFixed(2),
+        ]);
+      }
       srNo++;
     }
 
-    final columnWidths = {
-      0: const pw.FlexColumnWidth(1),
-      1: const pw.FlexColumnWidth(4),
-      2: const pw.FlexColumnWidth(2.5),
-      3: const pw.FlexColumnWidth(1.5),
-      4: const pw.FlexColumnWidth(2),
-    };
+    final columnWidths = isDirectGrn
+        ? {
+            0: const pw.FlexColumnWidth(1),
+            1: const pw.FlexColumnWidth(4),
+            2: const pw.FlexColumnWidth(1.5),
+            3: const pw.FlexColumnWidth(2),
+            4: const pw.FlexColumnWidth(2),
+            5: const pw.FlexColumnWidth(2),
+          }
+        : {
+            0: const pw.FlexColumnWidth(1),
+            1: const pw.FlexColumnWidth(4),
+            2: const pw.FlexColumnWidth(2.5),
+            3: const pw.FlexColumnWidth(1.5),
+            4: const pw.FlexColumnWidth(2),
+          };
 
-    return pw.Table(
-      border: pw.TableBorder.all(color: PdfColors.grey, width: 0.5),
-      columnWidths: columnWidths,
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
       children: [
-        // Header row
-        pw.TableRow(
-          decoration: pw.BoxDecoration(color: primaryColor),
-          children: headers
-              .map(
-                (h) => pw.Padding(
-                  padding: const pw.EdgeInsets.all(6),
-                  child: pw.Text(
-                    h,
-                    style: pw.TextStyle(
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 10,
-                      color: titleColor,
+        pw.Table(
+          border: pw.TableBorder.all(color: PdfColors.grey, width: 0.5),
+          columnWidths: columnWidths,
+          children: [
+            pw.TableRow(
+              decoration: pw.BoxDecoration(color: primaryColor),
+              children: headers
+                  .map(
+                    (h) => pw.Padding(
+                      padding: const pw.EdgeInsets.all(6),
+                      child: pw.Text(
+                        h,
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 10,
+                          color: titleColor,
+                        ),
+                        textAlign: pw.TextAlign.center,
+                      ),
                     ),
-                    textAlign: pw.TextAlign.center,
+                  )
+                  .toList(),
+            ),
+
+            ...rows.map(
+              (r) => pw.TableRow(
+                children: r
+                    .asMap()
+                    .entries
+                    .map(
+                      (entry) => pw.Padding(
+                        padding: const pw.EdgeInsets.all(5),
+                        child: pw.Text(
+                          entry.value,
+                          style: pw.TextStyle(
+                            fontSize: 9,
+                            color: textPrimaryColor,
+                          ),
+                          textAlign: entry.key == 0
+                              ? pw.TextAlign.center
+                              : (isDirectGrn &&
+                                    (entry.key == 3 ||
+                                        entry.key == 4 ||
+                                        entry.key == 5))
+                              ? pw.TextAlign.right
+                              : pw.TextAlign.left,
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ],
+        ),
+
+        if (isDirectGrn) ...[
+          pw.SizedBox(height: 10),
+          pw.Container(
+            padding: const pw.EdgeInsets.all(8),
+            decoration: pw.BoxDecoration(
+              color: primaryColor,
+              borderRadius: pw.BorderRadius.circular(5),
+            ),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.end,
+              children: [
+                pw.Text(
+                  'Grand Total: ',
+                  style: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 12,
+                    color: titleColor,
                   ),
                 ),
-              )
-              .toList(),
-        ),
-        // Data rows
-        ...rows.map(
-          (r) => pw.TableRow(
-            children: r
-                .asMap()
-                .entries
-                .map(
-                  (entry) => pw.Padding(
-                    padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(
-                      entry.value,
-                      style: pw.TextStyle(fontSize: 9, color: textPrimaryColor),
-                      textAlign: entry.key == 0
-                          ? pw.TextAlign.center
-                          : pw.TextAlign.left,
-                    ),
+                pw.Text(
+                  grandTotal.toStringAsFixed(2),
+                  style: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 12,
+                    color: titleColor,
                   ),
-                )
-                .toList(),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ],
     );
   }

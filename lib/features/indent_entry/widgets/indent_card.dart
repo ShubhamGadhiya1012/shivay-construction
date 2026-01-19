@@ -19,18 +19,24 @@ import 'package:shivay_construction/widgets/app_button.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
 class IndentCard extends StatefulWidget {
-  const IndentCard({super.key, required this.indent, required this.controller});
+  const IndentCard({
+    super.key,
+    required this.indent,
+    required this.controller,
+    required this.isExpanded,
+    required this.onTap,
+  });
 
   final IndentDm indent;
   final IndentsController controller;
+  final bool isExpanded;
+  final VoidCallback onTap;
 
   @override
   State<IndentCard> createState() => _IndentCardState();
 }
 
 class _IndentCardState extends State<IndentCard> {
-  bool isExpanded = false;
-
   @override
   Widget build(BuildContext context) {
     final bool tablet = AppScreenUtils.isTablet(context);
@@ -55,14 +61,12 @@ class _IndentCardState extends State<IndentCard> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            if (!isExpanded) {
+            if (!widget.isExpanded) {
               await widget.controller.getIndentDetails(
                 invNo: widget.indent.invNo,
               );
             }
-            setState(() {
-              isExpanded = !isExpanded;
-            });
+            widget.onTap();
           },
           borderRadius: BorderRadius.circular(tablet ? 14 : 12),
           child: Padding(
@@ -183,7 +187,7 @@ class _IndentCardState extends State<IndentCard> {
                     if (!widget.indent.authorize && !widget.indent.closeIndent)
                       AppSpaces.h8,
                     AnimatedRotation(
-                      turns: isExpanded ? 0.5 : 0,
+                      turns: widget.isExpanded ? 0.5 : 0, // Changed here
                       duration: const Duration(milliseconds: 300),
                       child: Icon(
                         Icons.keyboard_arrow_down_rounded,
@@ -494,7 +498,7 @@ class _IndentCardState extends State<IndentCard> {
                       }),
                     ],
                   ),
-                  crossFadeState: isExpanded
+                  crossFadeState: widget.isExpanded
                       ? CrossFadeState.showSecond
                       : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 300),

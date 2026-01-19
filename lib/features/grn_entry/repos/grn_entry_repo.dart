@@ -11,6 +11,7 @@ class GrnEntryRepo {
     required String remarks,
     required String pCode,
     required String siteCode,
+    required String type,
     required List<Map<String, dynamic>> itemData,
     required List<PlatformFile> newFiles,
     required List<String> existingAttachments,
@@ -25,6 +26,7 @@ class GrnEntryRepo {
         'Remarks': remarks,
         'PCode': pCode,
         'SiteCode': siteCode,
+        'Type': type,
       };
 
       for (int i = 0; i < itemData.length; i++) {

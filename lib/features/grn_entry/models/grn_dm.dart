@@ -9,6 +9,7 @@ class GrnDm {
   final String gdName;
   final String remarks;
   final String attachments;
+  final String type; 
 
   GrnDm({
     required this.invNo,
@@ -21,6 +22,7 @@ class GrnDm {
     required this.gdName,
     required this.remarks,
     required this.attachments,
+    required this.type, 
   });
 
   factory GrnDm.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class GrnDm {
       gdName: json['GDName'] ?? '',
       remarks: json['Remarks'] ?? '',
       attachments: json['Attachments'] ?? '',
+      type: json['Type'] ?? 'Against', 
     );
   }
 }

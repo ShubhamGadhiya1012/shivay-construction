@@ -16,12 +16,29 @@ import 'package:shivay_construction/widgets/app_appbar.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
-class RepairIssueListScreen extends StatelessWidget {
-  RepairIssueListScreen({super.key});
+class RepairIssueListScreen extends StatefulWidget {
+  const RepairIssueListScreen({super.key});
 
+  @override
+  State<RepairIssueListScreen> createState() => _RepairIssueListScreenState();
+}
+
+class _RepairIssueListScreenState extends State<RepairIssueListScreen> {
   final RepairIssueListController _controller = Get.put(
     RepairIssueListController(),
   );
+
+  int? expandedIndex;
+
+  void _handleCardTap(int index) {
+    setState(() {
+      if (expandedIndex == index) {
+        expandedIndex = null;
+      } else {
+        expandedIndex = index;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +80,10 @@ class RepairIssueListScreen extends StatelessWidget {
                       hintText: 'Search Repair Issue',
                       onChanged: (query) {
                         _controller.searchQuery.value = query;
+
+                        setState(() {
+                          expandedIndex = null; // Reset expansion
+                        });
                       },
                     ),
                     tablet ? AppSpaces.v12 : AppSpaces.v8,
@@ -142,6 +163,8 @@ class RepairIssueListScreen extends StatelessWidget {
                                   return RepairIssueCard(
                                     issue: issue,
                                     controller: _controller,
+                                    isExpanded: expandedIndex == index,
+                                    onTap: () => _handleCardTap(index),
                                   );
                                 } else {
                                   return Padding(

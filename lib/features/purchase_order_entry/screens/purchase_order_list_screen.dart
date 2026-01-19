@@ -15,12 +15,30 @@ import 'package:shivay_construction/widgets/app_appbar.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
-class PurchaseOrderListScreen extends StatelessWidget {
-  PurchaseOrderListScreen({super.key});
+class PurchaseOrderListScreen extends StatefulWidget {
+  const PurchaseOrderListScreen({super.key});
 
+  @override
+  State<PurchaseOrderListScreen> createState() =>
+      _PurchaseOrderListScreenState();
+}
+
+class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
   final PurchaseOrderListController _controller = Get.put(
     PurchaseOrderListController(),
   );
+
+  int? expandedIndex;
+
+  void _handleCardTap(int index) {
+    setState(() {
+      if (expandedIndex == index) {
+        expandedIndex = null;
+      } else {
+        expandedIndex = index;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +80,10 @@ class PurchaseOrderListScreen extends StatelessWidget {
                       hintText: 'Search Purchase Order',
                       onChanged: (query) {
                         _controller.searchQuery.value = query;
+
+                        setState(() {
+                          expandedIndex = null;
+                        });
                       },
                     ),
                     tablet ? AppSpaces.v16 : AppSpaces.v12,
@@ -143,6 +165,8 @@ class PurchaseOrderListScreen extends StatelessWidget {
                                   return PurchaseOrderCard(
                                     order: order,
                                     controller: _controller,
+                                    isExpanded: expandedIndex == index,
+                                    onTap: () => _handleCardTap(index),
                                     onDelete: () {
                                       Get.back();
                                       _controller.deletePurchaseOrder(

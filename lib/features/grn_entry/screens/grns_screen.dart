@@ -15,10 +15,27 @@ import 'package:shivay_construction/widgets/app_appbar.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
-class GrnsScreen extends StatelessWidget {
-  GrnsScreen({super.key});
+class GrnsScreen extends StatefulWidget {
+  const GrnsScreen({super.key});
 
+  @override
+  State<GrnsScreen> createState() => _GrnsScreenState();
+}
+
+class _GrnsScreenState extends State<GrnsScreen> {
   final GrnsController _controller = Get.put(GrnsController());
+
+  int? expandedIndex;
+
+  void _handleCardTap(int index) {
+    setState(() {
+      if (expandedIndex == index) {
+        expandedIndex = null;
+      } else {
+        expandedIndex = index;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +57,65 @@ class GrnsScreen extends StatelessWidget {
                   color: kColorPrimary,
                 ),
               ),
+              actions: [
+                PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert, color: kColorPrimary),
+                  offset: const Offset(0, 45),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 4,
+                  color: Colors.white,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 160,
+                    maxWidth: 180,
+                  ),
+                  onSelected: (value) {
+                    if (value == 'direct') {
+                      Get.to(
+                        () =>
+                            const GrnEntryScreen(isEdit: false, isDirect: true),
+                      );
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'direct',
+                      height: 45,
+                      padding: AppPaddings.combined(
+                        horizontal: 12,
+                        vertical: 0,
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: AppPaddings.p6,
+                            decoration: BoxDecoration(
+                              color: kColorPrimary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.add_circle_outline,
+                              color: kColorPrimary,
+                              size: 18,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Direct GRN',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
             body: RefreshIndicator(
               elevation: 0,
@@ -60,6 +136,10 @@ class GrnsScreen extends StatelessWidget {
                       hintText: 'Search GRN',
                       onChanged: (query) {
                         _controller.searchQuery.value = query;
+
+                        setState(() {
+                          expandedIndex = null; // Reset expansion
+                        });
                       },
                     ),
                     tablet ? AppSpaces.v16 : AppSpaces.v12,
@@ -99,6 +179,8 @@ class GrnsScreen extends StatelessWidget {
                                   return GrnCard(
                                     grn: grn,
                                     controller: _controller,
+                                    isExpanded: expandedIndex == index,
+                                    onTap: () => _handleCardTap(index),
                                   );
                                 } else {
                                   return Padding(

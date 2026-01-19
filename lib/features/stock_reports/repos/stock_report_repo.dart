@@ -15,9 +15,9 @@ class StockReportRepo {
     String? token = await SecureStorageHelper.read('token');
 
     try {
-      final response = await ApiService.getRequest(
+      final response = await ApiService.postRequest(
         endpoint: '/Report/stockReport',
-        queryParams: {
+        requestBody: {
           'FromDate': fromDate,
           'ToDate': toDate,
           'RTYPE': rType,

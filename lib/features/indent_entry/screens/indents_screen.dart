@@ -15,10 +15,26 @@ import 'package:shivay_construction/widgets/app_appbar.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
-class IndentsScreen extends StatelessWidget {
-  IndentsScreen({super.key});
+class IndentsScreen extends StatefulWidget {
+  const IndentsScreen({super.key});
 
+  @override
+  State<IndentsScreen> createState() => _IndentsScreenState();
+}
+
+class _IndentsScreenState extends State<IndentsScreen> {
   final IndentsController _controller = Get.put(IndentsController());
+  int? expandedIndex;
+
+  void _handleCardTap(int index) {
+    setState(() {
+      if (expandedIndex == index) {
+        expandedIndex = null;
+      } else {
+        expandedIndex = index;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +76,10 @@ class IndentsScreen extends StatelessWidget {
                       hintText: 'Search Indent',
                       onChanged: (query) {
                         _controller.searchQuery.value = query;
+
+                        setState(() {
+                          expandedIndex = null; // Reset expansion on search
+                        });
                       },
                     ),
                     tablet ? AppSpaces.v12 : AppSpaces.v8,
@@ -139,6 +159,8 @@ class IndentsScreen extends StatelessWidget {
                                   return IndentCard(
                                     indent: indent,
                                     controller: _controller,
+                                    isExpanded: expandedIndex == index,
+                                    onTap: () => _handleCardTap(index),
                                   );
                                 } else {
                                   return Padding(

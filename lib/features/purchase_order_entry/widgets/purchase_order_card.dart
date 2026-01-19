@@ -20,11 +20,15 @@ class PurchaseOrderCard extends StatefulWidget {
     super.key,
     required this.order,
     required this.controller,
+    required this.isExpanded,
+    required this.onTap,
     required this.onDelete,
   });
 
   final PurchaseOrderListDm order;
   final PurchaseOrderListController controller;
+  final bool isExpanded;
+  final VoidCallback onTap;
   final VoidCallback onDelete;
 
   @override
@@ -32,8 +36,6 @@ class PurchaseOrderCard extends StatefulWidget {
 }
 
 class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
-  bool isExpanded = false;
-
   @override
   Widget build(BuildContext context) {
     final bool tablet = AppScreenUtils.isTablet(context);
@@ -58,14 +60,12 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            if (!isExpanded) {
+            if (!widget.isExpanded) {
               await widget.controller.getOrderDetailsForCard(
                 widget.order.invNo,
               );
             }
-            setState(() {
-              isExpanded = !isExpanded;
-            });
+            widget.onTap(); // Call the parent's handler
           },
           borderRadius: BorderRadius.circular(tablet ? 14 : 12),
           child: Padding(
@@ -237,7 +237,7 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                     ),
                     tablet ? AppSpaces.h12 : AppSpaces.h8,
                     AnimatedRotation(
-                      turns: isExpanded ? 0.5 : 0,
+                      turns: widget.isExpanded ? 0.5 : 0,
                       duration: const Duration(milliseconds: 300),
                       child: Icon(
                         Icons.keyboard_arrow_down_rounded,
@@ -558,7 +558,7 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                       }),
                     ],
                   ),
-                  crossFadeState: isExpanded
+                  crossFadeState: widget.isExpanded
                       ? CrossFadeState.showSecond
                       : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 300),
