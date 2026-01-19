@@ -45,7 +45,7 @@ class IssueRepairPdfScreen {
       await _savePdf(pdf);
     } catch (e) {
       showErrorSnackbar('Error', 'Failed to generate PDF: $e');
-      print('PDF Generation Error: $e');
+    //  print('PDF Generation Error: $e');
     }
   }
 

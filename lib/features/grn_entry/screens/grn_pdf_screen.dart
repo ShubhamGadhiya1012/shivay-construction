@@ -19,9 +19,7 @@ class GrnPdfScreen {
         showErrorSnackbar('Error', 'No GRN data found to generate PDF.');
         return;
       }
-
       final pdf = pw.Document();
-
       final primaryColor = PdfColor.fromHex('#ADD8E6');
       final titleColor = PdfColor.fromHex('#1D5B86');
       final textPrimaryColor = PdfColor.fromHex('#363636');
@@ -46,10 +44,9 @@ class GrnPdfScreen {
       await _savePdf(pdf, grn.invNo);
     } catch (e) {
       showErrorSnackbar('Error', 'Failed to generate GRN PDF: $e');
-      print(e);
+      //    print(e);
     }
   }
-
   static pw.Widget _buildHeader(
     PdfColor titleColor,
     PdfColor textPrimaryColor,

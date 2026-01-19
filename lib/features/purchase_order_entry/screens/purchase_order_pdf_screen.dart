@@ -46,7 +46,7 @@ class PurchaseOrderPdfScreen {
       await _savePdf(pdf, order.invNo);
     } catch (e) {
       showErrorSnackbar('Error', 'Failed to generate Purchase Order PDF: $e');
-      print(e);
+    //  print(e);
     }
   }
 
