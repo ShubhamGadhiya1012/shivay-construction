@@ -390,7 +390,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
   Widget _buildItemNavigationHeader(bool tablet) {
     return Container(
       padding: tablet
-          ? AppPaddings.combined(horizontal: 24, vertical: 16)
+          ? AppPaddings.combined(horizontal: 24, vertical: 8)
           : AppPaddings.combined(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
         color: kColorWhite,

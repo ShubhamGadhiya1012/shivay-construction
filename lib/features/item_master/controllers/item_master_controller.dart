@@ -41,6 +41,15 @@ class ItemMasterController extends GetxController {
   void onInit() async {
     super.onInit();
     await fetchDropdownData();
+
+    iNameController.addListener(() {
+      if (!isEditMode.value) {
+        descriptionController.text = iNameController.text;
+      }
+    });
+    if (!isEditMode.value) {
+      unitController.text = 'NOS';
+    }
   }
 
   Future<void> fetchDropdownData() async {
@@ -175,7 +184,7 @@ class ItemMasterController extends GetxController {
     descriptionController.clear();
     rateController.clear();
     unitController.clear();
-
+    unitController.text = 'NOS';
     selectedCategory.value = '';
     selectedCategoryCode.value = '';
     selectedItemGroup.value = '';

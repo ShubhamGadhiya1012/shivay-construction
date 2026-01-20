@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/item_master/controllers/item_master_controller.dart';
 import 'package:shivay_construction/features/item_master/models/item_master_dm.dart';
+import 'package:shivay_construction/utils/formatters/text_input_formatters.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
@@ -67,6 +68,7 @@ class ItemMasterScreen extends StatelessWidget {
                             AppTextFormField(
                               controller: _controller.iNameController,
                               hintText: 'Item Name *',
+                              inputFormatters: [UpperCaseTextInputFormatter()],
                               validator: (value) =>
                                   (value == null || value.trim().isEmpty)
                                   ? 'Please enter item name'
@@ -80,6 +82,9 @@ class ItemMasterScreen extends StatelessWidget {
                               controller: _controller.descriptionController,
                               hintText: 'Description',
                               maxLines: 3,
+                              inputFormatters: [
+                                CapitalizeFirstLetterFormatter(),
+                              ],
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
