@@ -33,6 +33,10 @@ class StockReportRepo {
         return [];
       }
 
+      for (var item in response['data']) {
+        print(item);
+      }
+
       return (response['data'] as List<dynamic>)
           .map((item) => StockReportDm.fromJson(item))
           .toList();

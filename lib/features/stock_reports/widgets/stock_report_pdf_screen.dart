@@ -67,6 +67,26 @@ class StockReportPdfScreen {
             );
 
             widgets.add(pw.SizedBox(height: 10));
+            if (reportName == 'LEDGER' &&
+                (openingStock?.iName != null ||
+                    reportData.firstOrNull?.iName != null)) {
+              final itemName =
+                  openingStock?.iName ?? reportData.firstOrNull?.iName ?? '';
+              widgets.add(
+                pw.Center(
+                  child: pw.Text(
+                    itemName,
+                    style: pw.TextStyle(
+                      fontSize: 16,
+                      fontWeight: pw.FontWeight.bold,
+                      color: primaryColor,
+                    ),
+                  ),
+                ),
+              );
+              widgets.add(pw.SizedBox(height: 5));
+            }
+
             widgets.add(
               pw.Text(
                 'Period: $fromDate to $toDate',

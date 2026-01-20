@@ -6,6 +6,7 @@ import 'package:shivay_construction/features/stock_reports/models/stock_report_d
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/helpers/amount_format_helper.dart';
+import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
 import 'package:shivay_construction/widgets/app_card.dart';
@@ -206,10 +207,7 @@ class StockReportCard extends StatelessWidget {
               ),
               if (stockReport.dbc?.isNotEmpty == true)
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
+                  padding: AppPaddings.combined(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: kColorPrimary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),

@@ -12,6 +12,7 @@ import 'package:shivay_construction/features/department_master/screens/departmen
 import 'package:shivay_construction/features/godown_master/screens/godown_master_screen.dart';
 import 'package:shivay_construction/features/indent_entry/screens/indents_screen.dart';
 import 'package:shivay_construction/features/item_group_master/screens/item_group_master_screen.dart';
+import 'package:shivay_construction/features/item_help/screens/item_help_search_screen.dart';
 import 'package:shivay_construction/features/item_sub_group_master/screens/item_sub_group_master_screen.dart';
 import 'package:shivay_construction/features/item_master/screens/item_master_list_screen.dart';
 import 'package:shivay_construction/features/opening_stock_entry/screens/opening_stocks_screen.dart';
@@ -352,15 +353,13 @@ class AppDrawer extends StatelessWidget {
       case 'reports':
         iconData = Icons.assessment_rounded;
         break;
-      case 'materials':
-        iconData = Icons.inventory_2_rounded;
+      case 'stock reports':
+        iconData = Icons.assessment_rounded;
         break;
-      case 'workers':
-        iconData = Icons.people_rounded;
+      case 'item help':
+        iconData = Icons.help_outline_outlined;
         break;
-      case 'payments':
-        iconData = Icons.payment_rounded;
-        break;
+
       case 'user settings':
         iconData = Icons.settings_rounded;
         break;
@@ -413,6 +412,9 @@ class AppDrawer extends StatelessWidget {
           );
           _navigateToSubMenu(firstAccessible);
         }
+        break;
+      case 'item help':
+        Get.to(() => ItemHelpSearchScreen());
         break;
       case 'user settings':
         if (menu.subMenu.isNotEmpty) {

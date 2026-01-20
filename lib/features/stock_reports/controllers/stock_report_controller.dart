@@ -21,34 +21,33 @@ class StockReportController extends GetxController {
   var toDateController = TextEditingController();
   var siteNameController = TextEditingController();
 
-  // Godown related
   var godowns = <GodownMasterDm>[].obs;
   var godownNames = <String>[].obs;
   var selectedGodownName = ''.obs;
   var selectedGodownCode = ''.obs;
   var selectedSiteCode = ''.obs;
 
-  // Site related
   var sites = <SiteMasterDm>[].obs;
 
-  // Items related
   var items = <ItemMasterDm>[].obs;
   var filteredItems = <ItemMasterDm>[].obs;
   var selectedItems = <String>[].obs;
   var selectedItemNames = <String>[].obs;
   var searchItemController = TextEditingController();
 
-  // Report data
   var stockReports = <StockReportDm>[].obs;
   var grandTotal = Rxn<StockReportDm>();
   var openingStock = Rxn<StockReportDm>();
   var closingStock = Rxn<StockReportDm>();
 
-  // Report configuration
   String reportName = '';
   String reportTitle = '';
   String rType = '';
   String method = '';
+
+  var currentItemIndex = 0.obs;
+  var groupedReportsByItem = <String, List<StockReportDm>>{}.obs;
+  var itemCodes = <String>[].obs;
 
   void setReportConfig({
     required String name,
@@ -169,40 +168,53 @@ class StockReportController extends GetxController {
           'No Data',
           'No records found for the selected filters.',
         );
+        isLoading.value = false;
         return;
       }
 
-      _processReportData(response);
+      await _processReportData(response);
+
+      isLoading.value = false;
       togglePage();
     } catch (e) {
+      isLoading.value = false;
       if (e is Map<String, dynamic>) {
         showErrorSnackbar('Error', e['message']);
       } else {
         showErrorSnackbar('Error', e.toString());
       }
-    } finally {
-      isLoading.value = false;
     }
   }
 
-  void _processReportData(List<StockReportDm> response) {
+  Future<void> _processReportData(List<StockReportDm> response) async {
     stockReports.clear();
     grandTotal.value = null;
     openingStock.value = null;
     closingStock.value = null;
+    groupedReportsByItem.clear();
+    itemCodes.clear();
+    currentItemIndex.value = 0;
 
     if (reportName == 'LEDGER') {
-      // Stock Ledger processing
-      if (response.isNotEmpty) {
-        openingStock.value = response.first;
-        closingStock.value = response.last;
+      final Map<String, List<StockReportDm>> grouped = {};
 
-        if (response.length > 2) {
-          stockReports.assignAll(response.sublist(1, response.length - 1));
+      for (var item in response) {
+        final iCode = item.iCode ?? '';
+        if (iCode.isEmpty) continue;
+
+        if (!grouped.containsKey(iCode)) {
+          grouped[iCode] = [];
         }
+        grouped[iCode]!.add(item);
+      }
+
+      groupedReportsByItem.assignAll(grouped);
+      itemCodes.assignAll(grouped.keys.toList());
+
+      if (itemCodes.isNotEmpty) {
+        _loadItemData(0);
       }
     } else {
-      // Other reports processing
       final lastItem = response.lastOrNull;
       if (lastItem?.isGrandTotal == true) {
         grandTotal.value = lastItem;
@@ -210,6 +222,59 @@ class StockReportController extends GetxController {
       } else {
         stockReports.assignAll(response);
       }
+    }
+  }
+
+  void _loadItemData(int index) {
+    if (index < 0 || index >= itemCodes.length) return;
+
+    currentItemIndex.value = index;
+    final iCode = itemCodes[index];
+    final itemData = groupedReportsByItem[iCode] ?? [];
+
+    stockReports.clear();
+    openingStock.value = null;
+    closingStock.value = null;
+
+    if (itemData.isEmpty) return;
+
+    StockReportDm? opening;
+    StockReportDm? closing;
+    List<StockReportDm> transactions = [];
+
+    for (var item in itemData) {
+      final desc = item.desc?.trim() ?? '';
+
+      if (desc == 'Opening Stock') {
+        opening = item;
+      } else if (desc == 'Closing Stock') {
+        closing = item;
+      } else {
+        transactions.add(item);
+      }
+    }
+
+    openingStock.value = opening;
+    closingStock.value = closing;
+    stockReports.assignAll(transactions);
+
+    print('Item Index: $index');
+    print('Item Code: $iCode');
+    print('Total records: ${itemData.length}');
+    print('Opening: ${opening?.desc}');
+    print('Closing: ${closing?.desc}');
+    print('Transactions: ${transactions.length}');
+  }
+
+  void goToPreviousItem() {
+    if (currentItemIndex.value > 0) {
+      _loadItemData(currentItemIndex.value - 1);
+    }
+  }
+
+  void goToNextItem() {
+    if (currentItemIndex.value < itemCodes.length - 1) {
+      _loadItemData(currentItemIndex.value + 1);
     }
   }
 
@@ -252,5 +317,9 @@ class StockReportController extends GetxController {
     openingStock.value = null;
     closingStock.value = null;
     isReportScreen.value = false;
+
+    groupedReportsByItem.clear();
+    itemCodes.clear();
+    currentItemIndex.value = 0;
   }
 }

@@ -57,7 +57,14 @@ class HomeController extends GetxController {
 
   List<Map<String, dynamic>> getQuickActions() {
     List<Map<String, dynamic>> actions = [];
-
+    // Item Help menu
+    if (hasAccessToMenu('Item Help')) {
+      actions.add({
+        'title': 'Item Help',
+        'icon': Icons.help_outline_rounded,
+        'submenu': 'item help',
+      });
+    }
     // Entry submenu items
     if (hasAccessToMenu('Entry')) {
       if (menuAccess.any(
@@ -90,6 +97,7 @@ class HomeController extends GetxController {
           'submenu': 'purchase order entry',
         });
       }
+
       if (menuAccess.any(
         (menu) =>
             menu.menuName.toLowerCase() == 'entry' &&

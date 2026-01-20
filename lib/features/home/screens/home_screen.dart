@@ -8,6 +8,7 @@ import 'package:shivay_construction/features/grn_entry/screens/grns_screen.dart'
 import 'package:shivay_construction/features/home/controllers/home_controller.dart';
 import 'package:shivay_construction/features/home/widgets/app_drawer.dart';
 import 'package:shivay_construction/features/indent_entry/screens/indents_screen.dart';
+import 'package:shivay_construction/features/item_help/screens/item_help_search_screen.dart';
 import 'package:shivay_construction/features/profile/screens/profile_screen.dart';
 import 'package:shivay_construction/features/purchase_order_entry/screens/purchase_order_list_screen.dart';
 import 'package:shivay_construction/features/reports/screens/grn_report_screen.dart';
@@ -175,8 +176,9 @@ class HomeScreen extends StatelessWidget {
                                         ? (tablet ? 24 : 20)
                                         : (tablet ? 8 : 6),
                                     height: tablet ? 8 : 6,
-                                    margin: EdgeInsets.symmetric(
+                                    margin: AppPaddings.combined(
                                       horizontal: tablet ? 4 : 3,
+                                      vertical: 0,
                                     ),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(
@@ -388,6 +390,9 @@ class HomeScreen extends StatelessWidget {
             method: '',
           ),
         );
+        break;
+      case 'item help':
+        Get.to(() => ItemHelpSearchScreen());
         break;
     }
   }

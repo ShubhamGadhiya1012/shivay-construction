@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
@@ -142,7 +140,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
                 child: Column(
                   children: [
                     tablet ? AppSpaces.v10 : AppSpaces.v4,
-                    // Date Fields
+
                     Row(
                       children: [
                         Expanded(
@@ -168,7 +166,6 @@ class _StockReportScreenState extends State<StockReportScreen> {
                     ),
                     tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                    // Godown Dropdown
                     Obx(
                       () => AppDropdown(
                         items: _controller.godownNames,
@@ -182,7 +179,6 @@ class _StockReportScreenState extends State<StockReportScreen> {
                     ),
                     tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                    // Site Name (Auto-filled, disabled)
                     Obx(() {
                       if (_controller.selectedSiteCode.value.isEmpty) {
                         return const SizedBox.shrink();
@@ -201,7 +197,6 @@ class _StockReportScreenState extends State<StockReportScreen> {
                       );
                     }),
 
-                    // Items Selection
                     GestureDetector(
                       onTap: () => _showItemSelectionBottomSheet(context),
                       child: AppMultipleSelectionField(
@@ -217,7 +212,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
               ),
             ),
           ),
-          // Generate Report Button
+
           AppButton(
             title: 'Generate Report',
             buttonHeight: tablet ? 54 : 48,
@@ -235,7 +230,10 @@ class _StockReportScreenState extends State<StockReportScreen> {
 
   Widget _buildReportView(bool tablet) {
     return Obx(() {
-      if (_controller.stockReports.isEmpty && !_controller.isLoading.value) {
+      if (_controller.openingStock.value == null &&
+          _controller.closingStock.value == null &&
+          _controller.stockReports.isEmpty &&
+          !_controller.isLoading.value) {
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -262,6 +260,9 @@ class _StockReportScreenState extends State<StockReportScreen> {
 
       return Column(
         children: [
+          if (widget.reportName == 'LEDGER' && _controller.itemCodes.isNotEmpty)
+            _buildItemNavigationHeader(tablet),
+
           Expanded(
             child: ListView.builder(
               padding: tablet
@@ -273,7 +274,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
               },
             ),
           ),
-          // Fixed Closing Stock at bottom
+
           if (_controller.closingStock.value != null) ...[
             Padding(
               padding: tablet
@@ -305,6 +306,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
     int count = 0;
     if (_controller.openingStock.value != null) count++;
     count += _controller.stockReports.length;
+
     return count;
   }
 
@@ -382,6 +384,86 @@ class _StockReportScreenState extends State<StockReportScreen> {
         grandTotal: _controller.grandTotal.value!,
         reportName: widget.reportName,
       ),
+    );
+  }
+
+  Widget _buildItemNavigationHeader(bool tablet) {
+    return Container(
+      padding: tablet
+          ? AppPaddings.combined(horizontal: 24, vertical: 16)
+          : AppPaddings.combined(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: kColorWhite,
+        boxShadow: [
+          BoxShadow(
+            color: kColorBlack.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Obx(() {
+        final currentItem = _controller.openingStock.value;
+        final isFirst = _controller.currentItemIndex.value == 0;
+        final isLast =
+            _controller.currentItemIndex.value ==
+            _controller.itemCodes.length - 1;
+
+        return Row(
+          children: [
+            IconButton(
+              onPressed: isFirst ? null : _controller.goToPreviousItem,
+              icon: Icon(
+                Icons.arrow_back_ios,
+                size: tablet ? 24 : 20,
+                color: isFirst ? kColorLightGrey : kColorPrimary,
+              ),
+            ),
+
+            tablet ? AppSpaces.h12 : AppSpaces.h8,
+
+            Expanded(
+              child: Column(
+                children: [
+                  Text(
+                    currentItem?.iName ?? '',
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyles.kSemiBoldOutfit(
+                      fontSize: tablet
+                          ? FontSizes.k22FontSize
+                          : FontSizes.k18FontSize,
+                      color: kColorPrimary,
+                    ),
+                  ),
+                  AppSpaces.v2,
+                  Text(
+                    'Item ${_controller.currentItemIndex.value + 1} of ${_controller.itemCodes.length}',
+                    style: TextStyles.kRegularOutfit(
+                      fontSize: tablet
+                          ? FontSizes.k14FontSize
+                          : FontSizes.k12FontSize,
+                      color: kColorDarkGrey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            tablet ? AppSpaces.h12 : AppSpaces.h8,
+
+            IconButton(
+              onPressed: isLast ? null : _controller.goToNextItem,
+              icon: Icon(
+                Icons.arrow_forward_ios,
+                size: tablet ? 24 : 20,
+                color: isLast ? kColorLightGrey : kColorPrimary,
+              ),
+            ),
+          ],
+        );
+      }),
     );
   }
 }
