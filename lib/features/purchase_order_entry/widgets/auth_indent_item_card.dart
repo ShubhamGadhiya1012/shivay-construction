@@ -115,7 +115,7 @@ class AuthIndentItemCard extends StatelessWidget {
                         ),
                       ),
                       tablet ? AppSpaces.v12 : AppSpaces.v8,
-                      // REPLACE the ListView.builder (that builds indent items) with:
+
                       ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -253,6 +253,22 @@ class AuthIndentItemCard extends StatelessWidget {
                                                         TextInputType.number,
                                                     floatingLabelRequired:
                                                         false,
+
+                                                    validator: (value) {
+                                                      if (value == null ||
+                                                          value.isEmpty) {
+                                                        return 'Required';
+                                                      }
+                                                      final qty =
+                                                          double.tryParse(
+                                                            value,
+                                                          );
+                                                      if (qty == null ||
+                                                          qty <= 0) {
+                                                        return 'Must be > 0';
+                                                      }
+                                                      return null;
+                                                    },
                                                   ),
                                                 ),
                                               ),
@@ -288,6 +304,22 @@ class AuthIndentItemCard extends StatelessWidget {
                                                         TextInputType.number,
                                                     floatingLabelRequired:
                                                         false,
+
+                                                    validator: (value) {
+                                                      if (value == null ||
+                                                          value.isEmpty) {
+                                                        return 'Required';
+                                                      }
+                                                      final price =
+                                                          double.tryParse(
+                                                            value,
+                                                          );
+                                                      if (price == null ||
+                                                          price <= 0) {
+                                                        return 'Must be > 0';
+                                                      }
+                                                      return null;
+                                                    },
                                                   ),
                                                 ),
                                               ),

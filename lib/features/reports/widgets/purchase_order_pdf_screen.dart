@@ -180,7 +180,7 @@ class PurchaseOrderPdfScreen {
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text(
-                'Party: ${firstItem.partyName})',
+                'Party: ${firstItem.partyName}',
                 style: pw.TextStyle(
                   fontSize: 10,
                   fontWeight: pw.FontWeight.bold,

@@ -236,7 +236,6 @@ class PurchaseOrderController extends GetxController {
                 indent.indentSrNo == selectedItem['IndentSrNo']) {
               indent.isSelected = true;
 
-              // Set controllers with existing values
               final key = '${indent.indentNo}_${indent.indentSrNo}';
               qtyControllers[key]?.text = selectedItem['Qty'].toStringAsFixed(
                 2,
@@ -277,7 +276,6 @@ class PurchaseOrderController extends GetxController {
       if (!exists) {
         selectedPurchaseItems.add(newItem);
       } else {
-        // Update existing item
         int index = selectedPurchaseItems.indexWhere(
           (item) =>
               item['IndentNo'] == newItem['IndentNo'] &&
@@ -323,7 +321,6 @@ class PurchaseOrderController extends GetxController {
         expandedItemIndices.add(i);
       }
 
-      // Initialize controllers for all indents
       for (var item in fetchedItems) {
         for (var indent in item.indents) {
           final key = '${indent.indentNo}_${indent.indentSrNo}';
@@ -335,7 +332,9 @@ class PurchaseOrderController extends GetxController {
           }
 
           if (!priceControllers.containsKey(key)) {
-            priceControllers[key] = TextEditingController(text: '0.00');
+            priceControllers[key] = TextEditingController(
+              text: item.rate.toStringAsFixed(2),
+            );
           }
         }
       }
@@ -449,7 +448,15 @@ class PurchaseOrderController extends GetxController {
         showErrorSnackbar('Error', 'Please add at least one item');
         return;
       }
-
+      for (var item in selectedPurchaseItems) {
+        if (item['Price'] == null || item['Price'] <= 0) {
+          showErrorSnackbar(
+            'Error',
+            'Price must be greater than 0 for all items',
+          );
+          return;
+        }
+      }
       var response = await PurchaseOrderRepo.savePurchaseOrder(
         invNo: isEditMode.value ? currentInvNo.value : '',
         date: _convertToApiDateFormat(dateController.text),
@@ -497,7 +504,6 @@ class PurchaseOrderController extends GetxController {
     authIndentItems.clear();
     selectedPurchaseItems.clear();
 
-    // Dispose controllers
     for (var controller in qtyControllers.values) {
       controller.dispose();
     }

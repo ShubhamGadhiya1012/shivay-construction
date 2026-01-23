@@ -1,11 +1,13 @@
 class AuthIndentItemDm {
   final String iCode;
   final String iName;
+  final double rate;
   final List<IndentDm> indents;
 
   AuthIndentItemDm({
     required this.iCode,
     required this.iName,
+    required this.rate,
     required this.indents,
   });
 
@@ -13,6 +15,7 @@ class AuthIndentItemDm {
     return AuthIndentItemDm(
       iCode: json['iCode'] ?? '',
       iName: json['iName'] ?? '',
+      rate: (json['rate'] as num?)?.toDouble() ?? 0.0,
       indents:
           (json['indents'] as List<dynamic>?)
               ?.map((item) => IndentDm.fromJson(item))

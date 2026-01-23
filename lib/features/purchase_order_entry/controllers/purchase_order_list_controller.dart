@@ -20,7 +20,12 @@ class PurchaseOrderListController extends GetxController {
   var orderDetails = <PurchaseOrderDetailDm>[].obs;
   var purchaseOrders = <PurchaseOrderListDm>[].obs;
 
-  final filters = {'ALL': 'ALL', 'PENDING': 'Pending', 'COMPLETE': 'Complete'};
+  final filters = {
+    'ALL': 'ALL',
+    'PENDING': 'Pending',
+    'PARTIAL': 'Partial',
+    'COMPLETE': 'Complete',
+  };
   var selectedFilter = 'ALL'.obs;
 
   var canAuthorizePO = false.obs;
