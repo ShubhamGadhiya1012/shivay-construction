@@ -32,7 +32,7 @@ class GodownMasterController extends GetxController {
     try {
       final fetchedSites = await SiteMasterListRepo.getSites();
       sites.assignAll(fetchedSites);
-      siteNames.assignAll(fetchedSites.map((e) => e.siteName)); // Add this line
+      siteNames.assignAll(fetchedSites.map((e) => e.siteName));
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
@@ -43,7 +43,7 @@ class GodownMasterController extends GetxController {
   Future<void> getGodowns() async {
     isLoading.value = true;
     try {
-      final fetchedGodowns = await GodownMasterRepo.getGodowns();
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(siteCode: "");
       godowns.assignAll(fetchedGodowns);
       filteredGodowns.assignAll(fetchedGodowns);
     } catch (e) {

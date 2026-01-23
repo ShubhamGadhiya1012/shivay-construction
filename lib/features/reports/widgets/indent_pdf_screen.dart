@@ -14,6 +14,7 @@ class IndentPdfScreen {
     required String fromDate,
     required String toDate,
     required String status,
+    required String reportType,
   }) async {
     try {
       if (reportData.isEmpty) {
@@ -25,6 +26,7 @@ class IndentPdfScreen {
 
       final headerColor = PdfColor.fromHex('#1D5B86');
       final tableHeaderColor = PdfColor.fromHex('#E3F2FD');
+      final groupHeaderColor = PdfColor.fromHex('#BBDEFB');
       final textColor = PdfColor.fromHex('#333333');
 
       pdf.addPage(
@@ -32,10 +34,22 @@ class IndentPdfScreen {
           pageFormat: PdfPageFormat.a4.landscape,
           margin: const pw.EdgeInsets.all(20),
           header: (context) =>
-              _buildHeader(headerColor, fromDate, toDate, status),
+              _buildHeader(headerColor, fromDate, toDate, status, reportType),
           build: (context) => [
             pw.SizedBox(height: 10),
-            _buildTable(reportData, tableHeaderColor, textColor),
+            reportType == 'ItemWise'
+                ? _buildItemWiseGroupedTable(
+                    reportData,
+                    tableHeaderColor,
+                    groupHeaderColor,
+                    textColor,
+                  )
+                : _buildSiteWiseGroupedTable(
+                    reportData,
+                    tableHeaderColor,
+                    groupHeaderColor,
+                    textColor,
+                  ),
             pw.SizedBox(height: 20),
             _buildSummary(reportData, textColor),
           ],
@@ -43,7 +57,7 @@ class IndentPdfScreen {
         ),
       );
 
-      await _savePdf(pdf);
+      await _savePdf(pdf, reportType);
     } catch (e) {
       showErrorSnackbar('Error', 'Failed to generate PDF: $e');
     }
@@ -54,6 +68,7 @@ class IndentPdfScreen {
     String fromDate,
     String toDate,
     String status,
+    String reportType,
   ) {
     return pw.Container(
       padding: const pw.EdgeInsets.only(bottom: 10),
@@ -67,7 +82,7 @@ class IndentPdfScreen {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                'INDENT REPORT',
+                'INDENT REPORT - $reportType',
                 style: pw.TextStyle(
                   fontSize: 18,
                   fontWeight: pw.FontWeight.bold,
@@ -103,18 +118,28 @@ class IndentPdfScreen {
     );
   }
 
-  static pw.Widget _buildTable(
+  static pw.Widget _buildItemWiseGroupedTable(
     List<IndentReportDm> data,
     PdfColor headerBgColor,
+    PdfColor groupHeaderColor,
     PdfColor textColor,
   ) {
-    final headers = [
-      'Indent No',
-      'Indent Date',
-      'Item Name',
+    // Group data by item code
+    final Map<String, List<IndentReportDm>> groupedData = {};
+    for (var item in data) {
+      if (!groupedData.containsKey(item.iCode)) {
+        groupedData[item.iCode] = [];
+      }
+      groupedData[item.iCode]!.add(item);
+    }
+
+    final detailHeaders = [
       'Site Name',
-      'Godown Name',
+      'Req Date',
+      'Indent Date',
       'Indent Qty',
+      'Indent No',
+      'Godown Name',
       'Order Qty',
       'Pending Qty',
       'Ref PO No',
@@ -124,84 +149,295 @@ class IndentPdfScreen {
     final columnWidths = {
       0: const pw.FlexColumnWidth(2.5),
       1: const pw.FlexColumnWidth(1.5),
-      2: const pw.FlexColumnWidth(3.5),
-      3: const pw.FlexColumnWidth(2.5),
+      2: const pw.FlexColumnWidth(1.5),
+      3: const pw.FlexColumnWidth(1.5),
       4: const pw.FlexColumnWidth(2.5),
-      5: const pw.FlexColumnWidth(1.5),
+      5: const pw.FlexColumnWidth(2.5),
       6: const pw.FlexColumnWidth(1.5),
       7: const pw.FlexColumnWidth(1.5),
-      8: const pw.FlexColumnWidth(2.5),
+      8: const pw.FlexColumnWidth(2.0),
       9: const pw.FlexColumnWidth(1.5),
     };
 
-    return pw.Table(
-      border: pw.TableBorder.all(color: PdfColors.grey, width: 0.5),
-      columnWidths: columnWidths,
-      children: [
-        pw.TableRow(
-          decoration: pw.BoxDecoration(color: headerBgColor),
-          children: headers
-              .map(
-                (h) => pw.Padding(
-                  padding: const pw.EdgeInsets.all(6),
-                  child: pw.Text(
-                    h,
-                    textAlign: pw.TextAlign.center,
-                    style: pw.TextStyle(
-                      fontSize: 9,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                ),
-              )
-              .toList(),
-        ),
+    List<pw.Widget> widgets = [];
 
-        ...data.asMap().entries.map((entry) {
-          final item = entry.value;
-          return pw.TableRow(
-            decoration: pw.BoxDecoration(
-              color: entry.key.isEven ? PdfColors.white : PdfColors.grey100,
-            ),
+    groupedData.forEach((itemCode, items) {
+      final firstItem = items.first;
+      final totalQty = items.fold(0.0, (sum, item) => sum + item.indentQty);
+
+      // Item header
+      widgets.add(
+        pw.Container(
+          width: double.infinity,
+          padding: const pw.EdgeInsets.all(8),
+          decoration: pw.BoxDecoration(
+            color: groupHeaderColor,
+            border: pw.Border.all(color: PdfColors.grey, width: 0.5),
+          ),
+          child: pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              _cell(item.invno, textColor),
-              _cell(
-                convertyyyyMMddToddMMyyyy(item.indentDate),
-                textColor,
-                align: pw.TextAlign.center,
+              pw.Text(
+                'Item: ${firstItem.iName} (${firstItem.iCode})',
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
-              _cell(item.iName, textColor),
-              _cell(item.siteName, textColor),
-              _cell(item.gdName, textColor),
-              _cell(
-                item.indentQty.toStringAsFixed(2),
-                textColor,
-                align: pw.TextAlign.right,
-              ),
-              _cell(
-                item.orderQty.toStringAsFixed(2),
-                textColor,
-                align: pw.TextAlign.right,
-              ),
-              _cell(
-                item.pendingQty.toStringAsFixed(2),
-                item.pendingQty > 0 ? PdfColors.red : PdfColors.green,
-                align: pw.TextAlign.right,
-              ),
-              _cell(
-                item.refPOInvNo.isNotEmpty ? item.refPOInvNo : '-',
-                textColor,
-              ),
-              _cell(
-                item.indentStatus,
-                _getStatusColor(item.indentStatus),
-                align: pw.TextAlign.center,
+              pw.Text(
+                'Total Indent Qty: ${totalQty.toStringAsFixed(2)}',
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
             ],
-          );
-        }),
-      ],
-    );
+          ),
+        ),
+      );
+
+      // Details table
+      widgets.add(
+        pw.Table(
+          border: pw.TableBorder.all(color: PdfColors.grey, width: 0.5),
+          columnWidths: columnWidths,
+          children: [
+            // Table header
+            pw.TableRow(
+              decoration: pw.BoxDecoration(color: headerBgColor),
+              children: detailHeaders
+                  .map(
+                    (h) => pw.Padding(
+                      padding: const pw.EdgeInsets.all(6),
+                      child: pw.Text(
+                        h,
+                        textAlign: pw.TextAlign.center,
+                        style: pw.TextStyle(
+                          fontSize: 9,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+            // Detail rows
+            ...items.asMap().entries.map((entry) {
+              final item = entry.value;
+              return pw.TableRow(
+                decoration: pw.BoxDecoration(
+                  color: entry.key.isEven ? PdfColors.white : PdfColors.grey100,
+                ),
+                children: [
+                  _cell(item.siteName, textColor),
+                  _cell(
+                    convertyyyyMMddToddMMyyyy(item.reqDate),
+                    textColor,
+                    align: pw.TextAlign.center,
+                  ),
+                  _cell(
+                    convertyyyyMMddToddMMyyyy(item.indentDate),
+                    textColor,
+                    align: pw.TextAlign.center,
+                  ),
+                  _cell(
+                    item.indentQty.toStringAsFixed(2),
+                    textColor,
+                    align: pw.TextAlign.right,
+                  ),
+                  _cell(item.invno, textColor),
+                  _cell(item.gdName, textColor),
+                  _cell(
+                    item.orderQty.toStringAsFixed(2),
+                    textColor,
+                    align: pw.TextAlign.right,
+                  ),
+                  _cell(
+                    item.pendingQty.toStringAsFixed(2),
+                    item.pendingQty > 0 ? PdfColors.red : PdfColors.green,
+                    align: pw.TextAlign.right,
+                  ),
+                  _cell(
+                    item.refPOInvNo.isNotEmpty ? item.refPOInvNo : '-',
+                    textColor,
+                  ),
+                  _cell(
+                    item.indentStatus,
+                    _getStatusColor(item.indentStatus),
+                    align: pw.TextAlign.center,
+                  ),
+                ],
+              );
+            }),
+          ],
+        ),
+      );
+
+      widgets.add(pw.SizedBox(height: 15));
+    });
+
+    return pw.Column(children: widgets);
+  }
+
+  static pw.Widget _buildSiteWiseGroupedTable(
+    List<IndentReportDm> data,
+    PdfColor headerBgColor,
+    PdfColor groupHeaderColor,
+    PdfColor textColor,
+  ) {
+    // Group data by site code
+    final Map<String, List<IndentReportDm>> groupedData = {};
+    for (var item in data) {
+      if (!groupedData.containsKey(item.siteCode)) {
+        groupedData[item.siteCode] = [];
+      }
+      groupedData[item.siteCode]!.add(item);
+    }
+
+    final detailHeaders = [
+      'Item Name',
+      'Req Date',
+      'Indent Date',
+      'Indent Qty',
+      'Indent No',
+      'Godown Name',
+      'Order Qty',
+      'Pending Qty',
+      'Ref PO No',
+      'Status',
+    ];
+
+    final columnWidths = {
+      0: const pw.FlexColumnWidth(3.0),
+      1: const pw.FlexColumnWidth(1.5),
+      2: const pw.FlexColumnWidth(1.5),
+      3: const pw.FlexColumnWidth(1.5),
+      4: const pw.FlexColumnWidth(2.5),
+      5: const pw.FlexColumnWidth(2.5),
+      6: const pw.FlexColumnWidth(1.5),
+      7: const pw.FlexColumnWidth(1.5),
+      8: const pw.FlexColumnWidth(2.0),
+      9: const pw.FlexColumnWidth(1.5),
+    };
+
+    List<pw.Widget> widgets = [];
+
+    groupedData.forEach((siteCode, items) {
+      final firstItem = items.first;
+      final totalQty = items.fold(0.0, (sum, item) => sum + item.indentQty);
+
+      // Site header
+      widgets.add(
+        pw.Container(
+          width: double.infinity,
+          padding: const pw.EdgeInsets.all(8),
+          decoration: pw.BoxDecoration(
+            color: groupHeaderColor,
+            border: pw.Border.all(color: PdfColors.grey, width: 0.5),
+          ),
+          child: pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(
+                'Site: ${firstItem.siteName} (${firstItem.siteCode})',
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.Text(
+                'Total Indent Qty: ${totalQty.toStringAsFixed(2)}',
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Details table
+      widgets.add(
+        pw.Table(
+          border: pw.TableBorder.all(color: PdfColors.grey, width: 0.5),
+          columnWidths: columnWidths,
+          children: [
+            // Table header
+            pw.TableRow(
+              decoration: pw.BoxDecoration(color: headerBgColor),
+              children: detailHeaders
+                  .map(
+                    (h) => pw.Padding(
+                      padding: const pw.EdgeInsets.all(6),
+                      child: pw.Text(
+                        h,
+                        textAlign: pw.TextAlign.center,
+                        style: pw.TextStyle(
+                          fontSize: 9,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+            // Detail rows
+            ...items.asMap().entries.map((entry) {
+              final item = entry.value;
+              return pw.TableRow(
+                decoration: pw.BoxDecoration(
+                  color: entry.key.isEven ? PdfColors.white : PdfColors.grey100,
+                ),
+                children: [
+                  _cell(item.iName, textColor),
+                  _cell(
+                    convertyyyyMMddToddMMyyyy(item.reqDate),
+                    textColor,
+                    align: pw.TextAlign.center,
+                  ),
+                  _cell(
+                    convertyyyyMMddToddMMyyyy(item.indentDate),
+                    textColor,
+                    align: pw.TextAlign.center,
+                  ),
+                  _cell(
+                    item.indentQty.toStringAsFixed(2),
+                    textColor,
+                    align: pw.TextAlign.right,
+                  ),
+                  _cell(item.invno, textColor),
+                  _cell(item.gdName, textColor),
+                  _cell(
+                    item.orderQty.toStringAsFixed(2),
+                    textColor,
+                    align: pw.TextAlign.right,
+                  ),
+                  _cell(
+                    item.pendingQty.toStringAsFixed(2),
+                    item.pendingQty > 0 ? PdfColors.red : PdfColors.green,
+                    align: pw.TextAlign.right,
+                  ),
+                  _cell(
+                    item.refPOInvNo.isNotEmpty ? item.refPOInvNo : '-',
+                    textColor,
+                  ),
+                  _cell(
+                    item.indentStatus,
+                    _getStatusColor(item.indentStatus),
+                    align: pw.TextAlign.center,
+                  ),
+                ],
+              );
+            }),
+          ],
+        ),
+      );
+
+      widgets.add(pw.SizedBox(height: 15));
+    });
+
+    return pw.Column(children: widgets);
   }
 
   static pw.Widget _buildSummary(
@@ -333,12 +569,12 @@ class IndentPdfScreen {
     );
   }
 
-  static Future<void> _savePdf(pw.Document pdf) async {
+  static Future<void> _savePdf(pw.Document pdf, String reportType) async {
     final bytes = await pdf.save();
     final dir = await getTemporaryDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
 
-    final file = File('${dir.path}/Indent_Report_$timestamp.pdf');
+    final file = File('${dir.path}/Indent_Report_${reportType}_$timestamp.pdf');
     await file.writeAsBytes(bytes);
     await OpenFilex.open(file.path);
   }

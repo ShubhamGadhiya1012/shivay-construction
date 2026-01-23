@@ -13,11 +13,11 @@ class GodownMasterDm {
     return GodownMasterDm(
       gdCode: json['GDCODE'] ?? '',
       gdName: json['GDNAME'] ?? '',
-      siteCode: json['SiteCode'] ?? '',
+      siteCode: json['SITECODE'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'GDCode': gdCode, 'GDName': gdName, 'SiteCode': siteCode};
+    return {'GDCode': gdCode, 'GDName': gdName, 'SITECODE': siteCode};
   }
 }

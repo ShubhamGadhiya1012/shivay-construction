@@ -44,6 +44,7 @@ class HomeController extends GetxController {
   Future<void> _initializeData() async {
     await loadCompany();
     await loadMenuFromAPI();
+    await checkAppVersion();
   }
 
   Future<void> loadCompany() async {

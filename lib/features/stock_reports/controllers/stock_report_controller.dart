@@ -91,7 +91,7 @@ class StockReportController extends GetxController {
   Future<void> getGodowns() async {
     try {
       isLoading.value = true;
-      final fetchedGodowns = await GodownMasterRepo.getGodowns();
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(siteCode: "");
       godowns.assignAll(fetchedGodowns);
       godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
     } catch (e) {

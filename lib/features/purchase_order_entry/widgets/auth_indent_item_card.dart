@@ -183,7 +183,7 @@ class AuthIndentItemCard extends StatelessWidget {
                                               children: [
                                                 Expanded(
                                                   child: Text(
-                                                    'Date: ${convertyyyyMMddToddMMyyyy(indent.date)}',
+                                                    'Required Date: ${convertyyyyMMddToddMMyyyy(indent.date)}',
                                                     style:
                                                         TextStyles.kRegularOutfit(
                                                           fontSize: tablet

@@ -3,15 +3,19 @@ import 'package:shivay_construction/services/api_service.dart';
 import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
 class GodownMasterRepo {
-  static Future<List<GodownMasterDm>> getGodowns() async {
+  static Future<List<GodownMasterDm>> getGodowns({
+    required String siteCode,
+  }) async {
     String? token = await SecureStorageHelper.read('token');
-
+    print(siteCode);
     try {
       final response = await ApiService.getRequest(
         endpoint: '/Master/getGodown',
         token: token,
+        queryParams: {'SiteCode': siteCode},
       );
 
+      print(response);
       if (response == null) return [];
 
       if (response['data'] != null) {

@@ -72,7 +72,6 @@ class IndentReportScreen extends StatelessWidget {
                         key: _controller.reportFormKey,
                         child: Column(
                           children: [
-                            // Date Fields
                             Row(
                               children: [
                                 Expanded(
@@ -102,7 +101,6 @@ class IndentReportScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Status Dropdown
                             Obx(
                               () => AppDropdown(
                                 items: _controller.statusOptions,
@@ -115,53 +113,99 @@ class IndentReportScreen extends StatelessWidget {
                               ),
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
-
-                            // Site Dropdown
                             Obx(
                               () => AppDropdown(
-                                items: _controller.siteNames,
-                                hintText: 'Site',
-                                onChanged: _controller.onSiteSelected,
+                                items: _controller.reportTypeOptions,
+                                hintText: 'Report Type',
+                                onChanged: (value) {
+                                  _controller.selectedReportType.value =
+                                      value ?? 'ItemWise';
+                                },
                                 selectedItem:
-                                    _controller
-                                        .selectedSiteName
-                                        .value
-                                        .isNotEmpty
-                                    ? _controller.selectedSiteName.value
-                                    : null,
+                                    _controller.selectedReportType.value,
                               ),
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Godown Dropdown
                             Obx(
-                              () => AppDropdown(
-                                items: _controller.godownNames,
-                                hintText: 'Godown',
-                                onChanged: _controller.onGodownSelected,
-                                selectedItem:
-                                    _controller
-                                        .selectedGodownName
-                                        .value
-                                        .isNotEmpty
-                                    ? _controller.selectedGodownName.value
-                                    : null,
-                              ),
+                              () =>
+                                  _controller.selectedReportType.value ==
+                                      'SiteWise'
+                                  ? Column(
+                                      children: [
+                                        AppDropdown(
+                                          items: _controller.siteNames,
+                                          hintText: 'Site',
+                                          onChanged: _controller.onSiteSelected,
+                                          selectedItem:
+                                              _controller
+                                                  .selectedSiteName
+                                                  .value
+                                                  .isNotEmpty
+                                              ? _controller
+                                                    .selectedSiteName
+                                                    .value
+                                              : null,
+                                        ),
+                                        tablet ? AppSpaces.v16 : AppSpaces.v10,
+                                      ],
+                                    )
+                                  : const SizedBox.shrink(),
                             ),
-                            tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Items Selection
-                            GestureDetector(
-                              onTap: () {
-                                _showItemSelectionBottomSheet(context);
-                              },
-                              child: AppMultipleSelectionField(
-                                placeholder: 'Select Items',
-                                selectedItems: _controller.selectedItemNames,
-                                onTap: () =>
-                                    _showItemSelectionBottomSheet(context),
-                                showFullList: true,
-                              ),
+                            Obx(
+                              () =>
+                                  _controller.selectedReportType.value ==
+                                      'SiteWise'
+                                  ? Column(
+                                      children: [
+                                        AppDropdown(
+                                          items: _controller.godownNames,
+                                          hintText: 'Godown',
+                                          onChanged:
+                                              _controller.onGodownSelected,
+                                          selectedItem:
+                                              _controller
+                                                  .selectedGodownName
+                                                  .value
+                                                  .isNotEmpty
+                                              ? _controller
+                                                    .selectedGodownName
+                                                    .value
+                                              : null,
+                                        ),
+                                        tablet ? AppSpaces.v16 : AppSpaces.v10,
+                                      ],
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+
+                            Obx(
+                              () =>
+                                  _controller.selectedReportType.value ==
+                                      'ItemWise'
+                                  ? Column(
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            _showItemSelectionBottomSheet(
+                                              context,
+                                            );
+                                          },
+                                          child: AppMultipleSelectionField(
+                                            placeholder: 'Select Items',
+                                            selectedItems:
+                                                _controller.selectedItemNames,
+                                            onTap: () =>
+                                                _showItemSelectionBottomSheet(
+                                                  context,
+                                                ),
+                                            showFullList: true,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : const SizedBox.shrink(),
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
                           ],
@@ -169,7 +213,7 @@ class IndentReportScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Generate Report Button
+
                   AppButton(
                     title: 'Generate Report',
                     buttonHeight: tablet ? 54 : 48,

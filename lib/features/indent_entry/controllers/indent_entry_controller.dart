@@ -66,7 +66,7 @@ class IndentEntryController extends GetxController {
     try {
       isLoading.value = true;
       await getSites();
-      final fetchedGodowns = await GodownMasterRepo.getGodowns();
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(siteCode: "");
       godowns.assignAll(fetchedGodowns);
       godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
     } catch (e) {

@@ -142,16 +142,6 @@ class ItemMasterCard extends StatelessWidget {
                                 size: tablet ? 18 : 16,
                                 color: kColorPrimary,
                               ),
-                              AppSpaces.h6,
-                              Text(
-                                'Edit',
-                                style: TextStyles.kSemiBoldOutfit(
-                                  fontSize: tablet
-                                      ? FontSizes.k15FontSize
-                                      : FontSizes.k14FontSize,
-                                  color: kColorPrimary,
-                                ),
-                              ),
                             ],
                           ),
                         ),
