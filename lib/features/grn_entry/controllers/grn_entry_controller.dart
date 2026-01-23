@@ -163,12 +163,17 @@ class GrnEntryController extends GetxController {
       showErrorSnackbar('Error', 'Please select godown first');
       return;
     }
+    if (selectedPartyCode.value.isEmpty) {
+      showErrorSnackbar('Error', 'Please select party first');
+      return;
+    }
 
     try {
       isLoading.value = true;
       final fetchedItems = await PoAuthItemsRepo.getPoAuthItems(
         siteCode: selectedSiteCode.value,
         gdCode: selectedGodownCode.value,
+        pCode: selectedPartyCode.value,
       );
       poAuthItems.assignAll(fetchedItems);
       isItemSelectionMode.value = true;

@@ -19,7 +19,6 @@ import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_multiple_selection_bottom_sheet.dart';
 import 'package:shivay_construction/widgets/app_multiple_selection_field.dart';
 import 'package:shivay_construction/widgets/app_summary_bottom_sheet_button.dart';
-import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
 class StockReportScreen extends StatefulWidget {
   final String reportName;
@@ -114,11 +113,14 @@ class _StockReportScreenState extends State<StockReportScreen> {
                 }),
               ],
             ),
-            body: Obx(() {
-              return _controller.isReportScreen.value
-                  ? _buildReportView(tablet)
-                  : _buildFormView(tablet);
-            }),
+            body: SafeArea(
+              bottom: true,
+              child: Obx(() {
+                return _controller.isReportScreen.value
+                    ? _buildReportView(tablet)
+                    : _buildFormView(tablet);
+              }),
+            ),
           ),
         ),
         Obx(() => AppLoadingOverlay(isLoading: _controller.isLoading.value)),
@@ -165,7 +167,18 @@ class _StockReportScreenState extends State<StockReportScreen> {
                       ],
                     ),
                     tablet ? AppSpaces.v16 : AppSpaces.v10,
-
+                    Obx(
+                      () => AppDropdown(
+                        items: _controller.siteNames,
+                        hintText: 'Site',
+                        onChanged: _controller.onSiteSelected,
+                        selectedItem:
+                            _controller.selectedSiteName.value.isNotEmpty
+                            ? _controller.selectedSiteName.value
+                            : null,
+                      ),
+                    ),
+                    tablet ? AppSpaces.v16 : AppSpaces.v10,
                     Obx(
                       () => AppDropdown(
                         items: _controller.godownNames,
@@ -178,24 +191,6 @@ class _StockReportScreenState extends State<StockReportScreen> {
                       ),
                     ),
                     tablet ? AppSpaces.v16 : AppSpaces.v10,
-
-                    Obx(() {
-                      if (_controller.selectedSiteCode.value.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
-
-                      return Column(
-                        children: [
-                          AppTextFormField(
-                            controller: _controller.siteNameController,
-                            hintText: 'Site Name',
-                            enabled: false,
-                            fillColor: kColorLightGrey,
-                          ),
-                          tablet ? AppSpaces.v16 : AppSpaces.v10,
-                        ],
-                      );
-                    }),
 
                     GestureDetector(
                       onTap: () => _showItemSelectionBottomSheet(context),

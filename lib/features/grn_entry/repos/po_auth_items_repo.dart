@@ -6,13 +6,14 @@ class PoAuthItemsRepo {
   static Future<List<PoAuthItemDm>> getPoAuthItems({
     required String siteCode,
     required String gdCode,
+    required String pCode,
   }) async {
     String? token = await SecureStorageHelper.read('token');
 
     try {
       final response = await ApiService.getRequest(
         endpoint: '/GRN/getPOAuthItems',
-        queryParams: {'SiteCode': siteCode, 'GDCode': gdCode},
+        queryParams: {'SiteCode': siteCode, 'GDCode': gdCode, 'PCode': pCode},
         token: token,
       );
 

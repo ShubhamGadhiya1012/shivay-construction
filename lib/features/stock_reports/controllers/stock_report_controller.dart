@@ -19,15 +19,16 @@ class StockReportController extends GetxController {
 
   var fromDateController = TextEditingController();
   var toDateController = TextEditingController();
-  var siteNameController = TextEditingController();
 
   var godowns = <GodownMasterDm>[].obs;
   var godownNames = <String>[].obs;
   var selectedGodownName = ''.obs;
   var selectedGodownCode = ''.obs;
-  var selectedSiteCode = ''.obs;
 
   var sites = <SiteMasterDm>[].obs;
+  var siteNames = <String>[].obs;
+  var selectedSiteName = ''.obs;
+  var selectedSiteCode = ''.obs;
 
   var items = <ItemMasterDm>[].obs;
   var filteredItems = <ItemMasterDm>[].obs;
@@ -81,6 +82,7 @@ class StockReportController extends GetxController {
     try {
       final fetchedSites = await SiteMasterListRepo.getSites();
       sites.assignAll(fetchedSites);
+      siteNames.assignAll(fetchedSites.map((site) => site.siteName).toList());
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
@@ -88,10 +90,30 @@ class StockReportController extends GetxController {
     }
   }
 
-  Future<void> getGodowns() async {
+  void onSiteSelected(String? siteName) async {
+    selectedSiteName.value = siteName ?? '';
+    var selectedSiteObj = sites.firstWhereOrNull(
+      (site) => site.siteName == siteName,
+    );
+    selectedSiteCode.value = selectedSiteObj?.siteCode ?? '';
+
+    selectedGodownName.value = '';
+    selectedGodownCode.value = '';
+
+    if (selectedSiteCode.value.isNotEmpty) {
+      await getGodowns(selectedSiteCode.value);
+    } else {
+      godowns.clear();
+      godownNames.clear();
+    }
+  }
+
+  Future<void> getGodowns([String siteCode = '']) async {
     try {
       isLoading.value = true;
-      final fetchedGodowns = await GodownMasterRepo.getGodowns(siteCode: "");
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(
+        siteCode: siteCode,
+      );
       godowns.assignAll(fetchedGodowns);
       godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
     } catch (e) {
@@ -107,16 +129,10 @@ class StockReportController extends GetxController {
       (gd) => gd.gdName == godownName,
     );
     selectedGodownCode.value = selectedGodownObj?.gdCode ?? '';
-    selectedSiteCode.value = selectedGodownObj?.siteCode ?? '';
 
     if (selectedGodownObj?.siteCode.isNotEmpty ?? false) {
-      final site = sites.firstWhereOrNull(
-        (s) => s.siteCode == selectedGodownObj!.siteCode,
-      );
-      siteNameController.text = site?.siteName ?? '';
-    } else {
-      siteNameController.clear();
-    }
+      sites.firstWhereOrNull((s) => s.siteCode == selectedGodownObj!.siteCode);
+    } else {}
   }
 
   Future<void> getItems() async {
@@ -257,13 +273,6 @@ class StockReportController extends GetxController {
     openingStock.value = opening;
     closingStock.value = closing;
     stockReports.assignAll(transactions);
-
-    print('Item Index: $index');
-    print('Item Code: $iCode');
-    print('Total records: ${itemData.length}');
-    print('Opening: ${opening?.desc}');
-    print('Closing: ${closing?.desc}');
-    print('Transactions: ${transactions.length}');
   }
 
   void goToPreviousItem() {
@@ -298,7 +307,7 @@ class StockReportController extends GetxController {
     }
   }
 
-  void clearAll() {
+  Future<void> clearAll() async {
     final now = DateTime.now();
     final currentYear = now.month >= 4 ? now.year : now.year - 1;
     final financialYearStart = DateTime(currentYear, 4, 1);
@@ -309,7 +318,7 @@ class StockReportController extends GetxController {
     selectedGodownName.value = '';
     selectedGodownCode.value = '';
     selectedSiteCode.value = '';
-    siteNameController.clear();
+
     selectedItems.clear();
     selectedItemNames.clear();
     stockReports.clear();
@@ -317,9 +326,10 @@ class StockReportController extends GetxController {
     openingStock.value = null;
     closingStock.value = null;
     isReportScreen.value = false;
-
+    selectedSiteName.value = '';
     groupedReportsByItem.clear();
     itemCodes.clear();
     currentItemIndex.value = 0;
+    await getGodowns();
   }
 }
