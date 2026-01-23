@@ -31,6 +31,8 @@ class IndentReportController extends GetxController {
   var selectedSiteName = ''.obs;
   var selectedSiteCode = ''.obs;
 
+
+
   var items = <ItemMasterDm>[].obs;
   var filteredItems = <ItemMasterDm>[].obs;
   var selectedItems = <String>[].obs;

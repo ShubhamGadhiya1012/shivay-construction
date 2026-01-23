@@ -15,6 +15,9 @@ class PurchaseOrderReportDm {
   final String partyName;
   final bool authorize;
   final String poStatus;
+  final double receivedQty;
+  final double pendingQty;
+  final bool poClose;
 
   PurchaseOrderReportDm({
     required this.poNo,
@@ -31,6 +34,9 @@ class PurchaseOrderReportDm {
     required this.partyName,
     required this.authorize,
     required this.poStatus,
+    required this.receivedQty,
+    required this.pendingQty,
+    required this.poClose,
   });
 
   factory PurchaseOrderReportDm.fromJson(Map<String, dynamic> json) {
@@ -49,6 +55,9 @@ class PurchaseOrderReportDm {
       partyName: json['PartyName'] ?? '',
       authorize: json['Authorize'] ?? false,
       poStatus: json['POStatus'] ?? '',
+      receivedQty: (json['ReceivedQty'] ?? 0).toDouble(),
+      pendingQty: (json['PendingQty'] ?? 0).toDouble(),
+      poClose: json['POCLose'] ?? false,
     );
   }
 

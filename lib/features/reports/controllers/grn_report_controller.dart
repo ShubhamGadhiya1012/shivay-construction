@@ -19,7 +19,6 @@ class GrnReportController extends GetxController {
 
   var fromDateController = TextEditingController();
   var toDateController = TextEditingController();
-  var siteNameController = TextEditingController();
 
   // Party related
   var parties = <PartyMasterDm>[].obs;
@@ -32,10 +31,12 @@ class GrnReportController extends GetxController {
   var godownNames = <String>[].obs;
   var selectedGodownName = ''.obs;
   var selectedGodownCode = ''.obs;
-  var selectedSiteCode = ''.obs;
 
   // Site related
   var sites = <SiteMasterDm>[].obs;
+  var siteNames = <String>[].obs;
+  var selectedSiteName = ''.obs;
+  var selectedSiteCode = ''.obs;
 
   // Items related
   var items = <ItemMasterDm>[].obs;
@@ -86,6 +87,7 @@ class GrnReportController extends GetxController {
     try {
       final fetchedSites = await SiteMasterListRepo.getSites();
       sites.assignAll(fetchedSites);
+      siteNames.assignAll(fetchedSites.map((site) => site.siteName).toList());
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
@@ -93,10 +95,29 @@ class GrnReportController extends GetxController {
     }
   }
 
-  Future<void> getGodowns() async {
+  void onSiteSelected(String? siteName) async {
+    selectedSiteName.value = siteName ?? '';
+    var selectedSiteObj = sites.firstWhereOrNull(
+      (site) => site.siteName == siteName,
+    );
+    selectedSiteCode.value = selectedSiteObj?.siteCode ?? '';
+
+    selectedGodownName.value = '';
+    selectedGodownCode.value = '';
+
+    if (selectedSiteCode.value.isNotEmpty) {
+      await getGodowns(selectedSiteCode.value);
+    } else {
+      await getGodowns();
+    }
+  }
+
+  Future<void> getGodowns([String siteCode = '']) async {
     try {
       isLoading.value = true;
-      final fetchedGodowns = await GodownMasterRepo.getGodowns(siteCode: "");
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(
+        siteCode: siteCode,
+      );
       godowns.assignAll(fetchedGodowns);
       godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
     } catch (e) {
@@ -112,15 +133,16 @@ class GrnReportController extends GetxController {
       (gd) => gd.gdName == godownName,
     );
     selectedGodownCode.value = selectedGodownObj?.gdCode ?? '';
-    selectedSiteCode.value = selectedGodownObj?.siteCode ?? '';
 
     if (selectedGodownObj?.siteCode.isNotEmpty ?? false) {
       final site = sites.firstWhereOrNull(
         (s) => s.siteCode == selectedGodownObj!.siteCode,
       );
-      siteNameController.text = site?.siteName ?? '';
+
+      selectedSiteCode.value = selectedGodownObj?.siteCode ?? '';
+      selectedSiteName.value = site?.siteName ?? '';
     } else {
-      siteNameController.clear();
+      selectedSiteCode.value = '';
     }
   }
 
@@ -187,7 +209,7 @@ class GrnReportController extends GetxController {
     }
   }
 
-  void clearAll() {
+  Future<void> clearAll() async {
     final now = DateTime.now();
     final currentYear = now.month >= 4 ? now.year : now.year - 1;
     final financialYearStart = DateTime(currentYear, 4, 1);
@@ -195,13 +217,13 @@ class GrnReportController extends GetxController {
     fromDateController.text = formatter.format(financialYearStart);
     toDateController.text = formatter.format(now);
 
-    selectedPartyName.value = '';
-    selectedPartyCode.value = '';
+    selectedSiteName.value = '';
     selectedGodownName.value = '';
     selectedGodownCode.value = '';
     selectedSiteCode.value = '';
-    siteNameController.clear();
+
     selectedItems.clear();
     selectedItemNames.clear();
+    await getGodowns();
   }
 }

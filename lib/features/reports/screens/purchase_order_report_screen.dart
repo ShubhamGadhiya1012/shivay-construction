@@ -74,7 +74,6 @@ class PurchaseOrderReportScreen extends StatelessWidget {
                         key: _controller.reportFormKey,
                         child: Column(
                           children: [
-                            // Date Fields
                             Row(
                               children: [
                                 Expanded(
@@ -104,7 +103,6 @@ class PurchaseOrderReportScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Status Dropdown
                             Obx(
                               () => AppDropdown(
                                 items: _controller.statusOptions,
@@ -118,7 +116,46 @@ class PurchaseOrderReportScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Site Dropdown
+                            Obx(
+                              () => AppDropdown(
+                                items: _controller.reportTypeOptions,
+                                hintText: 'Report Type',
+                                onChanged: (value) {
+                                  _controller.selectedReportType.value =
+                                      value ?? 'PartyWise';
+                                },
+                                selectedItem:
+                                    _controller.selectedReportType.value,
+                              ),
+                            ),
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
+                            Obx(
+                              () =>
+                                  _controller.selectedReportType.value ==
+                                      'PartyWise'
+                                  ? Column(
+                                      children: [
+                                        AppDropdown(
+                                          items: _controller.partyNames,
+                                          hintText: 'Party',
+                                          onChanged:
+                                              _controller.onPartySelected,
+                                          selectedItem:
+                                              _controller
+                                                  .selectedPartyName
+                                                  .value
+                                                  .isNotEmpty
+                                              ? _controller
+                                                    .selectedPartyName
+                                                    .value
+                                              : null,
+                                        ),
+                                        tablet ? AppSpaces.v16 : AppSpaces.v10,
+                                      ],
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+
                             Obx(
                               () => AppDropdown(
                                 items: _controller.siteNames,
@@ -135,7 +172,6 @@ class PurchaseOrderReportScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Godown Dropdown
                             Obx(
                               () => AppDropdown(
                                 items: _controller.godownNames,
@@ -153,36 +189,33 @@ class PurchaseOrderReportScreen extends StatelessWidget {
 
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Party Dropdown
                             Obx(
-                              () => AppDropdown(
-                                items: _controller.partyNames,
-                                hintText: 'Party',
-                                onChanged: _controller.onPartySelected,
-                                selectedItem:
-                                    _controller
-                                        .selectedPartyName
-                                        .value
-                                        .isNotEmpty
-                                    ? _controller.selectedPartyName.value
-                                    : null,
-                              ),
-                            ),
-
-                            tablet ? AppSpaces.v16 : AppSpaces.v10,
-
-                            // Items Selection
-                            GestureDetector(
-                              onTap: () {
-                                _showItemSelectionBottomSheet(context);
-                              },
-                              child: AppMultipleSelectionField(
-                                placeholder: 'Select Items',
-                                selectedItems: _controller.selectedItemNames,
-                                onTap: () =>
-                                    _showItemSelectionBottomSheet(context),
-                                showFullList: true,
-                              ),
+                              () =>
+                                  _controller.selectedReportType.value ==
+                                      'ItemWise'
+                                  ? Column(
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            _showItemSelectionBottomSheet(
+                                              context,
+                                            );
+                                          },
+                                          child: AppMultipleSelectionField(
+                                            placeholder: 'Select Items',
+                                            selectedItems:
+                                                _controller.selectedItemNames,
+                                            onTap: () =>
+                                                _showItemSelectionBottomSheet(
+                                                  context,
+                                                ),
+                                            showFullList: true,
+                                          ),
+                                        ),
+                                        tablet ? AppSpaces.v16 : AppSpaces.v10,
+                                      ],
+                                    )
+                                  : const SizedBox.shrink(),
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
                           ],
@@ -190,7 +223,7 @@ class PurchaseOrderReportScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Generate Report Button
+
                   AppButton(
                     title: 'Generate Report',
                     buttonHeight: tablet ? 54 : 48,

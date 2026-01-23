@@ -23,6 +23,9 @@ class PurchaseOrderReportController extends GetxController {
   var statusOptions = ['All', 'Pending', 'Complete', 'Close'].obs;
   var selectedStatus = 'All'.obs;
 
+  var reportTypeOptions = ['PartyWise', 'ItemWise'].obs;
+  var selectedReportType = 'PartyWise'.obs;
+
   var godowns = <GodownMasterDm>[].obs;
   var godownNames = <String>[].obs;
   var selectedGodownName = ''.obs;
@@ -39,7 +42,6 @@ class PurchaseOrderReportController extends GetxController {
   var selectedItemNames = <String>[].obs;
   var searchItemController = TextEditingController();
 
-  // Party related
   var parties = <PartyMasterDm>[].obs;
   var partyNames = <String>[].obs;
   var selectedPartyName = ''.obs;
@@ -95,10 +97,12 @@ class PurchaseOrderReportController extends GetxController {
     }
   }
 
-  Future<void> getGodowns() async {
+  Future<void> getGodowns([String siteCode = '']) async {
     try {
       isLoading.value = true;
-      final fetchedGodowns = await GodownMasterRepo.getGodowns(siteCode: "");
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(
+        siteCode: siteCode,
+      );
       godowns.assignAll(fetchedGodowns);
       godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
     } catch (e) {
@@ -116,12 +120,21 @@ class PurchaseOrderReportController extends GetxController {
     selectedGodownCode.value = selectedGodownObj?.gdCode ?? '';
   }
 
-  void onSiteSelected(String? siteName) {
+  void onSiteSelected(String? siteName) async {
     selectedSiteName.value = siteName ?? '';
     var selectedSiteObj = sites.firstWhereOrNull(
       (site) => site.siteName == siteName,
     );
     selectedSiteCode.value = selectedSiteObj?.siteCode ?? '';
+
+    selectedGodownName.value = '';
+    selectedGodownCode.value = '';
+
+    if (selectedSiteCode.value.isNotEmpty) {
+      await getGodowns(selectedSiteCode.value);
+    } else {
+      await getGodowns();
+    }
   }
 
   Future<void> getItems() async {
@@ -153,15 +166,19 @@ class PurchaseOrderReportController extends GetxController {
 
     try {
       isLoading.value = true;
-
       final response = await PurchaseOrderReportRepo.getPurchaseOrderReport(
         fromDate: fromDate,
         toDate: toDate,
         status: selectedStatus.value,
-        pCode: selectedPartyCode.value,
+        type: selectedReportType.value,
+        pCode: selectedReportType.value == 'PartyWise'
+            ? selectedPartyCode.value
+            : '',
         siteCode: selectedSiteCode.value,
         gdCode: selectedGodownCode.value,
-        iCodes: selectedItems.join(','),
+        iCodes: selectedReportType.value == 'ItemWise'
+            ? selectedItems.join(',')
+            : '',
       );
 
       if (response.isEmpty) {
@@ -177,6 +194,7 @@ class PurchaseOrderReportController extends GetxController {
         fromDate: fromDateController.text,
         toDate: toDateController.text,
         status: selectedStatus.value,
+        reportType: selectedReportType.value,
       );
     } catch (e) {
       if (e is Map<String, dynamic>) {
@@ -189,7 +207,7 @@ class PurchaseOrderReportController extends GetxController {
     }
   }
 
-  void clearAll() {
+  Future<void> clearAll() async {
     final now = DateTime.now();
     final currentYear = now.month >= 4 ? now.year : now.year - 1;
     final financialYearStart = DateTime(currentYear, 4, 1);
@@ -204,5 +222,7 @@ class PurchaseOrderReportController extends GetxController {
     selectedSiteCode.value = '';
     selectedItems.clear();
     selectedItemNames.clear();
+    selectedReportType.value = 'PartyWise';
+    await getGodowns('');
   }
 }
