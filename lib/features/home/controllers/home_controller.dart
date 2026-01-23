@@ -36,12 +36,9 @@ class HomeController extends GetxController {
   }
 
   @override
-  void onInit() {
+  Future<void> onInit() async {
     super.onInit();
-    _initializeData();
-  }
 
-  Future<void> _initializeData() async {
     await loadCompany();
     await loadMenuFromAPI();
     await checkAppVersion();
@@ -248,6 +245,7 @@ class HomeController extends GetxController {
   }
 
   Future<void> loadMenuFromAPI() async {
+    await checkAppVersion();
     isLoading.value = true;
     try {
       String? userId = await SecureStorageHelper.read('userId');

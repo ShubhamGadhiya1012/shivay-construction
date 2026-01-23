@@ -1,6 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/purchase_order_entry/controllers/purchase_order_controller.dart';
 import 'package:shivay_construction/features/purchase_order_entry/models/auth_indent_item_dm.dart';
@@ -11,6 +13,8 @@ import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
+
+import '../../indent_entry/screens/site_wise_stock_screen.dart';
 
 class AuthIndentItemCard extends StatelessWidget {
   const AuthIndentItemCard({
@@ -80,6 +84,33 @@ class AuthIndentItemCard extends StatelessWidget {
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                    tablet ? AppSpaces.h12 : AppSpaces.h8,
+                    Material(
+                      color: kColorGreen.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(tablet ? 8 : 6),
+                      child: InkWell(
+                        onTap: () {
+                          Get.to(() => SiteWiseStockScreen(iCode: item.iCode));
+                        },
+                        borderRadius: BorderRadius.circular(tablet ? 8 : 6),
+                        child: Container(
+                          padding: tablet
+                              ? AppPaddings.combined(
+                                  horizontal: 10,
+                                  vertical: 10,
+                                )
+                              : AppPaddings.combined(
+                                  horizontal: 8,
+                                  vertical: 8,
+                                ),
+                          child: Icon(
+                            Icons.visibility_rounded,
+                            size: tablet ? 18 : 16,
+                            color: kColorGreen,
+                          ),
+                        ),
                       ),
                     ),
                     tablet ? AppSpaces.h12 : AppSpaces.h8,
