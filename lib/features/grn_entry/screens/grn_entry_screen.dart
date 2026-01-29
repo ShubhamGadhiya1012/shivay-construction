@@ -676,24 +676,6 @@ class _GrnEntryScreenState extends State<GrnEntryScreen> {
                         children: [
                           Expanded(
                             child: AppTextFormField(
-                              controller: _controller.directRateController,
-                              hintText: 'Rate *',
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter rate';
-                                }
-                                final rate = double.tryParse(value);
-                                if (rate == null || rate <= 0) {
-                                  return 'Please enter valid rate';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          tablet ? AppSpaces.h16 : AppSpaces.h12,
-                          Expanded(
-                            child: AppTextFormField(
                               controller: _controller.directQtyController,
                               hintText: 'Qty *',
                               keyboardType: TextInputType.number,
@@ -704,6 +686,24 @@ class _GrnEntryScreenState extends State<GrnEntryScreen> {
                                 final qty = double.tryParse(value);
                                 if (qty == null || qty <= 0) {
                                   return 'Please enter valid qty';
+                                }
+                                return null;
+                              },
+                            ), 
+                          ),
+                          tablet ? AppSpaces.h16 : AppSpaces.h12,
+                          Expanded(
+                            child: AppTextFormField(
+                              controller: _controller.directRateController,
+                              hintText: 'Rate *',
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter rate';
+                                }
+                                final rate = double.tryParse(value);
+                                if (rate == null || rate <= 0) {
+                                  return 'Please enter valid rate';
                                 }
                                 return null;
                               },

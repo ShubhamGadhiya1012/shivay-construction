@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/constants/image_constants.dart';
+import 'package:shivay_construction/features/dlr_entry/screens/dlr_list_screen.dart';
 import 'package:shivay_construction/features/grn_entry/screens/grns_screen.dart';
 import 'package:shivay_construction/features/home/controllers/home_controller.dart';
 import 'package:shivay_construction/features/home/widgets/version_and_developer_info.dart';
@@ -482,6 +483,9 @@ class AppDrawer extends StatelessWidget {
         break;
       case 'repair entry':
         Get.to(() => RepairIssueListScreen());
+        break;
+      case 'dlr entry':
+        Get.to(() => DlrListScreen());
         break;
       case 'opening stock report':
         Get.to(() => OpeningStockReportScreen());

@@ -6,6 +6,7 @@ import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/purchase_order_entry/controllers/purchase_order_controller.dart';
 import 'package:shivay_construction/features/purchase_order_entry/models/auth_indent_item_dm.dart';
+import 'package:shivay_construction/features/purchase_order_entry/screens/last_purchase_rate_screen.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
@@ -87,6 +88,7 @@ class AuthIndentItemCard extends StatelessWidget {
                       ),
                     ),
                     tablet ? AppSpaces.h12 : AppSpaces.h8,
+                    // Around line where eye icon exists
                     Material(
                       color: kColorGreen.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(tablet ? 8 : 6),
@@ -109,6 +111,36 @@ class AuthIndentItemCard extends StatelessWidget {
                             Icons.visibility_rounded,
                             size: tablet ? 18 : 16,
                             color: kColorGreen,
+                          ),
+                        ),
+                      ),
+                    ),
+                    tablet ? AppSpaces.h8 : AppSpaces.h6,
+                    // ADD THIS NEW ICON
+                    Material(
+                      color: kColorSecondary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(tablet ? 8 : 6),
+                      child: InkWell(
+                        onTap: () {
+                          Get.to(
+                            () => LastPurchaseRateScreen(iCode: item.iCode),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(tablet ? 8 : 6),
+                        child: Container(
+                          padding: tablet
+                              ? AppPaddings.combined(
+                                  horizontal: 10,
+                                  vertical: 10,
+                                )
+                              : AppPaddings.combined(
+                                  horizontal: 8,
+                                  vertical: 8,
+                                ),
+                          child: Icon(
+                            Icons.currency_rupee_rounded,
+                            size: tablet ? 18 : 16,
+                            color: kColorSecondary,
                           ),
                         ),
                       ),
