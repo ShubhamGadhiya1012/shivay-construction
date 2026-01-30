@@ -71,9 +71,117 @@ class _SiteWiseStockScreenState extends State<SiteWiseStockScreen> {
                     : AppPaddings.p12,
                 child: Column(
                   children: [
+                    // Item Summary Card
+                    Obx(() {
+                      if (_controller.isSingleItemMode.value &&
+                          _controller.itemName.value.isNotEmpty) {
+                        return Container(
+                          margin: tablet
+                              ? AppPaddings.custom(bottom: 12)
+                              : AppPaddings.custom(bottom: 10),
+                          padding: tablet
+                              ? AppPaddings.combined(
+                                  horizontal: 16,
+                                  vertical: 14,
+                                )
+                              : AppPaddings.combined(
+                                  horizontal: 12,
+                                  vertical: 12,
+                                ),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                kColorPrimary.withOpacity(0.1),
+                                kColorPrimary.withOpacity(0.05),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: kColorPrimary.withOpacity(0.3),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: tablet
+                                    ? AppPaddings.p10
+                                    : AppPaddings.p8,
+                                decoration: BoxDecoration(
+                                  color: kColorPrimary,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.inventory_2,
+                                  color: kColorWhite,
+                                  size: tablet ? 22 : 20,
+                                ),
+                              ),
+                              tablet ? AppSpaces.h12 : AppSpaces.h10,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _controller.itemName.value,
+                                      style: TextStyles.kBoldOutfit(
+                                        fontSize: tablet
+                                            ? FontSizes.k16FontSize
+                                            : FontSizes.k14FontSize,
+                                        color: kColorPrimary,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    AppSpaces.v4,
+                                    Text(
+                                      _controller.itemUnit.value,
+                                      style: TextStyles.kRegularOutfit(
+                                        fontSize: tablet
+                                            ? FontSizes.k12FontSize
+                                            : FontSizes.k10FontSize,
+                                        color: kColorDarkGrey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              tablet ? AppSpaces.h12 : AppSpaces.h10,
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    'Total Stock',
+                                    style: TextStyles.kRegularOutfit(
+                                      fontSize: tablet
+                                          ? FontSizes.k12FontSize
+                                          : FontSizes.k10FontSize,
+                                      color: kColorDarkGrey,
+                                    ),
+                                  ),
+                                  AppSpaces.v4,
+                                  Text(
+                                    '${_controller.totalItemStock.value.toStringAsFixed(2)} ${_controller.itemUnit.value}',
+                                    style: TextStyles.kBoldOutfit(
+                                      fontSize: tablet
+                                          ? FontSizes.k18FontSize
+                                          : FontSizes.k16FontSize,
+                                      color: kColorGreen,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }),
+
+                    // Site Stock List
                     Expanded(
                       child: Obx(() {
-                        if (_controller.filteredStockList.isEmpty &&
+                        if (_controller.groupedStockList.isEmpty &&
                             !_controller.isLoading.value) {
                           return Center(
                             child: Column(
@@ -100,22 +208,26 @@ class _SiteWiseStockScreenState extends State<SiteWiseStockScreen> {
                         }
 
                         return ListView.builder(
-                          itemCount: _controller.filteredStockList.length,
-                          itemBuilder: (context, index) {
-                            final stock = _controller.filteredStockList[index];
+                          itemCount: _controller.groupedStockList.length,
+                          itemBuilder: (context, siteIndex) {
+                            final siteGroup =
+                                _controller.groupedStockList[siteIndex];
 
-                            return Padding(
-                              padding: tablet
-                                  ? AppPaddings.custom(bottom: 12)
-                                  : AppPaddings.custom(bottom: 8),
-                              child: SiteWiseStockCard(
-                                siteName: stock.siteName,
-                                gdName: stock.gdName,
-                                itemName: stock.iName,
-                                stockQty: stock.stockQty,
-                                unit: stock.unit,
-                              ),
-                            );
+                            return Obx(() {
+                              final isExpanded = _controller.expandedSiteIndices
+                                  .contains(siteIndex);
+
+                              return SiteStockCard(
+                                siteGroup: siteGroup,
+                                siteIndex: siteIndex,
+                                isExpanded: isExpanded,
+                                onTap: () =>
+                                    _controller.toggleSiteExpansion(siteIndex),
+                                isSingleItemMode:
+                                    _controller.isSingleItemMode.value,
+                                tablet: tablet,
+                              );
+                            });
                           },
                         );
                       }),

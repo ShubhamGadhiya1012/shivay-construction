@@ -1,4 +1,3 @@
-// repos/site_transfer_repo.dart
 import 'package:shivay_construction/features/site_transfer/models/site_transfer_stock_dm.dart';
 import 'package:shivay_construction/services/api_service.dart';
 import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
@@ -31,6 +30,7 @@ class SiteTransferRepo {
   }
 
   static Future<dynamic> saveSiteTransfer({
+    required String invNo,
     required String date,
     required String fromSite,
     required String toSite,
@@ -43,6 +43,7 @@ class SiteTransferRepo {
 
     try {
       final Map<String, dynamic> requestBody = {
+        "Invno": invNo,
         "Date": date,
         "FromSite": fromSite,
         "ToSite": toSite,
@@ -52,10 +53,62 @@ class SiteTransferRepo {
         "ItemData": itemData,
       };
 
-      //   print(requestBody);
+      final response = await ApiService.postRequest(
+        endpoint: '/Transfer/siteTransferIssue',
+        requestBody: requestBody,
+        token: token,
+      );
+
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<dynamic> receiveSiteTransfer({
+    required String refInvNo,
+    required String date,
+    required String fromSite,
+    required String fromGDCode,
+    required String toSite,
+    required String toGDCode,
+    required List<Map<String, dynamic>> itemData,
+    required String remarks,
+  }) async {
+    String? token = await SecureStorageHelper.read('token');
+
+    try {
+      final Map<String, dynamic> requestBody = {
+        "RefInvno": refInvNo,
+        "Date": date,
+        "FromSite": fromSite,
+        "FromGDCode": fromGDCode,
+        "ToSite": toSite,
+        "ToGDCode": toGDCode,
+        "ItemData": itemData,
+        "Remarks": remarks,
+      };
+      print(requestBody);
+      final response = await ApiService.postRequest(
+        endpoint: '/Transfer/siteTransferReceive',
+        requestBody: requestBody,
+        token: token,
+      );
+
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<dynamic> deleteSiteTransfer({required String invNo}) async {
+    String? token = await SecureStorageHelper.read('token');
+
+    try {
+      final Map<String, dynamic> requestBody = {"Invno": invNo};
 
       final response = await ApiService.postRequest(
-        endpoint: '/Transfer/siteTransfer',
+        endpoint: '/Transfer/siteTransferDelete',
         requestBody: requestBody,
         token: token,
       );

@@ -8,6 +8,7 @@ import 'package:shivay_construction/features/indent_entry/screens/site_wise_stoc
 import 'package:shivay_construction/features/purchase_order_entry/controllers/purchase_order_controller.dart';
 import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_detail_dm.dart';
 import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_list_dm.dart';
+import 'package:shivay_construction/features/purchase_order_entry/screens/last_purchase_rate_screen.dart';
 import 'package:shivay_construction/features/purchase_order_entry/widgets/auth_indent_item_card.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
@@ -555,15 +556,72 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                               ),
                                             ),
                                           ),
+                                        ), // After the visibility icon Material widget, add:
+                                        tablet ? AppSpaces.h8 : AppSpaces.h6,
+                                        Material(
+                                          color: kColorSecondary.withOpacity(
+                                            0.1,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            tablet ? 8 : 6,
+                                          ),
+                                          child: InkWell(
+                                            onTap: () {
+                                              Get.to(
+                                                () => LastPurchaseRateScreen(
+                                                  iCode: item['ICode'],
+                                                ),
+                                              );
+                                            },
+                                            borderRadius: BorderRadius.circular(
+                                              tablet ? 8 : 6,
+                                            ),
+                                            child: Container(
+                                              padding: tablet
+                                                  ? AppPaddings.combined(
+                                                      horizontal: 10,
+                                                      vertical: 10,
+                                                    )
+                                                  : AppPaddings.combined(
+                                                      horizontal: 8,
+                                                      vertical: 8,
+                                                    ),
+                                              child: Icon(
+                                                Icons.currency_rupee_rounded,
+                                                size: tablet ? 18 : 16,
+                                                color: kColorSecondary,
+                                              ),
+                                            ),
+                                          ),
                                         ),
                                         tablet ? AppSpaces.h8 : AppSpaces.h6,
-                                        GestureDetector(
-                                          onTap: () => _controller
-                                              .removeSelectedItem(index),
-                                          child: Icon(
-                                            Icons.delete_rounded,
-                                            color: kColorRed,
-                                            size: tablet ? 20 : 18,
+                                        Material(
+                                          color: kColorRed.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            tablet ? 8 : 6,
+                                          ),
+                                          child: InkWell(
+                                            onTap: () => _controller
+                                                .removeSelectedItem(index),
+                                            borderRadius: BorderRadius.circular(
+                                              tablet ? 8 : 6,
+                                            ),
+                                            child: Container(
+                                              padding: tablet
+                                                  ? AppPaddings.combined(
+                                                      horizontal: 10,
+                                                      vertical: 10,
+                                                    )
+                                                  : AppPaddings.combined(
+                                                      horizontal: 8,
+                                                      vertical: 8,
+                                                    ),
+                                              child: Icon(
+                                                Icons.delete_rounded,
+                                                size: tablet ? 18 : 16,
+                                                color: kColorRed,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ],

@@ -1,4 +1,3 @@
-// controllers/site_transfer_controller.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +5,7 @@ import 'package:shivay_construction/features/godown_master/models/godown_master_
 import 'package:shivay_construction/features/godown_master/repos/godown_master_repo.dart';
 import 'package:shivay_construction/features/site_master/models/site_master_dm.dart';
 import 'package:shivay_construction/features/site_master/repos/site_master_list_repo.dart';
+import 'package:shivay_construction/features/site_transfer/controllers/site_transfer_list_controller.dart';
 import 'package:shivay_construction/features/site_transfer/models/site_transfer_stock_dm.dart';
 import 'package:shivay_construction/features/site_transfer/repos/site_transfer_repo.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
@@ -16,8 +16,9 @@ class SiteTransferController extends GetxController {
   final itemFormKey = GlobalKey<FormState>();
 
   var dateController = TextEditingController();
+  var isEditMode = false.obs;
+  var currentInvNo = ''.obs;
 
-  // From section
   var godowns = <GodownMasterDm>[].obs;
   var godownNames = <String>[].obs;
   var selectedFromGodownName = ''.obs;
@@ -25,7 +26,6 @@ class SiteTransferController extends GetxController {
   var selectedFromSiteCode = ''.obs;
   var fromSiteNameController = TextEditingController();
 
-  // To section
   var selectedToGodownName = ''.obs;
   var selectedToGodownCode = ''.obs;
   var selectedToSiteCode = ''.obs;
@@ -33,7 +33,6 @@ class SiteTransferController extends GetxController {
 
   var sites = <SiteMasterDm>[].obs;
 
-  // Items
   var stockItems = <SiteTransferStockDm>[].obs;
   var itemNames = <String>[].obs;
   var selectedItemName = ''.obs;
@@ -49,18 +48,8 @@ class SiteTransferController extends GetxController {
   var editingItemIndex = (-1).obs;
 
   var canAddItem = false.obs;
-
-  @override
-  void onInit() {
-    super.onInit();
-    dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
-    _initialize();
-  }
-
-  Future<void> _initialize() async {
-    await getSites();
-    await getGodowns();
-  }
+  final SiteTransferListController siteTransferListController =
+      Get.find<SiteTransferListController>();
 
   Future<void> getSites() async {
     try {
@@ -102,10 +91,8 @@ class SiteTransferController extends GetxController {
       fromSiteNameController.clear();
     }
 
-    // Check if can add items
     _checkCanAddItem();
 
-    // Load stock items
     if (selectedFromSiteCode.value.isNotEmpty &&
         selectedFromGodownCode.value.isNotEmpty) {
       getStockItems();
@@ -127,13 +114,44 @@ class SiteTransferController extends GetxController {
       toSiteNameController.clear();
     }
 
-    // Check if can add items
     _checkCanAddItem();
   }
 
   void _checkCanAddItem() {
-    // Can add item if from godown is selected
     canAddItem.value = selectedFromGodownCode.value.isNotEmpty;
+  }
+
+  void onFromGodownSelectedWithClear(String? godownName) {
+    selectedFromGodownName.value = godownName!;
+    var selectedGodownObj = godowns.firstWhere((gd) => gd.gdName == godownName);
+
+    bool isGodownChanging =
+        selectedFromGodownCode.value.isNotEmpty &&
+        selectedFromGodownCode.value != selectedGodownObj.gdCode;
+
+    selectedFromGodownCode.value = selectedGodownObj.gdCode;
+    selectedFromSiteCode.value = selectedGodownObj.siteCode;
+
+    if (isGodownChanging && itemsToSend.isNotEmpty) {
+      itemsToSend.clear();
+      stockItems.clear();
+    }
+
+    if (selectedGodownObj.siteCode.isNotEmpty) {
+      final site = sites.firstWhereOrNull(
+        (s) => s.siteCode == selectedGodownObj.siteCode,
+      );
+      fromSiteNameController.text = site?.siteName ?? '';
+    } else {
+      fromSiteNameController.clear();
+    }
+
+    _checkCanAddItem();
+
+    if (selectedFromSiteCode.value.isNotEmpty &&
+        selectedFromGodownCode.value.isNotEmpty) {
+      getStockItems();
+    }
   }
 
   Future<void> getStockItems() async {
@@ -178,7 +196,6 @@ class SiteTransferController extends GetxController {
       selectedUnit.value = item['unit'] ?? '';
       qtyController.text = (item['Qty'] ?? 0).toString();
 
-      // Get available qty from stock
       final stockItem = stockItems.firstWhereOrNull(
         (si) => si.iCode == selectedItemCode.value,
       );
@@ -261,7 +278,6 @@ class SiteTransferController extends GetxController {
     isLoading.value = true;
 
     try {
-      // Validation: Same site and same godown cannot transfer
       if (selectedFromSiteCode.value == selectedToSiteCode.value &&
           selectedFromGodownCode.value == selectedToGodownCode.value) {
         showErrorSnackbar(
@@ -269,6 +285,11 @@ class SiteTransferController extends GetxController {
           'Cannot transfer to the same site and godown. Please select a different destination.',
         );
         isLoading.value = false;
+        return;
+      }
+
+      if (itemsToSend.isEmpty) {
+        showErrorSnackbar('Error', 'Please add at least one item');
         return;
       }
 
@@ -281,6 +302,7 @@ class SiteTransferController extends GetxController {
       }).toList();
 
       var response = await SiteTransferRepo.saveSiteTransfer(
+        invNo: isEditMode.value ? currentInvNo.value : '',
         date: _convertToApiDateFormat(dateController.text),
         fromSite: selectedFromSiteCode.value,
         toSite: selectedToSiteCode.value,
@@ -292,6 +314,8 @@ class SiteTransferController extends GetxController {
 
       if (response != null && response.containsKey('message')) {
         String message = response['message'];
+        siteTransferListController.getSiteTransfers();
+        Get.back();
         showSuccessSnackbar('Success', message);
         clearAll();
       }
@@ -307,23 +331,21 @@ class SiteTransferController extends GetxController {
   }
 
   void clearAll() {
+    currentInvNo.value = '';
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
-
+    remarksController.clear();
+    fromSiteNameController.clear();
+    toSiteNameController.clear();
     selectedFromGodownName.value = '';
     selectedFromGodownCode.value = '';
     selectedFromSiteCode.value = '';
-    fromSiteNameController.clear();
-
     selectedToGodownName.value = '';
     selectedToGodownCode.value = '';
     selectedToSiteCode.value = '';
-    toSiteNameController.clear();
-
-    remarksController.clear();
     itemsToSend.clear();
     stockItems.clear();
     itemNames.clear();
-
     canAddItem.value = false;
+    isEditMode.value = false;
   }
 }

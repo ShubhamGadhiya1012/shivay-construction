@@ -167,6 +167,11 @@ class PurchaseOrderPdfScreen {
     groupedData.forEach((partyCode, items) {
       final firstItem = items.first;
       final totalAmount = items.fold(0.0, (sum, item) => sum + item.amount);
+      final totalPoQty = items.fold(0.0, (sum, item) => sum + item.poQty);
+      final totalPendingQty = items.fold(
+        0.0,
+        (sum, item) => sum + item.pendingQty,
+      );
 
       widgets.add(
         pw.Container(
@@ -186,12 +191,32 @@ class PurchaseOrderPdfScreen {
                   fontWeight: pw.FontWeight.bold,
                 ),
               ),
-              pw.Text(
-                'Total Amount: ${totalAmount.toStringAsFixed(2)}',
-                style: pw.TextStyle(
-                  fontSize: 10,
-                  fontWeight: pw.FontWeight.bold,
-                ),
+              pw.Row(
+                children: [
+                  pw.Text(
+                    'Total PO Qty: ${totalPoQty.toStringAsFixed(2)}',
+                    style: pw.TextStyle(
+                      fontSize: 10,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.SizedBox(width: 15),
+                  pw.Text(
+                    'Total Pending Qty: ${totalPendingQty.toStringAsFixed(2)}',
+                    style: pw.TextStyle(
+                      fontSize: 10,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.SizedBox(width: 15),
+                  pw.Text(
+                    'Total Amount: ${totalAmount.toStringAsFixed(2)}',
+                    style: pw.TextStyle(
+                      fontSize: 10,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -282,7 +307,6 @@ class PurchaseOrderPdfScreen {
 
       widgets.add(pw.SizedBox(height: 15));
     });
-
     return pw.Column(children: widgets);
   }
 
@@ -335,6 +359,10 @@ class PurchaseOrderPdfScreen {
     groupedData.forEach((itemCode, items) {
       final firstItem = items.first;
       final totalQty = items.fold(0.0, (sum, item) => sum + item.poQty);
+      final totalPendingQty = items.fold(
+        0.0,
+        (sum, item) => sum + item.pendingQty,
+      );
 
       widgets.add(
         pw.Container(
@@ -354,12 +382,24 @@ class PurchaseOrderPdfScreen {
                   fontWeight: pw.FontWeight.bold,
                 ),
               ),
-              pw.Text(
-                'Total PO Qty: ${totalQty.toStringAsFixed(2)}',
-                style: pw.TextStyle(
-                  fontSize: 10,
-                  fontWeight: pw.FontWeight.bold,
-                ),
+              pw.Row(
+                children: [
+                  pw.Text(
+                    'Total PO Qty: ${totalQty.toStringAsFixed(2)}',
+                    style: pw.TextStyle(
+                      fontSize: 10,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.SizedBox(width: 15),
+                  pw.Text(
+                    'Total Pending Qty: ${totalPendingQty.toStringAsFixed(2)}',
+                    style: pw.TextStyle(
+                      fontSize: 10,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -450,7 +490,6 @@ class PurchaseOrderPdfScreen {
 
       widgets.add(pw.SizedBox(height: 15));
     });
-
     return pw.Column(children: widgets);
   }
 

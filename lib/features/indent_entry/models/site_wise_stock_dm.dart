@@ -32,3 +32,31 @@ class SiteWiseStockDm {
     );
   }
 }
+
+class SiteStockGroup {
+  final String siteCode;
+  final String siteName;
+  final List<GodownStockGroup> godowns;
+  final double totalStock;
+
+  SiteStockGroup({
+    required this.siteCode,
+    required this.siteName,
+    required this.godowns,
+    required this.totalStock,
+  });
+}
+
+class GodownStockGroup {
+  final String gdCode;
+  final String gdName;
+  final List<SiteWiseStockDm> items;
+  final double totalStock;
+
+  GodownStockGroup({
+    required this.gdCode,
+    required this.gdName,
+    required this.items,
+    required this.totalStock,
+  });
+}

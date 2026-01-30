@@ -4,19 +4,19 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_detail_dm.dart';
-import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_list_dm.dart';
+import 'package:shivay_construction/features/site_transfer/models/site_transfer_detail_dm.dart';
+import 'package:shivay_construction/features/site_transfer/models/site_transfer_dm.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 
-class PurchaseOrderPdfScreen {
-  static Future<void> generatePurchaseOrderPdf({
-    required PurchaseOrderListDm order,
-    required List<PurchaseOrderDetailDm> orderDetails,
+class SiteTransferPdfScreen {
+  static Future<void> generateSiteTransferPdf({
+    required SiteTransferDm transfer,
+    required List<SiteTransferDetailDm> transferDetails,
   }) async {
     try {
-      if (orderDetails.isEmpty) {
-        showErrorSnackbar('Error', 'No order data found to generate PDF.');
+      if (transferDetails.isEmpty) {
+        showErrorSnackbar('Error', 'No transfer data found to generate PDF.');
         return;
       }
 
@@ -30,11 +30,11 @@ class PurchaseOrderPdfScreen {
         pw.MultiPage(
           margin: const pw.EdgeInsets.all(20),
           header: (context) =>
-              _buildHeader(titleColor, textPrimaryColor, order),
+              _buildHeader(titleColor, textPrimaryColor, transfer),
           build: (context) => [
             pw.SizedBox(height: 15),
-            _buildOrderTable(
-              orderDetails,
+            _buildTransferTable(
+              transferDetails,
               primaryColor,
               titleColor,
               textPrimaryColor,
@@ -42,17 +42,17 @@ class PurchaseOrderPdfScreen {
           ],
         ),
       );
-      await _savePdf(pdf, order.invNo);
+
+      await _savePdf(pdf, transfer.invNo);
     } catch (e) {
-      showErrorSnackbar('Error', 'Failed to generate Purchase Order PDF: $e');
-      //  print(e);
+      showErrorSnackbar('Error', 'Failed to generate Site Transfer PDF: $e');
     }
   }
 
   static pw.Widget _buildHeader(
     PdfColor titleColor,
     PdfColor textPrimaryColor,
-    PurchaseOrderListDm order,
+    SiteTransferDm transfer,
   ) {
     return pw.Container(
       decoration: pw.BoxDecoration(
@@ -69,7 +69,7 @@ class PurchaseOrderPdfScreen {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Text(
-                    'PURCHASE ORDER REPORT',
+                    'SITE TRANSFER REPORT',
                     style: pw.TextStyle(
                       fontSize: 20,
                       fontWeight: pw.FontWeight.bold,
@@ -78,7 +78,7 @@ class PurchaseOrderPdfScreen {
                   ),
                   pw.SizedBox(height: 4),
                   pw.Text(
-                    'PO No: ${order.invNo}',
+                    'Transfer No: ${transfer.invNo}',
                     style: pw.TextStyle(
                       fontSize: 12,
                       fontWeight: pw.FontWeight.bold,
@@ -110,7 +110,7 @@ class PurchaseOrderPdfScreen {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      'PO Date: ${convertyyyyMMddToddMMyyyy(order.date)}',
+                      'Transfer Date: ${convertyyyyMMddToddMMyyyy(transfer.date)}',
                       style: pw.TextStyle(
                         fontSize: 10,
                         color: textPrimaryColor,
@@ -118,7 +118,15 @@ class PurchaseOrderPdfScreen {
                     ),
                     pw.SizedBox(height: 3),
                     pw.Text(
-                      'Party: ${order.pName}',
+                      'FROM',
+                      style: pw.TextStyle(
+                        fontSize: 10,
+                        fontWeight: pw.FontWeight.bold,
+                        color: textPrimaryColor,
+                      ),
+                    ),
+                    pw.Text(
+                      'Godown: ${transfer.fromGodown}',
                       style: pw.TextStyle(
                         fontSize: 10,
                         color: textPrimaryColor,
@@ -126,7 +134,7 @@ class PurchaseOrderPdfScreen {
                     ),
                     pw.SizedBox(height: 3),
                     pw.Text(
-                      'Godown: ${order.gdName}',
+                      'Site: ${transfer.fromSiteName}',
                       style: pw.TextStyle(
                         fontSize: 10,
                         color: textPrimaryColor,
@@ -139,17 +147,34 @@ class PurchaseOrderPdfScreen {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
+                    pw.SizedBox(height: 16),
                     pw.Text(
-                      'Site: ${order.siteName}',
+                      'TO',
+                      style: pw.TextStyle(
+                        fontSize: 10,
+                        fontWeight: pw.FontWeight.bold,
+                        color: textPrimaryColor,
+                      ),
+                    ),
+                    pw.Text(
+                      'Godown: ${transfer.toGodown}',
                       style: pw.TextStyle(
                         fontSize: 10,
                         color: textPrimaryColor,
                       ),
                     ),
-                    if (order.remarks.isNotEmpty) ...[
+                    pw.SizedBox(height: 3),
+                    pw.Text(
+                      'Site: ${transfer.toSiteName}',
+                      style: pw.TextStyle(
+                        fontSize: 10,
+                        color: textPrimaryColor,
+                      ),
+                    ),
+                    if (transfer.remarks.isNotEmpty) ...[
                       pw.SizedBox(height: 3),
                       pw.Text(
-                        'Remarks: ${order.remarks}',
+                        'Remarks: ${transfer.remarks}',
                         style: pw.TextStyle(
                           fontSize: 10,
                           color: textPrimaryColor,
@@ -160,11 +185,11 @@ class PurchaseOrderPdfScreen {
                     ],
                     pw.SizedBox(height: 3),
                     pw.Text(
-                      'Status: ${order.authorize ? "Authorized" : "Pending"}',
+                      'Status: ${transfer.status}',
                       style: pw.TextStyle(
                         fontSize: 10,
                         fontWeight: pw.FontWeight.bold,
-                        color: order.authorize
+                        color: transfer.status == 'Completed'
                             ? PdfColor.fromHex('#4CAF50')
                             : PdfColor.fromHex('#FF9800'),
                       ),
@@ -179,37 +204,38 @@ class PurchaseOrderPdfScreen {
     );
   }
 
-  static pw.Widget _buildOrderTable(
-    List<PurchaseOrderDetailDm> orderDetails,
+  static pw.Widget _buildTransferTable(
+    List<SiteTransferDetailDm> transferDetails,
     PdfColor primaryColor,
     PdfColor titleColor,
     PdfColor textPrimaryColor,
   ) {
-    final headers = ['Sr.', 'Item Name', 'Indent No', 'Unit', 'Order Qty'];
+    final headers = [
+      'Sr.',
+      'Item Name',
+      'Qty',
+      'Received Qty',
+      'Dispute Godown Qty',
+    ];
 
-    // Flatten the structure to create rows
     final List<List<String>> rows = [];
-    int srNo = 1;
 
-    for (var item in orderDetails) {
-      for (var indent in item.indents) {
-        rows.add([
-          srNo.toString(),
-          item.iName,
-          indent.indentInvNo,
-          indent.unit,
-          indent.orderQty.toStringAsFixed(2),
-        ]);
-        srNo++;
-      }
+    for (var detail in transferDetails) {
+      rows.add([
+        detail.srNo.toString(),
+        detail.iName,
+        detail.qty.toStringAsFixed(2),
+        detail.receivedQty.toStringAsFixed(2),
+        detail.autoReturnQty.toStringAsFixed(2),
+      ]);
     }
 
     final columnWidths = {
       0: const pw.FlexColumnWidth(1),
       1: const pw.FlexColumnWidth(4),
-      2: const pw.FlexColumnWidth(2.5),
+      2: const pw.FlexColumnWidth(1.5),
       3: const pw.FlexColumnWidth(1.5),
-      4: const pw.FlexColumnWidth(2),
+      4: const pw.FlexColumnWidth(1.5),
     };
 
     return pw.Table(
@@ -268,7 +294,7 @@ class PurchaseOrderPdfScreen {
 
     final cleanInvNo = invNo.replaceAll('/', '_').replaceAll('\\', '_');
 
-    final file = File('${dir.path}/PurchaseOrder_${cleanInvNo}_$timestamp.pdf');
+    final file = File('${dir.path}/SiteTransfer_${cleanInvNo}_$timestamp.pdf');
     await file.writeAsBytes(bytes);
     await OpenFilex.open(file.path);
   }
