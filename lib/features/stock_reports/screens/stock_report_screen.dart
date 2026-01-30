@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
-import 'package:shivay_construction/features/item_master/models/item_master_dm.dart';
+import 'package:shivay_construction/features/item_master/models/filtered_item_dm.dart';
 import 'package:shivay_construction/features/stock_reports/controllers/stock_report_controller.dart';
 import 'package:shivay_construction/features/stock_reports/widgets/stock_report_card.dart';
 import 'package:shivay_construction/features/stock_reports/widgets/stock_report_grand_total_bottom_sheet.dart';
@@ -191,6 +191,45 @@ class _StockReportScreenState extends State<StockReportScreen> {
                       ),
                     ),
                     tablet ? AppSpaces.v16 : AppSpaces.v10,
+                    Obx(
+                      () => AppDropdown(
+                        items: _controller.categoryNames,
+                        hintText: 'Category',
+                        onChanged: _controller.onCategorySelected,
+                        selectedItem:
+                            _controller.selectedCategoryName.value.isNotEmpty
+                            ? _controller.selectedCategoryName.value
+                            : null,
+                      ),
+                    ),
+                    tablet ? AppSpaces.v16 : AppSpaces.v10,
+                    Obx(
+                      () => AppDropdown(
+                        items: _controller.itemGroupNames,
+                        hintText: 'Item Group',
+                        onChanged: _controller.onItemGroupSelected,
+                        selectedItem:
+                            _controller.selectedItemGroupName.value.isNotEmpty
+                            ? _controller.selectedItemGroupName.value
+                            : null,
+                      ),
+                    ),
+                    tablet ? AppSpaces.v16 : AppSpaces.v10,
+                    Obx(
+                      () => AppDropdown(
+                        items: _controller.itemSubGroupNames,
+                        hintText: 'Item Sub Group',
+                        onChanged: _controller.onItemSubGroupSelected,
+                        selectedItem:
+                            _controller
+                                .selectedItemSubGroupName
+                                .value
+                                .isNotEmpty
+                            ? _controller.selectedItemSubGroupName.value
+                            : null,
+                      ),
+                    ),
+                    tablet ? AppSpaces.v16 : AppSpaces.v10,
 
                     GestureDetector(
                       onTap: () => _showItemSelectionBottomSheet(context),
@@ -335,9 +374,9 @@ class _StockReportScreenState extends State<StockReportScreen> {
 
   void _showItemSelectionBottomSheet(BuildContext context) {
     Get.bottomSheet(
-      SelectionBottomSheet<ItemMasterDm>(
+      SelectionBottomSheet<FilteredItemDm>(
         title: 'Select Items',
-        items: _controller.filteredItems,
+        items: _controller.filteredItemsList,
         selectedCodes: _controller.selectedItems,
         selectedNames: _controller.selectedItemNames,
         itemNameGetter: (item) => item.iName,
@@ -358,12 +397,22 @@ class _StockReportScreenState extends State<StockReportScreen> {
           _controller.selectedItemNames.clear();
         },
         onSearchChanged: (value) {
-          _controller.filteredItems.value = _controller.items
-              .where(
-                (item) =>
-                    item.iName.toLowerCase().contains(value.toLowerCase()),
-              )
-              .toList();
+          if (value.isEmpty) {
+            _controller.filteredItemsList.value = List.from(
+              _controller.filteredItemsList,
+            );
+          } else {
+            // Note: Search will work on already filtered items
+            final allItems = List<FilteredItemDm>.from(
+              _controller.filteredItemsList,
+            );
+            _controller.filteredItemsList.value = allItems
+                .where(
+                  (item) =>
+                      item.iName.toLowerCase().contains(value.toLowerCase()),
+                )
+                .toList();
+          }
         },
       ),
       isScrollControlled: true,

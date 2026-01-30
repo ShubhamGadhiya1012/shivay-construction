@@ -10,6 +10,9 @@ class StockReportRepo {
     required String method,
     required String siteCode,
     required String gdCode,
+    required String cCode,
+    required String igCode,
+    required String icCode,
     required String iCode,
   }) async {
     String? token = await SecureStorageHelper.read('token');
@@ -24,6 +27,9 @@ class StockReportRepo {
           'METHOD': method,
           'SiteCode': siteCode,
           'GDCode': gdCode,
+          'CCode': cCode,
+          'IGCODE': igCode,
+          'ICCode': icCode,
           'ICode': iCode,
         },
         token: token,
@@ -31,10 +37,6 @@ class StockReportRepo {
 
       if (response == null || response['data'] == null) {
         return [];
-      }
-
-      for (var item in response['data']) {
-        print(item);
       }
 
       return (response['data'] as List<dynamic>)

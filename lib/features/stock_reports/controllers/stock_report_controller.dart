@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shivay_construction/features/category_master/models/category_master_dm.dart';
+import 'package:shivay_construction/features/category_master/repos/category_master_repo.dart';
 import 'package:shivay_construction/features/godown_master/models/godown_master_dm.dart';
 import 'package:shivay_construction/features/godown_master/repos/godown_master_repo.dart';
-import 'package:shivay_construction/features/item_master/models/item_master_dm.dart';
+import 'package:shivay_construction/features/item_group_master/models/item_group_master_dm.dart';
+import 'package:shivay_construction/features/item_group_master/repos/item_group_master_repo.dart';
+import 'package:shivay_construction/features/item_master/models/filtered_item_dm.dart';
 import 'package:shivay_construction/features/item_master/repos/item_master_list_repo.dart';
+import 'package:shivay_construction/features/item_sub_group_master/models/item_sub_group_master_dm.dart';
+import 'package:shivay_construction/features/item_sub_group_master/repos/item_sub_group_master_repo.dart';
 import 'package:shivay_construction/features/site_master/models/site_master_dm.dart';
 import 'package:shivay_construction/features/site_master/repos/site_master_list_repo.dart';
 import 'package:shivay_construction/features/stock_reports/models/stock_report_dm.dart';
@@ -30,11 +36,25 @@ class StockReportController extends GetxController {
   var selectedSiteName = ''.obs;
   var selectedSiteCode = ''.obs;
 
-  var items = <ItemMasterDm>[].obs;
-  var filteredItems = <ItemMasterDm>[].obs;
+  var filteredItemsList = <FilteredItemDm>[].obs;
   var selectedItems = <String>[].obs;
   var selectedItemNames = <String>[].obs;
   var searchItemController = TextEditingController();
+
+  var categories = <CategoryMasterDm>[].obs;
+  var categoryNames = <String>[].obs;
+  var selectedCategoryName = ''.obs;
+  var selectedCategoryCode = ''.obs;
+
+  var itemGroups = <ItemGroupMasterDm>[].obs;
+  var itemGroupNames = <String>[].obs;
+  var selectedItemGroupName = ''.obs;
+  var selectedItemGroupCode = ''.obs;
+
+  var itemSubGroups = <ItemSubGroupMasterDm>[].obs;
+  var itemSubGroupNames = <String>[].obs;
+  var selectedItemSubGroupName = ''.obs;
+  var selectedItemSubGroupCode = ''.obs;
 
   var stockReports = <StockReportDm>[].obs;
   var grandTotal = Rxn<StockReportDm>();
@@ -74,7 +94,10 @@ class StockReportController extends GetxController {
 
     await getSites();
     await getGodowns();
-    await getItems();
+    await getCategories();
+    await getItemGroups();
+    await getItemSubGroups();
+    await getFilteredItems();
   }
 
   Future<void> getSites() async {
@@ -135,12 +158,96 @@ class StockReportController extends GetxController {
     } else {}
   }
 
-  Future<void> getItems() async {
+  Future<void> getCategories() async {
     try {
       isLoading.value = true;
-      final fetchedItems = await ItemMasterListRepo.getItems();
-      items.assignAll(fetchedItems);
-      filteredItems.assignAll(fetchedItems);
+      final fetchedCategories = await CategoryMasterRepo.getCategories();
+      categories.assignAll(fetchedCategories);
+      categoryNames.assignAll(fetchedCategories.map((c) => c.cName).toList());
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void onCategorySelected(String? categoryName) async {
+    selectedCategoryName.value = categoryName ?? '';
+    var selectedCategoryObj = categories.firstWhereOrNull(
+      (c) => c.cName == categoryName,
+    );
+    selectedCategoryCode.value = selectedCategoryObj?.cCode ?? '';
+
+    await getFilteredItems();
+  }
+
+  Future<void> getItemGroups() async {
+    try {
+      isLoading.value = true;
+      final fetchedItemGroups = await ItemGroupMasterRepo.getItemGroups();
+      itemGroups.assignAll(fetchedItemGroups);
+      itemGroupNames.assignAll(
+        fetchedItemGroups.map((ig) => ig.igName).toList(),
+      );
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void onItemGroupSelected(String? itemGroupName) async {
+    selectedItemGroupName.value = itemGroupName ?? '';
+    var selectedItemGroupObj = itemGroups.firstWhereOrNull(
+      (ig) => ig.igName == itemGroupName,
+    );
+    selectedItemGroupCode.value = selectedItemGroupObj?.igCode ?? '';
+
+    await getFilteredItems();
+  }
+
+  Future<void> getItemSubGroups() async {
+    try {
+      isLoading.value = true;
+      final fetchedItemSubGroups =
+          await ItemSubGroupMasterRepo.getItemSubGroups();
+      itemSubGroups.assignAll(fetchedItemSubGroups);
+      itemSubGroupNames.assignAll(
+        fetchedItemSubGroups.map((isg) => isg.icName).toList(),
+      );
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void onItemSubGroupSelected(String? itemSubGroupName) async {
+    selectedItemSubGroupName.value = itemSubGroupName ?? '';
+    var selectedItemSubGroupObj = itemSubGroups.firstWhereOrNull(
+      (isg) => isg.icName == itemSubGroupName,
+    );
+    selectedItemSubGroupCode.value = selectedItemSubGroupObj?.icCode ?? '';
+
+    await getFilteredItems();
+  }
+
+  Future<void> getFilteredItems() async {
+    try {
+      isLoading.value = true;
+      final fetchedItems = await ItemMasterListRepo.getFilteredItems(
+        cCode: selectedCategoryCode.value,
+        igCode: selectedItemGroupCode.value,
+        icCode: selectedItemSubGroupCode.value,
+      );
+      filteredItemsList.assignAll(fetchedItems);
+
+      selectedItems.removeWhere(
+        (code) => !filteredItemsList.any((item) => item.iCode == code),
+      );
+      selectedItemNames.removeWhere(
+        (name) => !filteredItemsList.any((item) => item.iName == name),
+      );
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
@@ -149,8 +256,8 @@ class StockReportController extends GetxController {
   }
 
   void selectAllItems() {
-    selectedItems.assignAll(items.map((item) => item.iCode));
-    selectedItemNames.assignAll(items.map((item) => item.iName));
+    selectedItems.assignAll(filteredItemsList.map((item) => item.iCode));
+    selectedItemNames.assignAll(filteredItemsList.map((item) => item.iName));
   }
 
   void togglePage() {
@@ -176,6 +283,9 @@ class StockReportController extends GetxController {
         method: method,
         siteCode: selectedSiteCode.value,
         gdCode: selectedGodownCode.value,
+        cCode: selectedCategoryCode.value,
+        igCode: selectedItemGroupCode.value,
+        icCode: selectedItemSubGroupCode.value,
         iCode: selectedItems.join(','),
       );
 
@@ -318,6 +428,14 @@ class StockReportController extends GetxController {
     selectedGodownName.value = '';
     selectedGodownCode.value = '';
     selectedSiteCode.value = '';
+    selectedSiteName.value = '';
+
+    selectedCategoryName.value = '';
+    selectedCategoryCode.value = '';
+    selectedItemGroupName.value = '';
+    selectedItemGroupCode.value = '';
+    selectedItemSubGroupName.value = '';
+    selectedItemSubGroupCode.value = '';
 
     selectedItems.clear();
     selectedItemNames.clear();
@@ -326,10 +444,11 @@ class StockReportController extends GetxController {
     openingStock.value = null;
     closingStock.value = null;
     isReportScreen.value = false;
-    selectedSiteName.value = '';
     groupedReportsByItem.clear();
     itemCodes.clear();
     currentItemIndex.value = 0;
+
     await getGodowns();
+    await getFilteredItems();
   }
 }
