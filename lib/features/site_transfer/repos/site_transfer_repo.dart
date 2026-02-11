@@ -88,7 +88,7 @@ class SiteTransferRepo {
         "ItemData": itemData,
         "Remarks": remarks,
       };
-      print(requestBody);
+    //  print(requestBody);
       final response = await ApiService.postRequest(
         endpoint: '/Transfer/siteTransferReceive',
         requestBody: requestBody,

@@ -1,0 +1,1577 @@
+[
+  {
+    "feature": "Login",
+    "questions": [
+      "how do i login to the app?",
+      "what do i need to enter to login?",
+      "i can't login, what should i do?",
+      "what is the login process?",
+      "how do i sign in?"
+    ],
+    "answer": "1. Open the app on your mobile device.\n2. You will see the Login screen first.\n3. If you already registered, enter your mobile number and password.\n4. Click the Login button.\n5. You will go to the Dashboard.\n6. If you haven't registered yet, click on Register/Sign In button at the bottom."
+  },
+  {
+    "feature": "Register (Create Account)",
+    "questions": [
+      "how do i create a new account?",
+      "what is the registration process?",
+      "i'm a new user, how do i register?",
+      "what details do i need to register?",
+      "how do i sign up?"
+    ],
+    "answer": "1. Open the app on your mobile device.\n2. On the Login screen, look at the bottom for Register/Sign In option.\n3. Click on Register/Sign In.\n4. The registration screen will open.\n5. Fill in all required details (name, mobile number, password).\n6. Click the Register button.\n7. Your account will be created.\n8. Now you can login with your credentials."
+  },
+  {
+    "feature": "User Authorization Issue",
+    "questions": [
+      "i registered and logged in but can't proceed, why?",
+      "why am i not able to access the app?",
+      "account created but nothing works, what's wrong?",
+      "how do i get authorized?",
+      "nothing happens after login, why?"
+    ],
+    "answer": "If you registered and logged in but cannot proceed, you need to be authorized by the admin.\n\nAdmin needs to:\n1. Open Drawer menu.\n2. Go to User Setting.\n3. Click on User Authorization.\n4. Search for your username.\n5. Authorize your account.\n\nAfter authorization, you can access the app features."
+  },
+  {
+    "feature": "User Rights Issue",
+    "questions": [
+      "i'm authorized but dashboard is blank, why?",
+      "why can i only see app version and profile?",
+      "how do i get feature access?",
+      "dashboard shows nothing after authorization, why?",
+      "no features are visible, what's the issue?"
+    ],
+    "answer": "If you're authorized but dashboard is blank (showing only app version and user profile), you don't have rights assigned yet.\n\nAdmin needs to:\n1. Open Drawer menu.\n2. Go to User Setting.\n3. Click on User Rights.\n4. Search for your username.\n5. Enable the rights by ticking checkboxes for features you need.\n\nOnly enabled features will be visible in your app."
+  },
+  {
+    "feature": "Access User Profile",
+    "questions": [
+      "my profile?",
+      "where is the profile icon?",
+      "how to access account settings?",
+      "where is user profile?",
+      "how to view profile information?"
+    ],
+    "answer": "1. Login to the app.\n2. You'll be on the Dashboard.\n3. Look at the top right corner.\n4. Click on the Profile Icon.\n5. User Profile screen will open."
+  },
+  {
+    "feature": "Reset Password",
+    "questions": [
+      "reset password",
+      "how do i change my password?",
+      "how to reset password?",
+      "how can i update my password?",
+      "where is reset password option?",
+      "i want to change password, how?"
+    ],
+    "answer": "1. Login to the app.\n2. Go to Dashboard.\n3. Click Profile Icon at top right.\n4. Click Reset Password.\n5. Enter New Password.\n6. Re-enter in Confirm Password field.\n7. Click Reset Password button.\n8. Password updated successfully.",
+    "screenshots": [
+      "assets/screenshot/dashboard/2 dashboard.jpg",
+      "assets/screenshot/profile/reset/R1 reset.jpg",
+      "assets/screenshot/profile/reset/R1.1 reset.jpg"
+    ]
+  },
+  {
+    "feature": "Check for Updates",
+    "questions": [
+      "update",
+      "how to check for app updates?",
+      "how can i update the app?",
+      "where is check for updates?",
+      "how to get latest version?",
+      "is new update available?"
+    ],
+    "answer": "1. Login to the app.\n2. Go to Dashboard.\n3. Click Profile Icon at top right.\n4. Click Check for Updates.\n5. You'll be redirected to Play Store.\n6. If update available, click Update.\n7. Wait for download and install.",
+    "screenshots": [
+      "assets/screenshot/dashboard/2 dashboard.jpg",
+      "assets/screenshot/profile/update/C1 update.jpg",
+      "assets/screenshot/profile/update/C1.1 update.jpg"
+    ]
+  },
+  {
+    "feature": "Logout",
+    "questions": [
+      "logout",
+      "how to logout?",
+      "what is logout process?",
+      "how to sign out?",
+      "where is logout option?",
+      "how to exit my account?"
+    ],
+    "answer": "1. Login to the app.\n2. Go to Dashboard.\n3. Click Profile Icon at top right.\n4. Click Logout.\n5. You'll be logged out and taken to Login screen.",
+    "screenshots": [
+      "assets/screenshot/dashboard/2 dashboard.jpg",
+      "assets/screenshot/profile/logout/L1 logout.jpg",
+      "assets/screenshot/profile/logout/L1.1 login.jpg"
+    ]
+  },
+  {
+    "feature": "View App Version",
+    "questions": [
+      "version",
+      "how to check app version?",
+      "where can i see my version?",
+      "how to find version number?",
+      "where is version info shown?",
+      "what version am i using?"
+    ],
+    "answer": "1. Login to the app.\n2. Go to Dashboard.\n3. Click Profile Icon at top right.\n4. Scroll to bottom of screen.\n5. App version number will be displayed at bottom.",
+    "screenshots": [
+      "assets/screenshot/dashboard/2 dashboard.jpg",
+      "assets/screenshot/profile/version/version.jpg"
+    ]
+  },
+  {
+    "feature": "Open Drawer Menu",
+    "questions": [
+      "Drawer",
+      "how to open side menu?",
+      "where is drawer icon?",
+      "how to access navigation menu?",
+      "what is the three line icon?",
+      "how to view all options?"
+    ],
+    "answer": "1. Login to the app.\n2. You'll be on Dashboard.\n3. Look at top left corner.\n4. Click Drawer Icon (three horizontal lines).\n5. Sidebar menu opens showing all options.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/profile/drawer/drawer.jpg"
+    ]
+  },
+  {
+    "feature": "Navigate to Dashboard",
+    "questions": [
+      "how to go back to dashboard?",
+      "how to return to main screen?",
+      "where is dashboard in menu?",
+      "how to access dashboard?",
+      "how to navigate home?"
+    ],
+    "answer": "1. Click Drawer icon (three lines) at top left.\n2. In sidebar menu, click Dashboard.\n3. You'll be redirected to Dashboard screen."
+  },
+  {
+    "feature": "View Party Master List",
+    "questions": [
+      "customer",
+      "how to view all parties?",
+      "where is party master list?",
+      "how to access party information?",
+      "how to see registered parties?",
+      "where is party master?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer (three line icon at top left).\n3. Click Masters (second option).\n4. Click Party Master.\n5. Party Master list screen opens showing all existing parties.\n6. Each card shows party details.\n7. Click any card to see more details.\n8. Each card has Edit and Delete icons.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/party master/2.1 party master.jpg",
+      "assets/screenshot/masters/party master/A2 party list.jpg",
+      "assets/screenshot/masters/party master/A2.1 detail.jpg"
+    ]
+  },
+  {
+    "feature": "Add New Party",
+    "questions": [
+      "add customer",
+      "how to add new party?",
+      "how to create a party?",
+      "how to register new party?",
+      "where to add party details?",
+      "how to create party entry?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Party Master.\n3. Click Add New button.\n4. Add Party screen opens.\n5. Fill in all required party details.\n6. Click Submit button.\n7. New party added to Party Master list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/party master/2.1 party master.jpg",
+      "assets/screenshot/masters/party master/N2 add.jpg",
+      "assets/screenshot/masters/party master/N2.1 add.jpg"
+    ]
+  },
+  {
+    "feature": "Edit Party Details",
+    "questions": [
+      "edit customer",
+      "how to edit party information?",
+      "how to update party details?",
+      "how to modify a party?",
+      "how to change party info?",
+      "where is edit option for parties?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Party Master.\n3. Find the party you want to edit.\n4. Click Edit button on that party card.\n5. Party details open in edit mode.\n6. Change the data you want to update.\n7. Click Update button.\n8. Party details updated successfully.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/party master/2.1 party master.jpg",
+      "assets/screenshot/masters/party master/E2 edit.jpg",
+      "assets/screenshot/masters/party master/E2.1 edit.jpg"
+    ]
+  },
+  {
+    "feature": "Delete Party",
+    "questions": [
+      "delete customer",
+      "how to delete a party?",
+      "how to remove a party?",
+      "how to delete party info?",
+      "how to remove from list?",
+      "where is delete option?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Party Master.\n3. Find party to delete.\n4. Click Delete button on that card.\n5. Confirmation message appears.\n6. Click Yes or Confirm.\n7. Party deleted from list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/party master/2.1 party master.jpg",
+      "assets/screenshot/masters/party master/D2 delete.jpg",
+      "assets/screenshot/masters/party master/D2.1 delete.jpg"
+    ]
+  },
+  {
+    "feature": "View Site Master List",
+    "questions": [
+      "site",
+      "how to view all sites?",
+      "where is site master list?",
+      "how to access site information?",
+      "how to see registered sites?",
+      "where is site master?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer (three line icon).\n3. Click Masters.\n4. Click Site Master.\n5. Site Master list opens showing all sites.\n6. Each card has Edit and Delete icons.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/site master/2.2 site master.jpg",
+      "assets/screenshot/masters/site master/A2 site list.jpg",
+      "assets/screenshot/masters/site master/A2.1 detail.jpg"
+    ]
+  },
+  {
+    "feature": "Add New Site",
+    "questions": [
+      "add site",
+      "how to add new site?",
+      "how to create a site?",
+      "how to register new site?",
+      "where to add site details?",
+      "how to create site entry?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Site Master.\n3. Click Add New button.\n4. Add Site screen opens.\n5. Fill in required site details.\n6. Click Submit button.\n7. New site added to list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/site master/2.2 site master.jpg",
+      "assets/screenshot/masters/site master/N2 add.jpg",
+      "assets/screenshot/masters/site master/N2.1 add.jpg"
+    ]
+  },
+  {
+    "feature": "Edit Site Details",
+    "questions": [
+      "edit site",
+      "how to edit site information?",
+      "how to update site details?",
+      "how to modify a site?",
+      "how to change site info?",
+      "where is edit for sites?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Site Master.\n3. Find site to edit.\n4. Click Edit button.\n5. Details open in edit mode.\n6. Change the data.\n7. Click Update button.\n8. Site updated successfully.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/site master/2.2 site master.jpg",
+      "assets/screenshot/masters/site master/E2 edit.jpg",
+      "assets/screenshot/masters/site master/E2.1 edit.jpg"
+    ]
+  },
+  {
+    "feature": "Delete Site",
+    "questions": [
+      "delete site",
+      "how to delete a site?",
+      "how to remove a site?",
+      "how to delete site info?",
+      "how to remove from list?",
+      "where is delete option?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Site Master.\n3. Find site to delete.\n4. Click Delete button.\n5. Confirm deletion.\n6. Site deleted from list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/site master/2.2 site master.jpg",
+      "assets/screenshot/masters/site master/D2 delete.jpg",
+      "assets/screenshot/masters/site master/D2.1 delete.jpg"
+    ]
+  },
+  {
+    "feature": "View Item Master List",
+    "questions": [
+      "item",
+      "how to view all items?",
+      "where is item master list?",
+      "how to access item information?",
+      "how to see registered items?",
+      "where is item master?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Masters.\n4. Click Item Master.\n5. Item Master list opens showing all items.\n6. Each card has Edit and Delete icons.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/item master/2.8 item master.jpg",
+      "assets/screenshot/masters/item master/A2 item list.jpg",
+      "assets/screenshot/masters/item master/A2.1 detail.jpg"
+    ]
+  },
+  {
+    "feature": "Add New Item",
+    "questions": [
+      "add item",
+      "how to add new item?",
+      "how to create an item?",
+      "how to register new item?",
+      "where to add item details?",
+      "how to create item entry?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Item Master.\n3. Click Add New button.\n4. Add Item screen opens.\n5. Fill in required item details.\n6. Click Submit button.\n7. New item added to list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/item master/2.8 item master.jpg",
+      "assets/screenshot/masters/item master/N2 add.jpg",
+      "assets/screenshot/masters/item master/N2.1 add.jpg"
+    ]
+  },
+  {
+    "feature": "Edit Item Details",
+    "questions": [
+      "edit item",
+      "how to edit item information?",
+      "how to update item details?",
+      "how to modify an item?",
+      "how to change item info?",
+      "where is edit for items?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Item Master.\n3. Find item to edit.\n4. Click Edit button.\n5. Details open in edit mode.\n6. Change the data.\n7. Click Update button.\n8. Item updated successfully.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/item master/2.8 item master.jpg",
+      "assets/screenshot/masters/item master/E2 edit.jpg",
+      "assets/screenshot/masters/item master/E2.1 edit.jpg"
+    ]
+  },
+  {
+    "feature": "Delete Item",
+    "questions": [
+      "delete item",
+      "how to delete an item?",
+      "how to remove an item?",
+      "how to delete item info?",
+      "how to remove from list?",
+      "where is delete option?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Item Master.\n3. Find item to delete.\n4. Click Delete button.\n5. Confirm deletion.\n6. Item deleted from list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/item master/2.8 item master.jpg",
+      "assets/screenshot/masters/item master/D2 delete.jpg",
+      "assets/screenshot/masters/item master/D2.1 delete.jpg"
+    ]
+  },
+  {
+    "feature": "View Godown Master List",
+    "questions": [
+      "godown",
+      "how to view all godowns?",
+      "where is godown master list?",
+      "how to access godown information?",
+      "how to see registered godowns?",
+      "where is godown master?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Masters.\n4. Click Godown Master.\n5. Godown Master list opens showing all godowns.\n6. Each card has Edit and Delete icons.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/godown master/2.3 godown master.jpg",
+      "assets/screenshot/masters/godown master/A2 godown list.jpg"
+    ]
+  },
+  {
+    "feature": "Add New Godown",
+    "questions": [
+      "add godown",
+      "how to add new godown?",
+      "how to create a godown?",
+      "how to register new godown?",
+      "where to add godown details?",
+      "how to create godown entry?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Godown Master.\n3. Click Add New button.\n4. A popup opens in center.\n5. Enter godown name and select site.\n   (Only sites that you have access to will be shown)\n6. Click Add button.\n7. New godown added to list with Edit and Delete icons.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/godown master/2.3 godown master.jpg",
+      "assets/screenshot/masters/godown master/N2 add.jpg",
+      "assets/screenshot/masters/godown master/N2.1 add.jpg"
+    ]
+  },
+  {
+    "feature": "Edit Godown Details",
+    "questions": [
+      "edit godown",
+      "how to edit godown information?",
+      "how to update godown details?",
+      "how to modify a godown?",
+      "how to change godown info?",
+      "where is edit for godowns?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Godown Master.\n3. Find godown to edit.\n4. Click Edit button on card.\n5. Details open in edit mode.\n6. Change the data.\n7. Click Update button.\n8. Godown updated successfully.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/godown master/2.3 godown master.jpg",
+      "assets/screenshot/masters/godown master/E2 edit.jpg",
+      "assets/screenshot/masters/godown master/E2.1 edit.jpg"
+    ]
+  },
+  {
+    "feature": "Delete Godown",
+    "questions": [
+      "delete godown",
+      "how to delete a godown?",
+      "how to remove a godown?",
+      "how to delete godown info?",
+      "how to remove from list?",
+      "where is delete option?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Godown Master.\n3. Find godown to delete.\n4. Click Delete button on card.\n5. Confirm deletion.\n6. Godown deleted from list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/godown master/2.3 godown master.jpg",
+      "assets/screenshot/masters/godown master/D2 delete.jpg",
+      "assets/screenshot/masters/godown master/D2.1 delete.jpg"
+    ]
+  },
+  {
+    "feature": "View Department Master List",
+    "questions": [
+      "department",
+      "how to view all departments?",
+      "where is department master list?",
+      "how to access department information?",
+      "how to see registered departments?",
+      "where is department master?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Masters.\n4. Click Department Master.\n5. Department Master list opens.\n6. Each card has Edit and Delete icons.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/department master/2.4 department master.jpg",
+      "assets/screenshot/masters/department master/A2 department list.jpg"
+    ]
+  },
+  {
+    "feature": "Add New Department",
+    "questions": [
+      "add department",
+      "how to add new department?",
+      "how to create a department?",
+      "how to register new department?",
+      "where to add department details?",
+      "how to create department entry?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Department Master.\n3. Click Add New button.\n4. Popup opens in center.\n5. Enter department name.\n6. Click Add button.\n7. New department added to list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/department master/2.4 department master.jpg",
+      "assets/screenshot/masters/department master/N2 add.jpg",
+      "assets/screenshot/masters/department master/N2.1 add.jpg"
+    ]
+  },
+  {
+    "feature": "Edit Department Details",
+    "questions": [
+      "edit department",
+      "how to edit department information?",
+      "how to update department details?",
+      "how to modify a department?",
+      "how to change department info?",
+      "where is edit for departments?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Department Master.\n3. Find department to edit.\n4. Click Edit button on card.\n5. Details open in edit mode.\n6. Change the data.\n7. Click Update button.\n8. Department updated successfully.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/department master/2.4 department master.jpg",
+      "assets/screenshot/masters/department master/E2 edit.jpg",
+      "assets/screenshot/masters/department master/E2.1 edit.jpg"
+    ]
+  },
+  {
+    "feature": "Delete Department",
+    "questions": [
+      "delete department",
+      "how to delete a department?",
+      "how to remove a department?",
+      "how to delete department info?",
+      "how to remove from list?",
+      "where is delete option?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Department Master.\n3. Find department to delete.\n4. Click Delete button on card.\n5. Confirm deletion.\n6. Department deleted from list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/department master/2.4 department master.jpg",
+      "assets/screenshot/masters/department master/D2 delete.jpg",
+      "assets/screenshot/masters/department master/D2.1 delete.jpg"
+    ]
+  },
+  {
+    "feature": "View Category Master List",
+    "questions": [
+      "category",
+      "how to view all categories?",
+      "where is category master list?",
+      "how to access category information?",
+      "how to see registered categories?",
+      "where is category master?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Masters.\n4. Click Category Master.\n5. Category Master list opens.\n6. Each card has Edit and Delete icons.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/category master/2.5 category master.jpg",
+      "assets/screenshot/masters/category master/A2 category list.jpg"
+    ]
+  },
+  {
+    "feature": "Add New Category",
+    "questions": [
+      "add category",
+      "how to add new category?",
+      "how to create a category?",
+      "how to register new category?",
+      "where to add category details?",
+      "how to create category entry?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Category Master.\n3. Click Add New button.\n4. Popup opens.\n5. Enter category name.\n6. Click Add button.\n7. New category added to list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/category master/2.5 category master.jpg",
+      "assets/screenshot/masters/category master/N2 add.jpg",
+      "assets/screenshot/masters/category master/N2.1 add.jpg"
+    ]
+  },
+  {
+    "feature": "Edit Category Details",
+    "questions": [
+      "edit category",
+      "how to edit category information?",
+      "how to update category details?",
+      "how to modify a category?",
+      "how to change category info?",
+      "where is edit for categories?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Category Master.\n3. Find category to edit.\n4. Click Edit button.\n5. Details open in edit mode.\n6. Change the data.\n7. Click Update button.\n8. Category updated successfully.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/category master/2.5 category master.jpg",
+      "assets/screenshot/masters/category master/E2 edit.jpg",
+      "assets/screenshot/masters/category master/E2.1 edit.jpg"
+    ]
+  },
+  {
+    "feature": "Delete Category",
+    "questions": [
+      "delete category",
+      "how to delete a category?",
+      "how to remove a category?",
+      "how to delete category info?",
+      "how to remove from list?",
+      "where is delete option?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Category Master.\n3. Find category to delete.\n4. Click Delete button.\n5. Confirm deletion.\n6. Category deleted from list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/category master/2.5 category master.jpg",
+      "assets/screenshot/masters/category master/D2 delete.jpg",
+      "assets/screenshot/masters/category master/D2.1 delete.jpg"
+    ]
+  },
+  {
+    "feature": "View Item Group Master List",
+    "questions": [
+      "item group",
+      "how to view all item groups?",
+      "where is item group master list?",
+      "how to access item group information?",
+      "how to see registered item groups?",
+      "where is item group master?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Masters.\n4. Click Item Group Master.\n5. Item Group Master list opens.\n6. Each card has Edit and Delete icons.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/item group master/2.6 item group master.jpg",
+      "assets/screenshot/masters/item group master/A2 item group list.jpg"
+    ]
+  },
+  {
+    "feature": "Add New Item Group",
+    "questions": [
+      "add item group",
+      "how to add new item group?",
+      "how to create an item group?",
+      "how to register new item group?",
+      "where to add item group details?",
+      "how to create item group entry?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Item Group Master.\n3. Click Add New button.\n4. Popup opens.\n5. Enter item group name.\n6. Click Add button.\n7. New item group added to list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/item group master/2.6 item group master.jpg",
+      "assets/screenshot/masters/item group master/N2 add.jpg",
+      "assets/screenshot/masters/item group master/N2.1 add.jpg"
+    ]
+  },
+  {
+    "feature": "Edit Item Group Details",
+    "questions": [
+      "edit item group",
+      "how to edit item group information?",
+      "how to update item group details?",
+      "how to modify an item group?",
+      "how to change item group info?",
+      "where is edit for item groups?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Item Group Master.\n3. Find item group to edit.\n4. Click Edit button.\n5. Details open in edit mode.\n6. Change the data.\n7. Click Update button.\n8. Item group updated successfully.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/item group master/2.6 item group master.jpg",
+      "assets/screenshot/masters/item group master/E2 edit.jpg",
+      "assets/screenshot/masters/item group master/E2.1 edit.jpg"
+    ]
+  },
+  {
+    "feature": "Delete Item Group",
+    "questions": [
+      "delete item group",
+      "how to delete an item group?",
+      "how to remove an item group?",
+      "how to delete item group info?",
+      "how to remove from list?",
+      "where is delete option?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Item Group Master.\n3. Find item group to delete.\n4. Click Delete button.\n5. Confirm deletion.\n6. Item group deleted from list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/item group master/2.6 item group master.jpg",
+      "assets/screenshot/masters/item group master/D2 delete.jpg",
+      "assets/screenshot/masters/item group master/D2.1 delete.jpg"
+    ]
+  },
+  {
+    "feature": "View Item Sub Group Master List",
+    "questions": [
+      "item sub group",
+      "how to view all item sub groups?",
+      "where is item sub group master list?",
+      "how to access item sub group information?",
+      "how to see registered item sub groups?",
+      "where is item sub group master?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Masters.\n4. Click Item Sub Group Master.\n5. Item Sub Group Master list opens.\n6. Each card has Edit and Delete icons.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/item sub group master/2.7 item sub group.jpg",
+      "assets/screenshot/masters/item sub group master/A2 sub group list.jpg"
+    ]
+  },
+  {
+    "feature": "Add New Item Sub Group",
+    "questions": [
+      "add item sub group",
+      "how to add new item sub group?",
+      "how to create an item sub group?",
+      "how to register new item sub group?",
+      "where to add item sub group details?",
+      "how to create item sub group entry?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Item Sub Group Master.\n3. Click Add New button.\n4. Popup opens.\n5. Enter item sub group name.\n6. Click Add button.\n7. New item sub group added to list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/item sub group master/2.7 item sub group.jpg",
+      "assets/screenshot/masters/item sub group master/N2 add.jpg",
+      "assets/screenshot/masters/item sub group master/N2.1 add.jpg"
+    ]
+  },
+  {
+    "feature": "Edit Item Sub Group Details",
+    "questions": [
+      "edit item sub group",
+      "how to edit item sub group information?",
+      "how to update item sub group details?",
+      "how to modify an item sub group?",
+      "how to change item sub group info?",
+      "where is edit for item sub groups?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Item Sub Group Master.\n3. Find item sub group to edit.\n4. Click Edit button.\n5. Details open in edit mode.\n6. Change the data.\n7. Click Update button.\n8. Item sub group updated successfully.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/item sub group master/2.7 item sub group.jpg",
+      "assets/screenshot/masters/item sub group master/E2 edit.jpg",
+      "assets/screenshot/masters/item sub group master/E2.1 edit.jpg"
+    ]
+  },
+  {
+    "feature": "Delete Item Sub Group",
+    "questions": [
+      "delete item sub group",
+      "how to delete an item sub group?",
+      "how to remove an item sub group?",
+      "how to delete item sub group info?",
+      "how to remove from list?",
+      "where is delete option?"
+    ],
+    "answer": "1. Open Drawer, go to Masters.\n2. Click Item Sub Group Master.\n3. Find item sub group to delete.\n4. Click Delete button.\n5. Confirm deletion.\n6. Item sub group deleted from list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/2 masters.jpg",
+      "assets/screenshot/masters/item sub group master/2.7 item sub group.jpg",
+      "assets/screenshot/masters/item sub group master/D2 delete.jpg",
+      "assets/screenshot/masters/item sub group master/D2.1 delete.jpg"
+    ]
+  },
+  {
+    "feature": "View Opening Stock Entry List",
+    "questions": [
+      "opening stock",
+      "how to view opening stock entries?",
+      "where is opening stock list?",
+      "how to see opening stock records?",
+      "where is opening stock entry screen?",
+      "how to access opening stock?",
+      "view open stock",
+      "open stock list",
+      "show open stock entries"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Entry (third option).\n4. Click Opening Stock Entry.\n5. Opening Stock list screen opens showing all entries.\n6. Each card has Edit icon.\n7. Click card to see full details.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/3 entry.jpg",
+      "assets/screenshot/entry/opening stock/3.1 opening stock.jpg",
+      "assets/screenshot/entry/opening stock/A3 open stock list.jpg"
+    ]
+  },
+  {
+    "feature": "Add New Opening Stock Entry",
+    "questions": [
+      "add opening stock",
+      "how to add opening stock?",
+      "how to create opening stock entry?",
+      "how to enter opening stock?",
+      "where to add opening stock details?",
+      "how to create opening stock record?",
+      "open stock add",
+      "add open stock",
+      "create open stock entry",
+      "how to add open stock?"
+    ],
+    "answer": "1. Open Drawer, go to Entry.\n2. Click Opening Stock Entry.\n3. Click Add New button.\n4. Add Opening Stock screen opens.\n5. Select date and godown.\n6. Click Add Item button.\n7. Select item, enter qty and rate.\n8. Click Add button.\n9. Item added to list below.\n10. Click Save button at bottom.\n11. Opening stock entry created.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/3 entry.jpg",
+      "assets/screenshot/entry/opening stock/3.1 opening stock.jpg",
+      "assets/screenshot/entry/opening stock/N3 add.jpg",
+      "assets/screenshot/entry/opening stock/N3.1 add.jpg",
+      "assets/screenshot/entry/opening stock/N3.2 add.jpg",
+      "assets/screenshot/entry/opening stock/N3.3 add.jpg"
+    ]
+  },
+  {
+    "feature": "Edit Opening Stock Entry",
+    "questions": [
+      "edit opening stock",
+      "how to edit opening stock?",
+      "how to update opening stock details?",
+      "how to modify opening stock entry?",
+      "how to change opening stock info?",
+      "where is edit for opening stock?",
+      "edit open stock",
+      "change open stock",
+      "update open stock"
+    ],
+    "answer": "1. Open Drawer, go to Entry.\n2. Click Opening Stock Entry.\n3. Find entry to edit.\n4. Click Edit button on card.\n5. Full details open.\n6. You'll see item card(s) below with qty, rate, amount.\n7. Each item card has Edit and Delete icons.\n8. Click Edit on item card to update.\n9. Change qty, rate as needed.\n10. Click Update to save changes.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/3 entry.jpg",
+      "assets/screenshot/entry/opening stock/3.1 opening stock.jpg",
+      "assets/screenshot/entry/opening stock/E3 edit.jpg",
+      "assets/screenshot/entry/opening stock/E3.1 edit.jpg",
+      "assets/screenshot/entry/opening stock/E3.2 edit.jpg"
+    ]
+  },
+  {
+    "feature": "Delete Opening Stock Item",
+    "questions": [
+      "delete opening stock",
+      "how to delete opening stock item?",
+      "how to remove item from opening stock?",
+      "how to delete opening stock entry?",
+      "how to remove opening stock?",
+      "where is delete for opening stock?",
+      "delete open stock",
+      "remove open stock"
+    ],
+    "answer": "1. Open Drawer, go to Entry.\n2. Click Opening Stock Entry.\n3. Click Edit on the opening stock card.\n4. Item cards appear below.\n5. Click Delete icon on item card you want to remove.\n6. Item removed from opening stock.\nNote: You cannot delete entire opening stock from list, only items within it.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/3 entry.jpg",
+      "assets/screenshot/entry/opening stock/3.1 opening stock.jpg",
+      "assets/screenshot/entry/opening stock/D3 delete.jpg",
+      "assets/screenshot/entry/opening stock/D3.1 delete.jpg"
+    ]
+  },
+  {
+    "feature": "View Indent Entry List",
+    "questions": [
+      "how to view indent entries?",
+      "where is indent entry list?",
+      "how to see indent records?",
+      "where is indent entry screen?",
+      "how to access indents?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Entry.\n4. Click Indent Entry.\n5. Indent list screen opens showing all indents.\n6. Click any card to see details.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/3 entry.jpg",
+      "assets/screenshot/entry/indent/3.2 indent entry.jpg",
+      "assets/screenshot/entry/indent/A3 indent list.jpg",
+      "assets/screenshot/entry/indent/A3.1 detail.jpg"
+    ]
+  },
+  {
+    "feature": "Filter Indent Entries",
+    "questions": [
+      "how to filter indents?",
+      "how to view pending indents?",
+      "how to see authorized indents?",
+      "how to view closed indents?",
+      "where are indent filters?"
+    ],
+    "answer": "1. Go to Indent Entry screen.\n2. At top you'll see filter chips.\n3. Click All to view all indent entries.\n4. Click Pending to view only pending indents.\n5. Click Authorized to view only authorized indents.\n6. Click Closed to view only closed indents.\n7. List updates based on selected filter.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/3 entry.jpg",
+      "assets/screenshot/entry/indent/3.2 indent entry.jpg",
+      "assets/screenshot/entry/indent/F3 all.jpg",
+      "assets/screenshot/entry/indent/F3.1 pending.jpg",
+      "assets/screenshot/entry/indent/F3.2 authorised.jpg",
+      "assets/screenshot/entry/indent/F3.3 closed.jpg"
+    ]
+  },
+  {
+    "feature": "Add New Indent Entry",
+    "questions": [
+      "how to add indent?",
+      "how to create indent entry?",
+      "how to enter new indent?",
+      "where to add indent details?",
+      "how to create indent record?"
+    ],
+    "answer": "1. Open Drawer, go to Entry.\n2. Click Indent Entry.\n3. Click Add New button.\n4. Add Indent screen opens.\n5. Select date and godown.\n6. Click Add Item button.\n7. Enter request date, select item, enter qty.\n8. Click Add button.\n9. Item card appears below with eye icon, edit icon, delete icon.\n10. Eye icon shows site wise stock.\n11. Edit to change qty if needed.\n12. Delete to remove item.\n13. Click Save button at bottom.\n14. Indent entry created and added to list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/3 entry.jpg",
+      "assets/screenshot/entry/indent/3.2 indent entry.jpg",
+      "assets/screenshot/entry/indent/N3 add.jpg",
+      "assets/screenshot/entry/indent/N3.1 add.jpg",
+      "assets/screenshot/entry/indent/N3.2 add.jpg",
+      "assets/screenshot/entry/indent/N3.3 add.jpg"
+    ]
+  },
+  {
+    "feature": "View Site Stock from Indent",
+    "questions": [
+      "Indent stock",
+      "how to check stock while creating indent?",
+      "how to see site wise stock in indent?",
+      "where is eye icon in indent?",
+      "how to view available stock?",
+      "how to check stock before indenting?"
+    ],
+    "answer": "1. When adding indent items, each item card has an eye icon.\n2. Click eye icon on item card.\n3. Site wise stock will be displayed.\n4. You can see how much stock is available at each site.\n5. This helps you decide indent quantity.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/3 entry.jpg",
+      "assets/screenshot/entry/indent/3.2 indent entry.jpg",
+      "assets/screenshot/entry/indent/A3 indent list.jpg",
+      "assets/screenshot/entry/indent/V3 stock.jpg",
+      "assets/screenshot/entry/indent/V3.1 list.jpg",
+      "assets/screenshot/entry/indent/V3.3 detail.jpg"
+    ]
+  },
+  {
+    "feature": "Authorize Indent",
+    "questions": [
+      "auth indent",
+      "Authorize Indent",
+      "how to authorize indent?",
+      "how to approve indent entry?",
+      "where is authorize button for indent?",
+      "how to authorize partial indent?",
+      "who can authorize indents?"
+    ],
+    "answer": "1. Indent list shows Authorize button on pending indents.\n2. This button appears only if admin gave you Indent Authorize Access rights.\n3. Click on indent card to see items and quantities.\n4. Eye icon shows site wise stock for reference.\n5. Click Authorize button.\n6. If you want to authorize different qty (like 4 instead of 8):\n   - Click Authorize button\n   - Popup opens with current qty in edit mode\n   - Change qty (e.g., from 8 to 4)\n   - Click Authorize\n7. If you want to authorize full qty:\n   - Just click Authorize directly.\n8. Indent is now authorized."
+  },
+  {
+    "feature": "Close Indent Without Authorization",
+    "questions": [
+      "how to close indent without authorizing?",
+      "how to cancel indent?",
+      "where is close indent option?",
+      "how to close pending indent?",
+      "can i close indent without approval?"
+    ],
+    "answer": "1. Open indent entry list.\n2. Find the pending indent card.\n3. At bottom of card, there's an \"i\" info button.\n4. Text says \"Tap here to close this indent without authorization\".\n5. Click on it.\n6. Indent will be closed without authorization."
+  },
+  {
+    "feature": "View Indent PDF",
+    "questions": [
+      "how to view indent pdf?",
+      "where is pdf icon for indent?",
+      "how to download indent as pdf?",
+      "how to view indent document?",
+      "where is pdf option?"
+    ],
+    "answer": "1. Go to Indent Entry screen.\n2. Each indent card has PDF icon.\n3. Click PDF icon on the indent you want to view.\n4. Indent details open in PDF format.\n5. You can view, download, or share the PDF.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/3 entry.jpg",
+      "assets/screenshot/entry/indent/3.2 indent entry.jpg",
+      "assets/screenshot/entry/indent/P3 PDF.jpg",
+      "assets/screenshot/entry/indent/P3.1 pdf.jpg"
+    ]
+  },
+  {
+    "feature": "View Purchase Order Entry List",
+    "questions": [
+      "how to view purchase orders?",
+      "where is purchase order list?",
+      "how to see po records?",
+      "where is purchase order screen?",
+      "how to access purchase orders?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Entry.\n4. Click Purchase Order Entry.\n5. Purchase Order list opens showing all orders.\n6. At top, filter chips show: All, Pending, Partial, Complete.\n7. Each card shows party name, godown, site, total amount.\n8. Each card has PDF and Delete icons.\n9. Click card to see order items with qty and amount."
+  },
+  {
+    "feature": "Filter Purchase Orders",
+    "questions": [
+      "how to filter purchase orders?",
+      "how to view pending pos?",
+      "how to see partial pos?",
+      "how to view complete pos?",
+      "where are po filters?"
+    ],
+    "answer": "1. Go to Purchase Order Entry screen.\n2. At top you'll see filter chips.\n3. Click All to view all purchase orders.\n4. Click Pending to view only pending orders.\n5. Click Partial to view partially completed orders.\n6. Click Complete to view fully completed orders.\n7. List updates based on selected filter."
+  },
+  {
+    "feature": "Add New Purchase Order",
+    "questions": [
+      "how to add purchase order?",
+      "how to create po?",
+      "how to enter new purchase order?",
+      "where to add po details?",
+      "how to create purchase order?"
+    ],
+    "answer": "1. Open Drawer, go to Entry.\n2. Click Purchase Order Entry.\n3. Click New Order button.\n4. New Purchase Order screen opens.\n5. Fill date, godown, party, remark.\n6. Click Add Item button.\n7. List of authorized indents appears.\n8. Each card has eye icon (site stock) and rupee icon (last purchase).\n9. Long press on indent card to select it.\n   (Long press selects the order for authorization)\n   (You can select single card or click \"All Select\" at top to select multiple cards)\n10. Click Save button.\n11. Selected orders are added to purchase order.\n12. Each card shows eye icon and delete icon.\n13. Click Submit at bottom.\n14. Purchase order created."
+  },
+  {
+    "feature": "View Last Purchase from PO",
+    "questions": [
+      "how to see last purchase in po?",
+      "where is rupee icon in purchase order?",
+      "how to check previous purchase price?",
+      "how to view last purchase details?",
+      "what does rupee icon show?"
+    ],
+    "answer": "1. When adding items to purchase order, each indent card has rupee icon.\n2. Click rupee icon.\n3. Last purchase order details for that item will be shown.\n4. This helps you reference previous pricing."
+  },
+  {
+    "feature": "Delete Purchase Order",
+    "questions": [
+      "how to delete purchase order?",
+      "how to remove po?",
+      "how to delete po entry?",
+      "where is delete for purchase order?",
+      "can i delete a po?"
+    ],
+    "answer": "1. Go to Purchase Order Entry screen.\n2. Each card has Delete button.\n3. Click Delete on the PO you want to remove.\n4. Confirm deletion.\n5. Purchase order deleted from list."
+  },
+  {
+    "feature": "View Purchase Order PDF",
+    "questions": [
+      "how to view po pdf?",
+      "where is pdf icon for purchase order?",
+      "how to download po as pdf?",
+      "how to view po document?",
+      "where is pdf option for po?"
+    ],
+    "answer": "1. Go to Purchase Order Entry screen.\n2. Each PO card has PDF icon.\n3. Click PDF icon on the order.\n4. Purchase order opens in PDF format.\n5. You can view, download, or share the PDF."
+  },
+  {
+    "feature": "View GRN Entry List",
+    "questions": [
+      "how to view grn entries?",
+      "where is grn entry list?",
+      "how to see grn records?",
+      "where is grn entry screen?",
+      "how to access grns?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Entry.\n4. Click GRN Entry.\n5. GRN Entry list opens showing all entries.\n6. Each card has PDF, Edit, Delete buttons."
+  },
+  {
+    "feature": "Add New GRN Entry",
+    "questions": [
+      "how to add grn?",
+      "how to create grn entry?",
+      "how to enter new grn?",
+      "where to add grn details?",
+      "how to create grn record?"
+    ],
+    "answer": "1. Open Drawer, go to Entry.\n2. Click GRN Entry.\n3. Click Add New button.\n4. Add GRN screen opens.\n5. Select date, party, godown.\n6. Click Add Item button.\n7. Purchase order list appears.\n8. Long press on PO card to select it.\n9. Data becomes editable.\n10. Enter received qty.\n11. Click Confirm Selection button.\n12. Selected items appear in GRN screen.\n13. Delete option available if needed.\n14. Click Save button at bottom.\n15. GRN entry created and added to list."
+  },
+  {
+    "feature": "Add Direct GRN Entry",
+    "questions": [
+      "dgrn",
+      "direct grn",
+      "how to add direct grn without purchase order?",
+      "what is direct grn entry?",
+      "how to create grn directly?",
+      "where is direct grn option?",
+      "how to make grn without po?"
+    ],
+    "answer": "1. Open Drawer, go to Entry.\n2. Click GRN Entry.\n3. At top right corner, click on 3 dot menu icon.\n4. Click on Direct GRN option.\n5. Add GRN screen opens.\n6. Select date.\n7. Select party.\n8. Select godown.\n9. Enter remark if needed.\n10. Click Add button.\n11. Add New Item screen opens.\n12. Select item.\n13. Enter qty.\n14. Enter rate.\n15. Click Add button.\n16. Item card appears in Add GRN screen with edit and delete options.\n17. If you want to edit item, click edit icon.\n18. If you want to delete item, click delete icon.\n19. Click Save button at bottom.\n20. Direct GRN entry created and added to GRN list.\n21. This entry will show \"Direct GRN\" tag in the list."
+  },
+  {
+    "feature": "Edit GRN Entry",
+    "questions": [
+      "how to edit grn?",
+      "how to update grn details?",
+      "how to modify grn entry?",
+      "how to change grn info?",
+      "where is edit for grn?"
+    ],
+    "answer": "1. Go to GRN Entry screen.\n2. Find GRN to edit.\n3. Click Edit button on card.\n4. GRN screen opens in edit mode.\n5. Update the data as needed.\n6. Click Update button.\n7. GRN entry updated successfully."
+  },
+  {
+    "feature": "Delete GRN Entry",
+    "questions": [
+      "how to delete grn?",
+      "how to remove grn entry?",
+      "how to delete grn record?",
+      "where is delete for grn?",
+      "can i delete a grn?"
+    ],
+    "answer": "1. Go to GRN Entry screen.\n2. Find GRN to delete.\n3. Click Delete button on card.\n4. Confirm deletion.\n5. GRN entry deleted from list."
+  },
+  {
+    "feature": "View GRN PDF",
+    "questions": [
+      "how to view grn pdf?",
+      "where is pdf icon for grn?",
+      "how to download grn as pdf?",
+      "how to view grn document?",
+      "where is pdf option for grn?"
+    ],
+    "answer": "1. Go to GRN Entry screen.\n2. Each GRN card has PDF icon.\n3. Click PDF icon on the GRN.\n4. GRN details open in PDF format.\n5. You can view, download, or share the PDF."
+  },
+  {
+    "feature": "View Site Transfer List",
+    "questions": [
+      "how to view all site transfers?",
+      "where is site transfer list?",
+      "how to check transfer history?",
+      "list site transfers"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Entry.\n4. Click Site Transfer Entry.\n5. Site Transfer screen opens showing list of all transfers.\n6. Each card shows transfer details and options like PDF, Edit, Delete.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/3 entry.jpg",
+      "assets/screenshot/entry/site transfer/3.5 site transfer.jpg"
+    ]
+  },
+  {
+    "feature": "Add New Site Transfer",
+    "questions": [
+      "how to add new site transfer?",
+      "how to create site transfer?",
+      "how to move stock to another site?",
+      "add site transfer"
+    ],
+    "answer": "1. Open Drawer, go to Entry.\n2. Click Site Transfer Entry.\n3. Click Add New button.\n4. Site Transfer screen opens.\n5. Select date, from godown, to godown.\n6. Enter remark if needed.\n7. Click Add Item button.\n8. Select item, check available qty, enter transfer qty.\n9. Click Add button.\n10. Item added to list.\n11. Click Save Transfer button at bottom.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/3 entry.jpg",
+      "assets/screenshot/entry/site transfer/3.5 site transfer.jpg"
+    ]
+  },
+  {
+    "feature": "Edit Site Transfer Entry",
+    "questions": [
+      "how to edit site transfer?",
+      "how to update transfer details?",
+      "edit site transfer"
+    ],
+    "answer": "1. Go to Site Transfer list.\n2. Find the transfer to edit.\n3. Click Edit icon on the card.\n4. Update details as needed.\n5. Click Update button to save changes.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/3 entry.jpg",
+      "assets/screenshot/entry/site transfer/3.5 site transfer.jpg"
+    ]
+  },
+  {
+    "feature": "Delete Site Transfer Entry",
+    "questions": [
+      "how to delete site transfer?",
+      "how to remove transfer entry?",
+      "delete site transfer"
+    ],
+    "answer": "1. Go to Site Transfer list.\n2. Find the transfer to delete.\n3. Click Delete icon on the card.\n4. Confirm deletion.\n5. Transfer entry removed from list.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/3 entry.jpg",
+      "assets/screenshot/entry/site transfer/3.5 site transfer.jpg"
+    ]
+  },
+  {
+    "feature": "View Site Transfer PDF",
+    "questions": [
+      "how to view transfer pdf?",
+      "how to download site transfer document?",
+      "view site transfer pdf"
+    ],
+    "answer": "1. Go to Site Transfer list.\n2. Click the PDF icon on any transfer card.\n3. Transfer details open in PDF format.\n4. View or share the document.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/3 entry.jpg",
+      "assets/screenshot/entry/site transfer/3.5 site transfer.jpg"
+    ]
+  },
+  {
+    "feature": "View Repair Entry List",
+    "questions": [
+      "how to view repair entries?",
+      "where is repair entry list?",
+      "how to see repair records?",
+      "where is repair entry screen?",
+      "how to access repair issues?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Entry.\n4. Click Repair Entry.\n5. Repair Issue screen opens showing all entries.\n6. At top, filter chips show: All, Pending, Complete.\n7. Click card to see repair items with issued qty, received qty, balance qty."
+  },
+  {
+    "feature": "Filter Repair Entries",
+    "questions": [
+      "how to filter repair entries?",
+      "how to view pending repairs?",
+      "how to see completed repairs?",
+      "where are repair filters?",
+      "how to view all repairs?"
+    ],
+    "answer": "1. Go to Repair Entry screen.\n2. At top you'll see filter chips.\n3. Click All to view all repair entries.\n4. Click Pending to view only pending repairs.\n5. Click Complete to view only completed repairs.\n6. List updates based on selected filter."
+  },
+  {
+    "feature": "Add New Repair Issue",
+    "questions": [
+      "how to add repair issue?",
+      "how to create repair entry?",
+      "how to issue items for repair?",
+      "where to add repair details?",
+      "how to create repair record?"
+    ],
+    "answer": "1. Open Drawer, go to Entry.\n2. Click Repair Entry.\n3. Click Add Issue button.\n4. New Repair Issue screen opens.\n5. Fill date, party, description, from godown.\n6. Click Add New button.\n7. Add Item screen opens.\n8. Select item.\n9. List shows site-wise qty available.\n10. Enter repair qty.\n11. Click Add button.\n12. Item appears in repair issue screen with edit and delete options.\n13. Click Save button at bottom.\n14. Repair issue created and added to list."
+  },
+  {
+    "feature": "Receive Repaired Items",
+    "questions": [
+      "how to receive repaired items?",
+      "how to complete repair order?",
+      "where is receive button for repair?",
+      "how to mark repair as complete?",
+      "how to receive items back from repair?"
+    ],
+    "answer": "1. Go to Repair Entry screen.\n2. Find pending repair card.\n3. Card has Receive button.\n4. Click Receive button.\n5. Receive Repair screen opens.\n6. Enter received qty for items.\n7. Click Receive button.\n8. Repair order marked as complete."
+  },
+  {
+    "feature": "View DLR Entry List",
+    "questions": [
+      "how to view dlr entries?",
+      "where is dlr entry list?",
+      "how to see dlr records?",
+      "where is dlr entry screen?",
+      "how to access dlr entries?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Entry.\n4. Click DLR Entry.\n5. DLR Entry screen opens showing all entries."
+  },
+  {
+    "feature": "Add New DLR Entry",
+    "questions": [
+      "how to add dlr entry?",
+      "how to create dlr?",
+      "how to enter new dlr?",
+      "where to add dlr details?",
+      "how to create dlr record?"
+    ],
+    "answer": "1. Open Drawer, go to Entry.\n2. Click DLR Entry.\n3. Click Add New button.\n4. DLR Entry screen opens.\n5. Fill in all details:\n   - Date\n   - Select party\n   - Select shift\n   - Fill skill count\n   - Fill skill rate\n   - Fill unskill count\n   - Fill unskill rate\n   - Select supervisor\n   - Select site\n   (After selecting site, only godowns of that site will be shown)\n   - Select godown\n6. Click Submit button.\n7. DLR entry created and added to list."
+  },
+  {
+    "feature": "Generate Opening Stock Report",
+    "questions": [
+      "open stock report",
+      "openig stock report",
+      "how to generate opening stock report?",
+      "how to view opening stock report?",
+      "where is opening stock report?",
+      "how to create opening stock report?",
+      "how to get opening stock pdf?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Reports (fourth option).\n4. Click Opening Stock Report.\n5. Opening Stock Report screen opens.\n6. Fill filters: from date, to date, select site, select godown, select items.\n   (After selecting site, only godowns of that site will be shown)\n7. Click Generate Report button.\n8. Report displays as PDF.\n9. You can view, download, or share the PDF.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/4 reports.jpg",
+      "assets/screenshot/reports/open stock report/4.1 open stock reports.jpg",
+      "assets/screenshot/reports/open stock report/G4 open stock.jpg",
+      "assets/screenshot/reports/open stock report/G4.1 open stock.jpg"
+    ]
+  },
+  {
+    "feature": "Generate Indent Report",
+    "questions": [
+      "indent report",
+      "how to generate indent report?",
+      "how to view indent report?",
+      "where is indent report?",
+      "how to create indent report?",
+      "how to get indent pdf?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Reports.\n4. Click Indent Report.\n5. Indent Report screen opens.\n6. Fill filters: from date, to date, status, report type, select item.\n7. Click Generate Report button.\n8. Report displays as PDF.\n9. You can view, download, or share the PDF.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/4 reports.jpg",
+      "assets/screenshot/reports/indent report/4.2 indent report.jpg",
+      "assets/screenshot/reports/indent report/G4 indent.jpg",
+      "assets/screenshot/reports/indent report/G4.1 indent.jpg"
+    ]
+  },
+  {
+    "feature": "Generate Purchase Order Report",
+    "questions": [
+      "po report",
+      "purchase order report",
+      "how to generate purchase order report?",
+      "how to view po report?",
+      "where is purchase order report?",
+      "how to create po report?",
+      "how to get po pdf?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Reports.\n4. Click Purchase Order Report.\n5. Purchase Order Report screen opens.\n6. Fill filters: from date, to date, status, report type, select party, select site, select godown.\n   (After selecting site, only godowns of that site will be shown)\n7. Click Generate Report button.\n8. Report displays as PDF.\n9. You can view, download, or share the PDF.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/4 reports.jpg",
+      "assets/screenshot/reports/PO report/4.3 po report.jpg",
+      "assets/screenshot/reports/PO report/G4 po report.jpg",
+      "assets/screenshot/reports/PO report/G4.1 po report.jpg"
+    ]
+  },
+  {
+    "feature": "Generate GRN Report",
+    "questions": [
+      "grn report",
+      "how to generate grn report?",
+      "how to view grn report?",
+      "where is grn report?",
+      "how to create grn report?",
+      "how to get grn pdf?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Reports.\n4. Click GRN Report.\n5. GRN Report screen opens.\n6. Fill filters: from date, to date, select party, select site, select godown, select item.\n   (After selecting site, only godowns of that site will be shown)\n7. Click Generate Report button.\n8. Report displays as PDF.\n9. You can view, download, or share the PDF.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/4 reports.jpg",
+      "assets/screenshot/reports/grn report/4.4 grn report.jpg",
+      "assets/screenshot/reports/grn report/G4 grn report.jpg",
+      "assets/screenshot/reports/grn report/G4.1 grn report.jpg"
+    ]
+  },
+  {
+    "feature": "Generate Site Transfer Report",
+    "questions": [
+      "site transfer report",
+      "how to generate site transfer report?",
+      "how to view site transfer report?",
+      "where is site transfer report?",
+      "how to create site transfer report?",
+      "how to get site transfer pdf?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Reports.\n4. Click Site Transfer Report.\n5. Site Transfer Report screen opens.\n6. Fill filters: from date, to date, select items.\n7. Click Generate Report button.\n8. Report displays as PDF.\n9. You can view, download, or share the PDF.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/4 reports.jpg",
+      "assets/screenshot/reports/site transfer report/4.5 site transfer report.jpg",
+      "assets/screenshot/reports/site transfer report/G4 site transfer.jpg",
+      "assets/screenshot/reports/site transfer report/G4.1 site transfer.jpg"
+    ]
+  },
+  {
+    "feature": "Generate Issue Repair Report",
+    "questions": [
+      "repair report",
+      "issue repair report",
+      "how to generate issue repair report?",
+      "how to view repair report?",
+      "where is issue repair report?",
+      "how to create repair report?",
+      "how to get repair pdf?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Reports.\n4. Click Issue Repair Report.\n5. Issue Repair Report screen opens.\n6. Fill filters: from date, to date, status, select site, select godown, select items.\n   (After selecting site, only godowns of that site will be shown)\n7. Click Generate Report button.\n8. Report displays as PDF.\n9. You can view, download, or share the PDF.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/4 reports.jpg",
+      "assets/screenshot/reports/repair isse/4.6 repair issue report.jpg",
+      "assets/screenshot/reports/repair isse/G4 repair issue.jpg",
+      "assets/screenshot/reports/repair isse/G4.1 repair issue.jpg"
+    ]
+  },
+  {
+    "feature": "Generate Stock Ledger Report",
+    "questions": [
+      "how to generate stock ledger?",
+      "how to view stock ledger?",
+      "where is stock ledger report?",
+      "how to download stock ledger?",
+      "how to create stock ledger?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Stock Reports (fifth option).\n4. Click Stock Ledger.\n5. Stock Ledger screen opens.\n6. Fill filters: from date, to date, select site, select godown, select category, select item group, select sub group, select items.\n   (After selecting site, only godowns of that site will be shown)\n7. Click Generate Report button.\n8. Report displays as cards on screen.\n9. At top right, you'll see Download icon.\n10. Click Download icon to download the report.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/5 stock reports.jpg",
+      "assets/screenshot/stock reports/stock ledger/5.1 stock ledger.jpg",
+      "assets/screenshot/stock reports/stock ledger/G5 stock ledger.jpg",
+      "assets/screenshot/stock reports/stock ledger/G5.1 stock ledger.jpg",
+      "assets/screenshot/stock reports/stock ledger/G5.2 stock ledger.jpg"
+    ]
+  },
+  {
+    "feature": "Generate Group Stock Report",
+    "questions": [
+      "how to generate group stock report?",
+      "how to view group stock?",
+      "where is group stock report?",
+      "how to download group stock?",
+      "how to create group stock report?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Stock Reports.\n4. Click Group Stock Report.\n5. Group Stock Report screen opens.\n6. Fill filters: from date, to date, select site, select godown, select category, select item group, select sub group, select items.\n   (After selecting site, only godowns of that site will be shown)\n7. Click Generate Report button.\n8. Report displays as cards on screen.\n9. At top right, Download icon available.\n10. Click Download to save report.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/5 stock reports.jpg",
+      "assets/screenshot/stock reports/group stock/5.2 group stock.jpg",
+      "assets/screenshot/stock reports/group stock/G5 group stock.jpg",
+      "assets/screenshot/stock reports/group stock/G5.1 group stock.jpg",
+      "assets/screenshot/stock reports/group stock/G5.2 group stock.jpg",
+      "assets/screenshot/stock reports/group stock/G5.3 group stock.jpg"
+    ]
+  },
+  {
+    "feature": "Generate Site Stock Report",
+    "questions": [
+      "how to generate site stock report?",
+      "how to view site stock?",
+      "where is site stock report?",
+      "how to download site stock?",
+      "how to create site stock report?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Stock Reports.\n4. Click Site Stock Report.\n5. Site Stock Report screen opens.\n6. Fill filters: from date, to date, select site, select godown, select category, select item group, select sub group, select items.\n   (After selecting site, only godowns of that site will be shown)\n7. Click Generate Report button.\n8. Report displays as cards.\n9. Download icon at top right.\n10. Click Download to save.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/5 stock reports.jpg",
+      "assets/screenshot/stock reports/site stock/5.3 site stock.jpg",
+      "assets/screenshot/stock reports/site stock/G5 site stock.jpg",
+      "assets/screenshot/stock reports/site stock/G5.1 site stock.jpg",
+      "assets/screenshot/stock reports/site stock/G5.2 site stock.jpg"
+    ]
+  },
+  {
+    "feature": "Generate Stock Statement Report",
+    "questions": [
+      "how to generate stock statement?",
+      "how to view stock statement?",
+      "where is stock statement report?",
+      "how to download stock statement?",
+      "how to create stock statement?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Stock Reports.\n4. Click Stock Statement Report.\n5. Stock Statement Report screen opens.\n6. Fill filters: from date, to date, select site, select godown, select category, select item group, select sub group, select items.\n   (After selecting site, only godowns of that site will be shown)\n7. Click Generate Report button.\n8. Report displays as cards.\n9. Download icon at top right.\n10. Click Download to save.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/5 stock reports.jpg",
+      "assets/screenshot/stock reports/stock statement/5.4 stock statement.jpg",
+      "assets/screenshot/stock reports/stock statement/G5 stock statemenet.jpg",
+      "assets/screenshot/stock reports/stock statement/G5.1 stock statement.jpg",
+      "assets/screenshot/stock reports/stock statement/G5.2 stock statement.jpg",
+      "assets/screenshot/stock reports/stock statement/G5.3 stock statement.jpg"
+    ]
+  },
+  {
+    "feature": "Generate FIFO Stock Valuation",
+    "questions": [
+      "how to generate fifo valuation?",
+      "how to view fifo stock valuation?",
+      "where is fifo valuation report?",
+      "how to download fifo report?",
+      "what is fifo stock valuation?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Stock Reports.\n4. Click FIFO - Stock Valuation.\n5. FIFO Stock Valuation screen opens.\n6. Fill filters: from date, to date, select site, select godown, select category, select item group, select sub group, select items.\n   (After selecting site, only godowns of that site will be shown)\n7. Click Generate Report button.\n8. Report displays as cards.\n9. Download icon at top right.\n10. Click Download to save.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/5 stock reports.jpg",
+      "assets/screenshot/stock reports/fifo/5.5 fifo.jpg",
+      "assets/screenshot/stock reports/fifo/G5 fifo.jpg",
+      "assets/screenshot/stock reports/fifo/G5.1 fifo.jpg",
+      "assets/screenshot/stock reports/fifo/G5.2 fifo.jpg",
+      "assets/screenshot/stock reports/fifo/G5.3 fifo.jpg"
+    ]
+  },
+  {
+    "feature": "Generate LIFO Stock Valuation",
+    "questions": [
+      "how to generate lifo valuation?",
+      "how to view lifo stock valuation?",
+      "where is lifo valuation report?",
+      "how to download lifo report?",
+      "what is lifo stock valuation?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Stock Reports.\n4. Click LIFO - Stock Valuation.\n5. LIFO Stock Valuation screen opens.\n6. Fill filters: from date, to date, select site, select godown, select category, select item group, select sub group, select items.\n   (After selecting site, only godowns of that site will be shown)\n7. Click Generate Report button.\n8. Report displays as cards.\n9. Download icon at top right.\n10. Click Download to save.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/5 stock reports.jpg",
+      "assets/screenshot/stock reports/lifo/5.6 lifo.jpg",
+      "assets/screenshot/stock reports/lifo/G5 lifo.jpg",
+      "assets/screenshot/stock reports/lifo/G5.1 lifo.jpg",
+      "assets/screenshot/stock reports/lifo/G5.2 lifo.jpg",
+      "assets/screenshot/stock reports/lifo/G5.3 lifo.jpg"
+    ]
+  },
+  {
+    "feature": "Generate LP Stock Valuation",
+    "questions": [
+      "how to generate lp valuation?",
+      "how to view lp stock valuation?",
+      "where is lp valuation report?",
+      "how to download lp report?",
+      "what is lp stock valuation?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Stock Reports.\n4. Click LP - Stock Valuation.\n5. LP Stock Valuation screen opens.\n6. Fill filters: from date, to date, select site, select godown, select category, select item group, select sub group, select items.\n   (After selecting site, only godowns of that site will be shown)\n7. Click Generate Report button.\n8. Report displays as cards.\n9. Download icon at top right.\n10. Click Download to save.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/5 stock reports.jpg",
+      "assets/screenshot/stock reports/lp/5.7 lp.jpg",
+      "assets/screenshot/stock reports/lp/G5 lp.jpg",
+      "assets/screenshot/stock reports/lp/G5.1 lp.jpg",
+      "assets/screenshot/stock reports/lp/G5.2 lp.jpg",
+      "assets/screenshot/stock reports/lp/G5.3 lp.jpg"
+    ]
+  },
+  {
+    "feature": "Search Item Help",
+    "questions": [
+      "item help",
+      "how to search for items?",
+      "how to use item help?",
+      "where is item help feature?",
+      "how to find item information?",
+      "how to look up items?",
+      "How to open item details from search results?",
+      "How to check item stock site-wise?",
+      "Where can I view the latest GRN for an item?",
+      "What actions are available in the search result card?",
+      "How to view complete item information after searching?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click Item Helps (sixth option).\n4. Item Help screen opens.\n5. Fill in date field.\n6. Click Search Item button.\n7. Search results display showing matching item details.\n8. You can view item information from results.\n9. In the search result card, click the View Details button.\n10. Item Details screen opens and displays complete item information.\n11. In the same card, click the View Stocks button.\n12. Site-wise stock screen opens and shows available stock for the item at different locations/sites.\n13. Click the Last GRN button on the card.\n14. Latest GRN (Goods Receipt Note) cards open and display the most recent GRN details related to that item.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/6 item help.jpg",
+      "assets/screenshot/item help/I6 item help.jpg",
+      "assets/screenshot/item help/I6.1 Search item.jpg",
+      "assets/screenshot/item help/I6.2 list.jpg",
+      "assets/screenshot/item help/I6.3 detail.jpg",
+      "assets/screenshot/item help/I6.4 site stock.jpg",
+      "assets/screenshot/item help/I6.5 last grn.jpg"
+    ]
+  },
+  {
+    "feature": "View User Authorization",
+    "questions": [
+      "auth user",
+      "user authorization",
+      "how to view unauthorized users?",
+      "how to check user authorization?",
+      "where is user authorization?",
+      "how to see who needs authorization?",
+      "how to authorize users?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click User Setting (seventh option).\n4. Click User Authorization.\n5. User Authorization screen opens.\n6. List shows all unauthorized users.\n7. Search for specific user if needed.\n8. Authorize users from this screen.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/7 user settings.jpg",
+      "assets/screenshot/User settings/user authorization/7.1.jpg",
+      "assets/screenshot/User settings/user authorization/U7.jpg"
+    ]
+  },
+  {
+    "feature": "View User Management",
+    "questions": [
+      "manage user",
+      "user manage",
+      "how to view all users?",
+      "how to manage users?",
+      "where is user management?",
+      "how to see user list?",
+      "how to check user roles?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click User Setting.\n4. Click User Management.\n5. User Management screen opens.\n6. List shows all users allocated.\n7. Each user shows their role (Admin or User).\n8. You can manage roles and permissions here.",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/7 user settings.jpg",
+      "assets/screenshot/User settings/user managemnt/7.1.jpg",
+      "assets/screenshot/User settings/user managemnt/U7.jpg",
+      "assets/screenshot/User settings/user managemnt/U7.1.jpg"
+    ]
+  },
+  {
+    "feature": "View User Rights",
+    "questions": [
+      "user rights",
+      "how to view user rights?",
+      "how to check user permissions?",
+      "where is user rights setting?",
+      "how to see what access users have?",
+      "how to manage user rights?"
+    ],
+    "answer": "1. Login to the app.\n2. Open Drawer.\n3. Click User Setting.\n4. Click User Rights.\n5. User Rights screen opens.\n6. List shows all users.\n7. Search for specific user.\n8. You can see and modify their assigned rights.\n9. Enable/disable features by ticking checkboxes.\n10. Only enabled features will be visible to that user.\n\nAvailable rights to assign:\n- App access\n- Indent Authorize access\n- PO Authorize access\n- Dashboard\n- Masters (Party, Site, Godown, Department, Category, Item Group, Item Sub Group, Item)\n- Entry (Opening Stock, Indent, Purchase Order, GRN, Site Transfer, Repair, DLR)\n- Reports (Opening Stock, Indent, Purchase Order, GRN, Site Transfer, Issue Repair)\n- Stock Reports (Stock Ledger, Group Stock, Site Stock, Stock Statement, FIFO/LIFO/LP Valuation)\n- Item Help\n- User Setting (User Authorization, User Management, User Rights)",
+    "screenshots": [
+      "assets/screenshot/dashboard/1 dashboard.jpg",
+      "assets/screenshot/sidebar/7 user settings.jpg",
+      "assets/screenshot/User settings/user rights/7.1.jpg",
+      "assets/screenshot/User settings/user rights/U7.jpg",
+      "assets/screenshot/User settings/user rights/U7.1.jpg"
+    ]
+  }
+]

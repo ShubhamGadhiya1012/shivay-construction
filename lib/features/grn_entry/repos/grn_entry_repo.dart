@@ -67,25 +67,25 @@ class GrnEntryRepo {
         }
       }
 
-      // ===== PRINT FULL PAYLOAD =====
-      print('----- GRN PAYLOAD START -----');
+      // // ===== PRINT FULL PAYLOAD =====
+      // print('----- GRN PAYLOAD START -----');
 
-      print('FIELDS:');
-      fields.forEach((key, value) {
-        print('$key : $value');
-      });
+      // print('FIELDS:');
+      // fields.forEach((key, value) {
+      //   print('$key : $value');
+      // });
 
-      print('FILES:');
-      for (var f in multipartFiles) {
-        print({
-          'field': f.field,
-          'filename': f.filename,
-          'contentType': f.contentType.toString(),
-          'length': f.length,
-        });
-      }
+      // print('FILES:');
+      // for (var f in multipartFiles) {
+      //   print({
+      //     'field': f.field,
+      //     'filename': f.filename,
+      //     'contentType': f.contentType.toString(),
+      //     'length': f.length,
+      //   });
+      // }
 
-      print('----- GRN PAYLOAD END -----');
+      // print('----- GRN PAYLOAD END -----');
 
       final response = await ApiService.postFormData(
         endpoint: '/GRN/grnEntry',

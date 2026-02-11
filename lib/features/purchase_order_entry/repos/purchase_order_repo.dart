@@ -95,20 +95,20 @@ class PurchaseOrderRepo {
         }
       }
 
-      print('------ PURCHASE ORDER PAYLOAD ------');
-      fields.forEach((key, value) {
-        print('$key : $value');
-      });
+      // print('------ PURCHASE ORDER PAYLOAD ------');
+      // fields.forEach((key, value) {
+      //   print('$key : $value');
+      // });
 
-      print('------ ATTACHMENTS ------');
-      for (var file in newFiles) {
-        print({
-          'name': file.name,
-          'path': file.path,
-          'size': file.size,
-          'hasBytes': file.bytes != null,
-        });
-      }
+      // print('------ ATTACHMENTS ------');
+      // for (var file in newFiles) {
+      //   print({
+      //     'name': file.name,
+      //     'path': file.path,
+      //     'size': file.size,
+      //     'hasBytes': file.bytes != null,
+      //   });
+      // }
       final response = await ApiService.postFormData(
         endpoint: '/Order/orderEntry',
         fields: fields,

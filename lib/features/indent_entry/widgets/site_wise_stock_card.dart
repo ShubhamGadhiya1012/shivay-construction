@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/indent_entry/models/site_wise_stock_dm.dart';
@@ -148,7 +150,7 @@ class SiteStockCard extends StatelessWidget {
                       // Godowns List
                       ...siteGroup.godowns.map((godown) {
                         return _buildGodownSection(godown);
-                      }).toList(),
+                      }),
                     ],
                   ),
                   crossFadeState: isExpanded
@@ -228,7 +230,7 @@ class SiteStockCard extends StatelessWidget {
               tablet ? AppSpaces.v10 : AppSpaces.v8,
               ...godown.items.map((item) {
                 return _buildItemCard(item);
-              }).toList(),
+              }),
             ],
           ],
         ),

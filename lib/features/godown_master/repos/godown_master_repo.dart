@@ -7,7 +7,7 @@ class GodownMasterRepo {
     required String siteCode,
   }) async {
     String? token = await SecureStorageHelper.read('token');
-    print(siteCode);
+ //   print(siteCode);
     try {
       final response = await ApiService.getRequest(
         endpoint: '/Master/getGodown',
@@ -15,7 +15,7 @@ class GodownMasterRepo {
         queryParams: {'SiteCode': siteCode},
       );
 
-      print(response);
+    //  print(response);
       if (response == null) return [];
 
       if (response['data'] != null) {

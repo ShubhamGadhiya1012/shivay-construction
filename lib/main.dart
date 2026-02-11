@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/auth/screens/splash_screen.dart';
+import 'package:shivay_construction/features/chatbot/widgets/floating_chat_icon.dart';
 import 'package:shivay_construction/utils/helpers/fcm_helper.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -70,6 +71,10 @@ class MyApp extends StatelessWidget {
               useMaterial3: true,
               scaffoldBackgroundColor: kColorWhite,
             ),
+            navigatorObservers: [FloatingIconObserver()],
+            builder: (context, child) {
+              return Stack(children: [child!, const FloatingChatIcon()]);
+            },
             home: const SplashScreen(),
           ),
         );

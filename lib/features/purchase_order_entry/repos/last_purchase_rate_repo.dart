@@ -7,7 +7,7 @@ class LastPurchaseRateRepo {
     required String iCode,
   }) async {
     String? token = await SecureStorageHelper.read('token');
-    print(iCode);
+   // print(iCode);
     try {
       final response = await ApiService.getRequest(
         endpoint: '/Order/getLastPurchase',
