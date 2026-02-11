@@ -16,6 +16,7 @@ import 'package:shivay_construction/features/item_group_master/screens/item_grou
 import 'package:shivay_construction/features/item_help/screens/item_help_search_screen.dart';
 import 'package:shivay_construction/features/item_sub_group_master/screens/item_sub_group_master_screen.dart';
 import 'package:shivay_construction/features/item_master/screens/item_master_list_screen.dart';
+import 'package:shivay_construction/features/notification_master/noifications/screens/notifications_screen.dart';
 import 'package:shivay_construction/features/opening_stock_entry/screens/opening_stocks_screen.dart';
 import 'package:shivay_construction/features/party_masters/screens/party_master_list_screen.dart';
 import 'package:shivay_construction/features/purchase_order_entry/screens/purchase_order_list_screen.dart';
@@ -434,6 +435,9 @@ class AppDrawer extends StatelessWidget {
     switch (subMenu.subMenuName.toLowerCase()) {
       case 'user authorization':
         Get.to(() => UnauthorisedUsersScreen());
+        break;
+      case 'notification master':
+        Get.to(() => NotificationsScreen());
         break;
 
       case 'user management':
