@@ -21,6 +21,7 @@ import 'package:shivay_construction/features/opening_stock_entry/screens/opening
 import 'package:shivay_construction/features/party_masters/screens/party_master_list_screen.dart';
 import 'package:shivay_construction/features/purchase_order_entry/screens/purchase_order_list_screen.dart';
 import 'package:shivay_construction/features/repair_entry/screens/repair_issue_list_screen.dart';
+import 'package:shivay_construction/features/reports/screens/dlr_report_screen.dart';
 import 'package:shivay_construction/features/reports/screens/grn_report_screen.dart';
 import 'package:shivay_construction/features/reports/screens/indent_report_screen.dart';
 import 'package:shivay_construction/features/reports/screens/issue_repair_report_screen.dart';
@@ -508,6 +509,9 @@ class AppDrawer extends StatelessWidget {
         break;
       case 'issue repair report':
         Get.to(() => IssueRepairReportScreen());
+        break;
+      case 'dlr report':
+        Get.to(() => DlrReportScreen());
         break;
 
       case 'stock statement report':
