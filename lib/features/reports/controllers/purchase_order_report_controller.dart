@@ -20,7 +20,7 @@ class PurchaseOrderReportController extends GetxController {
   var fromDateController = TextEditingController();
   var toDateController = TextEditingController();
 
-  var statusOptions = ['All', 'Pending', 'Complete', 'Close'].obs;
+  var statusOptions = ['All', 'Pending', 'Partial', 'Complete'].obs;
   var selectedStatus = 'All'.obs;
 
   var reportTypeOptions = ['PartyWise', 'ItemWise'].obs;

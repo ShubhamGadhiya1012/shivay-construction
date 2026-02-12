@@ -172,23 +172,22 @@ class PurchaseOrderReportScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            Obx(
-                              () => AppDropdown(
-                                items: _controller.godownNames,
-                                hintText: 'Godown',
-                                onChanged: _controller.onGodownSelected,
-                                selectedItem:
-                                    _controller
-                                        .selectedGodownName
-                                        .value
-                                        .isNotEmpty
-                                    ? _controller.selectedGodownName.value
-                                    : null,
-                              ),
-                            ),
+                            // Obx(
+                            //   () => AppDropdown(
+                            //     items: _controller.godownNames,
+                            //     hintText: 'Godown',
+                            //     onChanged: _controller.onGodownSelected,
+                            //     selectedItem:
+                            //         _controller
+                            //             .selectedGodownName
+                            //             .value
+                            //             .isNotEmpty
+                            //         ? _controller.selectedGodownName.value
+                            //         : null,
+                            //   ),
+                            // ),
 
-                            tablet ? AppSpaces.v16 : AppSpaces.v10,
-
+                            // tablet ? AppSpaces.v16 : AppSpaces.v10,
                             Obx(
                               () =>
                                   _controller.selectedReportType.value ==

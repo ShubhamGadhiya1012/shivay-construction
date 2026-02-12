@@ -5,7 +5,7 @@ import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 class PoAuthItemsRepo {
   static Future<List<PoAuthItemDm>> getPoAuthItems({
     required String siteCode,
-    required String gdCode,
+
     required String pCode,
   }) async {
     String? token = await SecureStorageHelper.read('token');
@@ -13,7 +13,7 @@ class PoAuthItemsRepo {
     try {
       final response = await ApiService.getRequest(
         endpoint: '/GRN/getPOAuthItems',
-        queryParams: {'SiteCode': siteCode, 'GDCode': gdCode, 'PCode': pCode},
+        queryParams: {'SiteCode': siteCode, 'PCode': pCode},
         token: token,
       );
 

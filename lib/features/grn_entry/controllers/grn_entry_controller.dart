@@ -38,9 +38,11 @@ class GrnEntryController extends GetxController {
   var godownNames = <String>[].obs;
   var selectedGodownName = ''.obs;
   var selectedGodownCode = ''.obs;
-  var selectedSiteCode = ''.obs;
 
   var sites = <SiteMasterDm>[].obs;
+  var siteNames = <String>[].obs;
+  var selectedSiteName = ''.obs;
+  var selectedSiteCode = ''.obs;
 
   var poAuthItems = <PoAuthItemDm>[].obs;
   var selectedPoOrders = <String, Map<String, dynamic>>{}.obs;
@@ -95,10 +97,31 @@ class GrnEntryController extends GetxController {
       isLoading.value = true;
       final fetchedSites = await SiteMasterListRepo.getSites();
       sites.assignAll(fetchedSites);
+      siteNames.assignAll(fetchedSites.map((site) => site.siteName).toList());
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  void onSiteSelected(String? siteName) async {
+    selectedSiteName.value = siteName ?? '';
+    var selectedSiteObj = sites.firstWhereOrNull(
+      (site) => site.siteName == siteName,
+    );
+    selectedSiteCode.value = selectedSiteObj?.siteCode ?? '';
+
+    // Clear godown selection
+    selectedGodownName.value = '';
+    selectedGodownCode.value = '';
+    siteNameController.clear();
+
+    // Fetch godowns for selected site
+    if (selectedSiteCode.value.isNotEmpty) {
+      await getGodowns(selectedSiteCode.value);
+    } else {
+      await getGodowns(); // Get all godowns
     }
   }
 
@@ -123,11 +146,12 @@ class GrnEntryController extends GetxController {
     selectedPartyCode.value = selectedPartyObj.pCode;
   }
 
-  Future<void> getGodowns() async {
+  Future<void> getGodowns([String siteCode = '']) async {
     try {
       isLoading.value = true;
-      await getSites();
-      final fetchedGodowns = await GodownMasterRepo.getGodowns(siteCode: "");
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(
+        siteCode: siteCode,
+      );
       godowns.assignAll(fetchedGodowns);
       godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
     } catch (e) {
@@ -138,29 +162,16 @@ class GrnEntryController extends GetxController {
   }
 
   void onGodownSelected(String? godownName) {
-    selectedGodownName.value = godownName!;
-    var selectedGodownObj = godowns.firstWhere((gd) => gd.gdName == godownName);
-    selectedGodownCode.value = selectedGodownObj.gdCode;
-    selectedSiteCode.value = selectedGodownObj.siteCode;
-
-    if (selectedGodownObj.siteCode.isNotEmpty) {
-      final site = sites.firstWhereOrNull(
-        (s) => s.siteCode == selectedGodownObj.siteCode,
-      );
-      siteNameController.text = site?.siteName ?? '';
-    } else {
-      siteNameController.clear();
-    }
-
-    selectedPoOrders.clear();
-    poAuthItems.clear();
-    isInSelectionMode.value = false;
-    _disposeQtyControllers();
+    selectedGodownName.value = godownName ?? '';
+    var selectedGodownObj = godowns.firstWhereOrNull(
+      (gd) => gd.gdName == godownName,
+    );
+    selectedGodownCode.value = selectedGodownObj?.gdCode ?? '';
   }
 
   Future<void> getPoAuthItems() async {
-    if (selectedSiteCode.value.isEmpty || selectedGodownCode.value.isEmpty) {
-      showErrorSnackbar('Error', 'Please select godown first');
+    if (selectedSiteCode.value.isEmpty) {
+      showErrorSnackbar('Error', 'Please select Site first');
       return;
     }
     if (selectedPartyCode.value.isEmpty) {
@@ -172,7 +183,6 @@ class GrnEntryController extends GetxController {
       isLoading.value = true;
       final fetchedItems = await PoAuthItemsRepo.getPoAuthItems(
         siteCode: selectedSiteCode.value,
-        gdCode: selectedGodownCode.value,
         pCode: selectedPartyCode.value,
       );
       poAuthItems.assignAll(fetchedItems);
@@ -621,7 +631,7 @@ class GrnEntryController extends GetxController {
     }
   }
 
-  void clearAll() {
+  Future<void> clearAll() async {
     currentInvNo.value = '';
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
     remarksController.clear();
@@ -632,7 +642,7 @@ class GrnEntryController extends GetxController {
     selectedGodownName.value = '';
     selectedGodownCode.value = '';
     selectedSiteCode.value = '';
-
+    selectedSiteName.value = '';
     selectedPoOrders.clear();
     poAuthItems.clear();
     directGrnItems.clear();
@@ -645,5 +655,6 @@ class GrnEntryController extends GetxController {
     isInSelectionMode.value = false;
 
     _disposeQtyControllers();
+    await getGodowns();
   }
 }

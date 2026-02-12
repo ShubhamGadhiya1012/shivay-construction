@@ -57,6 +57,7 @@ class _GrnEntryScreenState extends State<GrnEntryScreen> {
       'dd-MM-yyyy',
     ).format(DateTime.now());
 
+    await _controller.getSites();
     await _controller.getParties();
     await _controller.getGodowns();
     await _controller.getItems();
@@ -76,10 +77,21 @@ class _GrnEntryScreenState extends State<GrnEntryScreen> {
       _controller.selectedPartyCode.value = grn.pCode;
       _controller.selectedPartyName.value = grn.pName;
 
+      // Set site code and name
+      _controller.selectedSiteCode.value = grn.siteCode;
+      final site = _controller.sites.firstWhereOrNull(
+        (s) => s.siteCode == grn.siteCode,
+      );
+      _controller.selectedSiteName.value = site?.siteName ?? '';
+
+      // Reload godowns for the selected site
+      if (grn.siteCode.isNotEmpty) {
+        await _controller.getGodowns(grn.siteCode);
+      }
+
+      // Set godown after loading site-specific godowns
       _controller.selectedGodownCode.value = grn.gdCode;
       _controller.selectedGodownName.value = grn.gdName;
-      _controller.selectedSiteCode.value = grn.siteCode;
-      _controller.siteNameController.text = grn.siteName;
 
       _controller.remarksController.text = grn.remarks;
 
@@ -173,6 +185,21 @@ class _GrnEntryScreenState extends State<GrnEntryScreen> {
                                 tablet ? AppSpaces.v16 : AppSpaces.v10,
                                 Obx(
                                   () => AppDropdown(
+                                    items: _controller.siteNames,
+                                    hintText: 'Site',
+                                    onChanged: _controller.onSiteSelected,
+                                    selectedItem:
+                                        _controller
+                                            .selectedSiteName
+                                            .value
+                                            .isNotEmpty
+                                        ? _controller.selectedSiteName.value
+                                        : null,
+                                  ),
+                                ),
+                                tablet ? AppSpaces.v16 : AppSpaces.v10,
+                                Obx(
+                                  () => AppDropdown(
                                     items: _controller.godownNames,
                                     hintText: 'Godown *',
                                     onChanged: _controller.onGodownSelected,
@@ -186,28 +213,6 @@ class _GrnEntryScreenState extends State<GrnEntryScreen> {
                                     validatorText: 'Please select a godown',
                                   ),
                                 ),
-                                Obx(() {
-                                  if (_controller
-                                      .selectedGodownCode
-                                      .value
-                                      .isEmpty) {
-                                    return const SizedBox.shrink();
-                                  }
-
-                                  return Column(
-                                    children: [
-                                      tablet ? AppSpaces.v16 : AppSpaces.v10,
-                                      AppTextFormField(
-                                        controller:
-                                            _controller.siteNameController,
-                                        hintText: 'Site Name',
-                                        enabled: false,
-                                        fillColor: kColorLightGrey,
-                                      ),
-                                    ],
-                                  );
-                                }),
-
                                 tablet ? AppSpaces.v16 : AppSpaces.v10,
                                 AppTextFormField(
                                   controller: _controller.remarksController,
@@ -432,17 +437,6 @@ class _GrnEntryScreenState extends State<GrnEntryScreen> {
                                           : 0.45.screenWidth,
                                       title: '+ Add Item',
                                       onPressed: () {
-                                        if (_controller
-                                            .selectedGodownCode
-                                            .value
-                                            .isEmpty) {
-                                          showErrorSnackbar(
-                                            'Error',
-                                            'Please select godown first',
-                                          );
-                                          return;
-                                        }
-
                                         if (_controller.isDirectGrn.value) {
                                           _controller.prepareAddDirectItem();
                                           _showDirectItemDialog();
@@ -689,7 +683,7 @@ class _GrnEntryScreenState extends State<GrnEntryScreen> {
                                 }
                                 return null;
                               },
-                            ), 
+                            ),
                           ),
                           tablet ? AppSpaces.h16 : AppSpaces.h12,
                           Expanded(

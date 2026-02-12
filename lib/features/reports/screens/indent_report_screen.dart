@@ -153,33 +153,32 @@ class IndentReportScreen extends StatelessWidget {
                                   : const SizedBox.shrink(),
                             ),
 
-                            Obx(
-                              () =>
-                                  _controller.selectedReportType.value ==
-                                      'SiteWise'
-                                  ? Column(
-                                      children: [
-                                        AppDropdown(
-                                          items: _controller.godownNames,
-                                          hintText: 'Godown',
-                                          onChanged:
-                                              _controller.onGodownSelected,
-                                          selectedItem:
-                                              _controller
-                                                  .selectedGodownName
-                                                  .value
-                                                  .isNotEmpty
-                                              ? _controller
-                                                    .selectedGodownName
-                                                    .value
-                                              : null,
-                                        ),
-                                        tablet ? AppSpaces.v16 : AppSpaces.v10,
-                                      ],
-                                    )
-                                  : const SizedBox.shrink(),
-                            ),
-
+                            // Obx(
+                            //   () =>
+                            //       _controller.selectedReportType.value ==
+                            //           'SiteWise'
+                            //       ? Column(
+                            //           children: [
+                            //             AppDropdown(
+                            //               items: _controller.godownNames,
+                            //               hintText: 'Godown',
+                            //               onChanged:
+                            //                   _controller.onGodownSelected,
+                            //               selectedItem:
+                            //                   _controller
+                            //                       .selectedGodownName
+                            //                       .value
+                            //                       .isNotEmpty
+                            //                   ? _controller
+                            //                         .selectedGodownName
+                            //                         .value
+                            //                   : null,
+                            //             ),
+                            //             tablet ? AppSpaces.v16 : AppSpaces.v10,
+                            //           ],
+                            //         )
+                            //       : const SizedBox.shrink(),
+                            // ),
                             Obx(
                               () =>
                                   _controller.selectedReportType.value ==
