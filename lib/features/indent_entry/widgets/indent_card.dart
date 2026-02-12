@@ -200,12 +200,12 @@ class _IndentCardState extends State<IndentCard> {
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
                 Divider(height: 1, color: kColorLightGrey.withOpacity(0.5)),
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
-                _buildInfoRow(
-                  label: 'Godown',
-                  value: widget.indent.gdName,
-                  tablet: tablet,
-                ),
-                tablet ? AppSpaces.v12 : AppSpaces.v10,
+                // _buildInfoRow(
+                //   label: 'Godown',
+                //   value: widget.indent.gdName,
+                //   tablet: tablet,
+                // ),
+                // tablet ? AppSpaces.v12 : AppSpaces.v10,
                 _buildInfoRow(
                   label: 'Site',
                   value: widget.indent.siteName,

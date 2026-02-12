@@ -47,7 +47,7 @@ class IndentPdfScreen {
       await _savePdf(pdf, indent.invNo);
     } catch (e) {
       showErrorSnackbar('Error', 'Failed to generate Indent PDF: $e');
-    //  print(e);
+      //  print(e);
     }
   }
 
@@ -113,14 +113,6 @@ class IndentPdfScreen {
                   children: [
                     pw.Text(
                       'Indent Date: ${convertyyyyMMddToddMMyyyy(indent.date)}',
-                      style: pw.TextStyle(
-                        fontSize: 10,
-                        color: textPrimaryColor,
-                      ),
-                    ),
-                    pw.SizedBox(height: 3),
-                    pw.Text(
-                      'Godown: ${indent.gdName}',
                       style: pw.TextStyle(
                         fontSize: 10,
                         color: textPrimaryColor,

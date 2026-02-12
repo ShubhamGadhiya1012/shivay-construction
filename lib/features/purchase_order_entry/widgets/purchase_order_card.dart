@@ -213,18 +213,13 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
                 Divider(height: 1, color: kColorLightGrey.withOpacity(0.5)),
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
-                _buildInfoRow(
-                  label: 'Party',
-                  value: widget.order.pName,
-                  tablet: tablet,
-                ),
-                tablet ? AppSpaces.v12 : AppSpaces.v10,
+
                 Row(
                   children: [
                     Expanded(
                       child: _buildInfoRow(
-                        label: 'Godown',
-                        value: widget.order.gdName,
+                        label: 'Party',
+                        value: widget.order.pName,
                         tablet: tablet,
                       ),
                     ),

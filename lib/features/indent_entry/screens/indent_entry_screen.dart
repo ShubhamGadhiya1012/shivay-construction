@@ -52,8 +52,7 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
     _controller.dateController.text = DateFormat(
       'dd-MM-yyyy',
     ).format(DateTime.now());
-
-    await _controller.getGodowns();
+    await _controller.getSites();
     await _controller.getItems();
 
     if (widget.isEdit && widget.indent != null) {
@@ -63,10 +62,8 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
       _controller.currentInvNo.value = indent.invNo;
       _controller.dateController.text = _convertyyyyMMddToddMMyyyy(indent.date);
 
-      _controller.selectedGodownCode.value = indent.gdCode;
-      _controller.selectedGodownName.value = indent.gdName;
       _controller.selectedSiteCode.value = indent.siteCode;
-      _controller.siteNameController.text = indent.siteName;
+      _controller.selectedSiteName.value = indent.siteName;
 
       if (indent.attachments.isNotEmpty) {
         _controller.existingAttachmentUrls.clear();
@@ -151,35 +148,20 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
                             Obx(
                               () => AppDropdown(
-                                items: _controller.godownNames,
-                                hintText: 'Godown *',
-                                onChanged: _controller.onGodownSelected,
+                                items: _controller.siteNames,
+                                hintText: 'Site *',
+                                onChanged: _controller.onSiteSelected,
                                 selectedItem:
                                     _controller
-                                        .selectedGodownName
+                                        .selectedSiteName
                                         .value
                                         .isNotEmpty
-                                    ? _controller.selectedGodownName.value
+                                    ? _controller.selectedSiteName.value
                                     : null,
-                                validatorText: 'Please select a godown',
+                                validatorText: 'Please select a site',
                               ),
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
-                            Obx(() {
-                              if (_controller
-                                  .selectedGodownCode
-                                  .value
-                                  .isEmpty) {
-                                return const SizedBox.shrink();
-                              }
-
-                              return AppTextFormField(
-                                controller: _controller.siteNameController,
-                                hintText: 'Site Name',
-                                enabled: false,
-                                fillColor: kColorLightGrey,
-                              );
-                            }),
 
                             tablet ? AppSpaces.v20 : AppSpaces.v14,
                             Obx(

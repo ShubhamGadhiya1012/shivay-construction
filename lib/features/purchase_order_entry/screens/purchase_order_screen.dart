@@ -48,7 +48,7 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
       'dd-MM-yyyy',
     ).format(DateTime.now());
 
-    await _controller.getGodowns();
+    await _controller.getSites();
     await _controller.getParties();
 
     if (widget.order != null && widget.orderDetails != null) {
@@ -65,10 +65,8 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
     _controller.dateController.text = convertyyyyMMddToddMMyyyy(order.date);
     _controller.remarksController.text = order.remarks;
 
-    _controller.selectedGodownCode.value = order.gdCode;
-    _controller.selectedGodownName.value = order.gdName;
     _controller.selectedSiteCode.value = order.siteCode;
-    _controller.siteNameController.text = order.siteName;
+    _controller.selectedSiteName.value = order.siteName;
 
     _controller.selectedPartyCode.value = order.pCode;
     _controller.selectedPartyName.value = order.pName;
@@ -188,33 +186,16 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                     tablet ? AppSpaces.v16 : AppSpaces.v10,
                     Obx(
                       () => AppDropdown(
-                        items: _controller.godownNames,
-                        hintText: 'Godown *',
-                        onChanged: _controller.onGodownSelected,
+                        items: _controller.siteNames,
+                        hintText: 'Site *',
+                        onChanged: _controller.onSiteSelected,
                         selectedItem:
-                            _controller.selectedGodownName.value.isNotEmpty
-                            ? _controller.selectedGodownName.value
+                            _controller.selectedSiteName.value.isNotEmpty
+                            ? _controller.selectedSiteName.value
                             : null,
-                        validatorText: 'Please select a godown',
+                        validatorText: 'Please select a site',
                       ),
                     ),
-                    Obx(() {
-                      if (_controller.selectedGodownCode.value.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
-
-                      return Column(
-                        children: [
-                          tablet ? AppSpaces.v16 : AppSpaces.v10,
-                          AppTextFormField(
-                            controller: _controller.siteNameController,
-                            hintText: 'Site Name',
-                            enabled: false,
-                            fillColor: kColorLightGrey,
-                          ),
-                        ],
-                      );
-                    }),
                     tablet ? AppSpaces.v16 : AppSpaces.v10,
                     Obx(
                       () => AppDropdown(

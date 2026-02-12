@@ -7,7 +7,6 @@ import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 class PurchaseOrderRepo {
   static Future<List<AuthIndentItemDm>> getAuthIndentItems({
     required String siteCode,
-    required String gdCode,
   }) async {
     String? token = await SecureStorageHelper.read('token');
     // print(siteCode);
@@ -15,7 +14,7 @@ class PurchaseOrderRepo {
     try {
       final response = await ApiService.getRequest(
         endpoint: '/Order/getAuthIndentItems',
-        queryParams: {'SiteCode': siteCode, 'GDCode': gdCode},
+        queryParams: {'SiteCode': siteCode},
         token: token,
       );
 
@@ -36,7 +35,7 @@ class PurchaseOrderRepo {
   static Future<dynamic> savePurchaseOrder({
     required String invNo,
     required String date,
-    required String gdCode,
+
     required String pCode,
     required String remarks,
     required String siteCode,
@@ -50,7 +49,7 @@ class PurchaseOrderRepo {
       final Map<String, String> fields = {
         'Invno': invNo,
         'Date': date,
-        'GDCode': gdCode,
+
         'PCode': pCode,
         'Remark': remarks,
         'SiteCode': siteCode,

@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:shivay_construction/features/godown_master/models/godown_master_dm.dart';
-import 'package:shivay_construction/features/godown_master/repos/godown_master_repo.dart';
 import 'package:shivay_construction/features/party_masters/models/party_master_dm.dart';
 import 'package:shivay_construction/features/party_masters/repos/party_master_list_repo.dart';
 import 'package:shivay_construction/features/purchase_order_entry/controllers/purchase_order_list_controller.dart';
@@ -24,19 +22,15 @@ class PurchaseOrderController extends GetxController {
   var dateController = TextEditingController();
   var remarksController = TextEditingController();
 
-  var godowns = <GodownMasterDm>[].obs;
-  var godownNames = <String>[].obs;
-  var selectedGodownName = ''.obs;
-  var selectedGodownCode = ''.obs;
+  var sites = <SiteMasterDm>[].obs;
+  var siteNames = <String>[].obs;
+  var selectedSiteName = ''.obs;
   var selectedSiteCode = ''.obs;
-  var siteNameController = TextEditingController();
 
   var parties = <PartyMasterDm>[].obs;
   var partyNames = <String>[].obs;
   var selectedPartyName = ''.obs;
   var selectedPartyCode = ''.obs;
-
-  var sites = <SiteMasterDm>[].obs;
 
   var attachmentFiles = <PlatformFile>[].obs;
   var existingAttachmentUrls = <String>[].obs;
@@ -59,6 +53,7 @@ class PurchaseOrderController extends GetxController {
       isLoading.value = true;
       final fetchedSites = await SiteMasterListRepo.getSites();
       sites.assignAll(fetchedSites);
+      siteNames.assignAll(fetchedSites.map((s) => s.siteName).toList());
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
@@ -66,44 +61,19 @@ class PurchaseOrderController extends GetxController {
     }
   }
 
-  Future<void> getGodowns() async {
-    try {
-      isLoading.value = true;
-      await getSites();
-      final fetchedGodowns = await GodownMasterRepo.getGodowns(siteCode: "");
-      godowns.assignAll(fetchedGodowns);
-      godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
-    } catch (e) {
-      showErrorSnackbar('Error', e.toString());
-    } finally {
-      isLoading.value = false;
-    }
-  }
+  void onSiteSelected(String? siteName) {
+    selectedSiteName.value = siteName!;
+    var selectedSiteObj = sites.firstWhere((s) => s.siteName == siteName);
 
-  void onGodownSelected(String? godownName) {
-    selectedGodownName.value = godownName!;
-    var selectedGodownObj = godowns.firstWhere((gd) => gd.gdName == godownName);
+    bool isSiteChanging =
+        selectedSiteCode.value.isNotEmpty &&
+        selectedSiteCode.value != selectedSiteObj.siteCode;
 
-    bool isGodownChanging =
-        selectedGodownCode.value.isNotEmpty &&
-        selectedGodownCode.value != selectedGodownObj.gdCode;
+    selectedSiteCode.value = selectedSiteObj.siteCode;
 
-    selectedGodownCode.value = selectedGodownObj.gdCode;
-    selectedSiteCode.value = selectedGodownObj.siteCode;
-
-    if (isGodownChanging && selectedPurchaseItems.isNotEmpty) {
+    if (isSiteChanging && selectedPurchaseItems.isNotEmpty) {
       selectedPurchaseItems.clear();
-
       authIndentItems.clear();
-    }
-
-    if (selectedGodownObj.siteCode.isNotEmpty) {
-      final site = sites.firstWhereOrNull(
-        (s) => s.siteCode == selectedGodownObj.siteCode,
-      );
-      siteNameController.text = site?.siteName ?? '';
-    } else {
-      siteNameController.clear();
     }
   }
 
@@ -312,7 +282,6 @@ class PurchaseOrderController extends GetxController {
     try {
       final fetchedItems = await PurchaseOrderRepo.getAuthIndentItems(
         siteCode: selectedSiteCode.value,
-        gdCode: selectedGodownCode.value,
       );
       authIndentItems.assignAll(fetchedItems);
 
@@ -460,7 +429,7 @@ class PurchaseOrderController extends GetxController {
       var response = await PurchaseOrderRepo.savePurchaseOrder(
         invNo: isEditMode.value ? currentInvNo.value : '',
         date: _convertToApiDateFormat(dateController.text),
-        gdCode: selectedGodownCode.value,
+
         pCode: selectedPartyCode.value,
         remarks: remarksController.text.trim(),
         siteCode: selectedSiteCode.value,
@@ -491,10 +460,8 @@ class PurchaseOrderController extends GetxController {
     currentInvNo.value = '';
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
     remarksController.clear();
-    siteNameController.clear();
 
-    selectedGodownName.value = '';
-    selectedGodownCode.value = '';
+    selectedSiteName.value = '';
     selectedSiteCode.value = '';
     selectedPartyName.value = '';
     selectedPartyCode.value = '';
