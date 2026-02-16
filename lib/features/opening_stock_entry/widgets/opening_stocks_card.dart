@@ -90,13 +90,6 @@ class OpeningStocksCard extends StatelessWidget {
             children: [
               Expanded(
                 child: AppTitleValueContainer(
-                  title: 'Godown',
-                  value: openingStock.gdName,
-                ),
-              ),
-              AppSpaces.h10,
-              Expanded(
-                child: AppTitleValueContainer(
                   title: 'Site',
                   value: openingStock.siteName,
                 ),

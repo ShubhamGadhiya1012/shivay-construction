@@ -35,7 +35,7 @@ class IndentDm {
   final String siteName;
   final String gCode;
   final String gdName;
-  final String date;
+  final String reqDate;
   bool isSelected;
 
   IndentDm({
@@ -48,7 +48,7 @@ class IndentDm {
     required this.siteName,
     required this.gCode,
     required this.gdName,
-    required this.date,
+    required this.reqDate,
     this.isSelected = false,
   });
 
@@ -63,7 +63,7 @@ class IndentDm {
       siteName: json['siteName'] ?? '',
       gCode: json['gCode'] ?? '',
       gdName: json['gdName'] ?? '',
-      date: json['date'] ?? '',
+      reqDate: json['reqDate'] ?? '',
       isSelected: false,
     );
   }

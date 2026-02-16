@@ -47,7 +47,7 @@ class _OpeningStockEntryScreenState extends State<OpeningStockEntryScreen> {
   }
 
   void _initialize() async {
-    await _controller.getGodowns();
+    await _controller.getSites(); // Changed from getGodowns
     await _controller.getItems();
 
     if (widget.isEdit && widget.openingStock != null) {
@@ -56,10 +56,8 @@ class _OpeningStockEntryScreenState extends State<OpeningStockEntryScreen> {
       final parts = stock.date.split('-');
       _controller.dateController.text = '${parts[2]}-${parts[1]}-${parts[0]}';
 
-      _controller.selectedGodownCode.value = stock.gdCode;
-      _controller.selectedGodownName.value = stock.gdName;
       _controller.selectedSiteCode.value = stock.siteCode;
-      _controller.siteNameController.text = stock.siteName;
+      _controller.selectedSiteName.value = stock.siteName;
 
       if (stock.items.isNotEmpty) {
         _controller.itemsToSend.assignAll(
@@ -115,22 +113,15 @@ class _OpeningStockEntryScreenState extends State<OpeningStockEntryScreen> {
                     tablet ? AppSpaces.v16 : AppSpaces.v10,
                     Obx(
                       () => AppDropdown(
-                        items: _controller.godownNames,
-                        hintText: 'Godown',
-                        onChanged: _controller.onGodownSelected,
+                        items: _controller.siteNames,
+                        hintText: 'Site *',
+                        onChanged: _controller.onSiteSelected,
                         selectedItem:
-                            _controller.selectedGodownName.value.isNotEmpty
-                            ? _controller.selectedGodownName.value
+                            _controller.selectedSiteName.value.isNotEmpty
+                            ? _controller.selectedSiteName.value
                             : null,
-                        validatorText: 'Please select a godown.',
+                        validatorText: 'Please select a site',
                       ),
-                    ),
-                    tablet ? AppSpaces.v16 : AppSpaces.v10,
-                    AppTextFormField(
-                      controller: _controller.siteNameController,
-                      hintText: 'Site Name',
-                      enabled: false,
-                      fillColor: kColorLightGrey,
                     ),
                     tablet ? AppSpaces.v20 : AppSpaces.v14,
                     Row(
