@@ -551,7 +551,6 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                                                                     kColorPrimary,
                                                               ),
                                                             ),
-
                                                             if (indent.price !=
                                                                 null) ...[
                                                               Padding(
@@ -589,6 +588,42 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                                                             ],
                                                           ],
                                                         ),
+
+                                                        if (indent
+                                                            .reqDate
+                                                            .isNotEmpty) ...[
+                                                          AppSpaces.v2,
+                                                          Row(
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .calendar_today_rounded,
+                                                                size: tablet
+                                                                    ? 10
+                                                                    : 9,
+                                                                color:
+                                                                    kColorDarkGrey,
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 4,
+                                                              ),
+                                                              Text(
+                                                                'Req Date: ${convertyyyyMMddToddMMyyyy(indent.reqDate)}',
+                                                                style: TextStyles.kRegularOutfit(
+                                                                  fontSize:
+                                                                      tablet
+                                                                      ? FontSizes
+                                                                            .k10FontSize
+                                                                      : FontSizes
+                                                                            .k10FontSize,
+                                                                  color:
+                                                                      kColorDarkGrey,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+
                                                         Text(
                                                           'Amt: ₹${indent.amount!.toStringAsFixed(2)}',
                                                           style: TextStyles.kMediumOutfit(

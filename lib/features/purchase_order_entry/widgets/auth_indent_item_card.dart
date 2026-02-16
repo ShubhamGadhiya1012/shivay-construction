@@ -13,6 +13,7 @@ import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
+import 'package:shivay_construction/widgets/app_date_picker_text_form_field.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
 import '../../indent_entry/screens/site_wise_stock_screen.dart';
@@ -189,6 +190,8 @@ class AuthIndentItemCard extends StatelessWidget {
                           final qtyController = controller.qtyControllers[key];
                           final priceController =
                               controller.priceControllers[key];
+                          final dateController =
+                              controller.dateControllers[key]; // ADD THIS
 
                           return GestureDetector(
                             onTap: () => onIndentTap(index),
@@ -284,8 +287,31 @@ class AuthIndentItemCard extends StatelessWidget {
 
                                   if (indent.isSelected &&
                                       qtyController != null &&
-                                      priceController != null) ...[
+                                      priceController != null &&
+                                      dateController != null) ...[
                                     tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                                    // Required Date Field
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        AppDatePickerTextFormField(
+                                          dateController: dateController,
+                                          hintText: 'Required Date',
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'Required';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ],
+                                    ),
+
+                                    tablet ? AppSpaces.v12 : AppSpaces.v10,
+
                                     Row(
                                       children: [
                                         Expanded(
@@ -316,7 +342,6 @@ class AuthIndentItemCard extends StatelessWidget {
                                                         TextInputType.number,
                                                     floatingLabelRequired:
                                                         false,
-
                                                     validator: (value) {
                                                       if (value == null ||
                                                           value.isEmpty) {
@@ -367,7 +392,6 @@ class AuthIndentItemCard extends StatelessWidget {
                                                         TextInputType.number,
                                                     floatingLabelRequired:
                                                         false,
-
                                                     validator: (value) {
                                                       if (value == null ||
                                                           value.isEmpty) {

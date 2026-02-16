@@ -89,6 +89,11 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
           'Price': indent.price ?? 0.0,
           'IndentNo': indent.indentInvNo,
           'IndentSrNo': indent.indentSrNo,
+          'ReqDate': indent.reqDate.isNotEmpty
+              ? convertyyyyMMddToddMMyyyy(indent.reqDate)
+              : convertyyyyMMddToddMMyyyy(
+                  DateTime.now().toString().split(' ')[0],
+                ),
         });
       }
     }
@@ -105,6 +110,12 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
       if (!_controller.priceControllers.containsKey(key)) {
         _controller.priceControllers[key] = TextEditingController(
           text: (item['Price'] ?? 0.0).toStringAsFixed(2),
+        );
+      }
+
+      if (!_controller.dateControllers.containsKey(key)) {
+        _controller.dateControllers[key] = TextEditingController(
+          text: item['ReqDate'] ?? '',
         );
       }
     }
@@ -449,6 +460,8 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                   _controller.qtyControllers[key];
                               final priceController =
                                   _controller.priceControllers[key];
+                              final dateController =
+                                  _controller.dateControllers[key]; // ADD THIS
 
                               return Padding(
                                 padding: tablet
@@ -503,7 +516,6 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                             ],
                                           ),
                                         ),
-
                                         Material(
                                           color: kColorGreen.withOpacity(0.1),
                                           borderRadius: BorderRadius.circular(
@@ -537,7 +549,7 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                               ),
                                             ),
                                           ),
-                                        ), // After the visibility icon Material widget, add:
+                                        ),
                                         tablet ? AppSpaces.h8 : AppSpaces.h6,
                                         Material(
                                           color: kColorSecondary.withOpacity(
@@ -608,6 +620,38 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                       ],
                                     ),
                                     tablet ? AppSpaces.v12 : AppSpaces.v10,
+                                    if (dateController != null) ...[
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          AppDatePickerTextFormField(
+                                            dateController: dateController,
+                                            hintText: 'Required Date',
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.isEmpty) {
+                                                return 'Required';
+                                              }
+                                              return null;
+                                            },
+                                            onChanged: (value) {
+                                              if (value.isNotEmpty) {
+                                                _controller
+                                                        .selectedPurchaseItems[index]['ReqDate'] =
+                                                    value;
+                                                _controller
+                                                    .selectedPurchaseItems
+                                                    .refresh();
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      tablet ? AppSpaces.v12 : AppSpaces.v10,
+                                    ],
+
+                                    // EXISTING QUANTITY AND PRICE ROW
                                     Row(
                                       children: [
                                         Expanded(
@@ -635,7 +679,6 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                                   keyboardType:
                                                       TextInputType.number,
                                                   floatingLabelRequired: false,
-
                                                   validator: (value) {
                                                     if (value == null ||
                                                         value.isEmpty) {
@@ -692,7 +735,6 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                                   keyboardType:
                                                       TextInputType.number,
                                                   floatingLabelRequired: false,
-
                                                   validator: (value) {
                                                     if (value == null ||
                                                         value.isEmpty) {

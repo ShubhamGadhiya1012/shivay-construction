@@ -117,22 +117,6 @@ class OpeningStockReportScreen extends StatelessWidget {
                               ),
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
-                            Obx(
-                              () => AppDropdown(
-                                items: _controller.godownNames,
-                                hintText: 'Godown',
-                                onChanged: _controller.onGodownSelected,
-                                selectedItem:
-                                    _controller
-                                        .selectedGodownName
-                                        .value
-                                        .isNotEmpty
-                                    ? _controller.selectedGodownName.value
-                                    : null,
-                              ),
-                            ),
-
-                            tablet ? AppSpaces.v16 : AppSpaces.v10,
                             GestureDetector(
                               onTap: () {
                                 _showItemSelectionBottomSheet(context);

@@ -108,7 +108,7 @@ class OpeningStockPdfScreen {
       'Rate',
       'Amount',
       'Site Name',
-      'Godown Name',
+      // 'Godown Name',
     ];
 
     final columnWidths = {
@@ -120,7 +120,7 @@ class OpeningStockPdfScreen {
       5: const pw.FlexColumnWidth(1.2),
       6: const pw.FlexColumnWidth(1.8),
       7: const pw.FlexColumnWidth(3),
-      8: const pw.FlexColumnWidth(3),
+      // 8: const pw.FlexColumnWidth(3),
     };
 
     return pw.Table(
@@ -177,7 +177,7 @@ class OpeningStockPdfScreen {
                 align: pw.TextAlign.right,
               ),
               _cell(item.siteName, textColor),
-              _cell(item.gdName, textColor),
+              // _cell(item.gdName, textColor),
             ],
           );
         }),

@@ -13,6 +13,7 @@ import 'package:shivay_construction/features/site_master/models/site_master_dm.d
 import 'package:shivay_construction/features/site_master/repos/site_master_list_repo.dart';
 import 'package:shivay_construction/services/api_service.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
+import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PurchaseOrderController extends GetxController {
@@ -47,6 +48,7 @@ class PurchaseOrderController extends GetxController {
 
   var qtyControllers = <String, TextEditingController>{}.obs;
   var priceControllers = <String, TextEditingController>{}.obs;
+  var dateControllers = <String, TextEditingController>{}.obs;
 
   Future<void> getSites() async {
     try {
@@ -212,6 +214,11 @@ class PurchaseOrderController extends GetxController {
               );
               priceControllers[key]?.text = (selectedItem['Price'] ?? 0.0)
                   .toStringAsFixed(2);
+
+              // ADD THIS BLOCK
+              if (selectedItem.containsKey('ReqDate')) {
+                dateControllers[key]?.text = selectedItem['ReqDate'];
+              }
             }
           }
         }
@@ -254,6 +261,8 @@ class PurchaseOrderController extends GetxController {
         if (index != -1) {
           selectedPurchaseItems[index]['Qty'] = newItem['Qty'];
           selectedPurchaseItems[index]['Price'] = newItem['Price'];
+          selectedPurchaseItems[index]['ReqDate'] =
+              newItem['ReqDate']; // ADD THIS
         }
       }
     }
@@ -303,6 +312,13 @@ class PurchaseOrderController extends GetxController {
           if (!priceControllers.containsKey(key)) {
             priceControllers[key] = TextEditingController(
               text: item.rate.toStringAsFixed(2),
+            );
+          }
+
+          // ADD THIS BLOCK
+          if (!dateControllers.containsKey(key)) {
+            dateControllers[key] = TextEditingController(
+              text: convertyyyyMMddToddMMyyyy(indent.reqDate),
             );
           }
         }
@@ -388,6 +404,9 @@ class PurchaseOrderController extends GetxController {
               indent.authoriseQty;
           final price =
               double.tryParse(priceControllers[key]?.text ?? '') ?? 0.0;
+          final reqDate =
+              dateControllers[key]?.text ??
+              convertyyyyMMddToddMMyyyy(indent.reqDate); // ADD THIS
 
           selectedData.add({
             'SrNo': srNo,
@@ -397,6 +416,7 @@ class PurchaseOrderController extends GetxController {
             'Price': price,
             'IndentNo': indent.indentNo,
             'IndentSrNo': indent.indentSrNo,
+            'ReqDate': reqDate, // ADD THIS
           });
           srNo++;
         }
@@ -477,8 +497,14 @@ class PurchaseOrderController extends GetxController {
     for (var controller in priceControllers.values) {
       controller.dispose();
     }
+    // ADD THIS BLOCK
+    for (var controller in dateControllers.values) {
+      controller.dispose();
+    }
+
     qtyControllers.clear();
     priceControllers.clear();
+    dateControllers.clear(); // ADD THIS
 
     currentStep.value = 0;
     isEditMode.value = false;

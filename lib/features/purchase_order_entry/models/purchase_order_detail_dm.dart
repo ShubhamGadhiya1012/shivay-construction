@@ -29,6 +29,7 @@ class IndentDetailDm {
   final double orderQty;
   final double? price;
   final double? amount;
+  final String reqDate;
 
   IndentDetailDm({
     required this.indentSrNo,
@@ -37,6 +38,7 @@ class IndentDetailDm {
     required this.orderQty,
     this.price,
     this.amount,
+    required this.reqDate,
   });
 
   factory IndentDetailDm.fromJson(Map<String, dynamic> json) {
@@ -47,6 +49,7 @@ class IndentDetailDm {
       orderQty: (json['orderQty'] as num?)?.toDouble() ?? 0.0,
       price: (json['rate'] as num?)?.toDouble(),
       amount: (json['amount'] as num?)?.toDouble(),
+      reqDate: json['reqDate'] ?? '',
     );
   }
 }

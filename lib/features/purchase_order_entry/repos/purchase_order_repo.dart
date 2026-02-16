@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:shivay_construction/features/purchase_order_entry/models/auth_indent_item_dm.dart';
 import 'package:shivay_construction/services/api_service.dart';
+import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
 class PurchaseOrderRepo {
@@ -64,6 +65,9 @@ class PurchaseOrderRepo {
         fields['ItemData[$i].IndentNo'] = itemData[i]['IndentNo'];
         fields['ItemData[$i].IndentSrNo'] = itemData[i]['IndentSrNo']
             .toString();
+        fields['ItemData[$i].ReqDate'] = convertToApiDateFormat(
+          itemData[i]['ReqDate'] ?? '',
+        );
       }
 
       if (existingAttachments.isNotEmpty) {
