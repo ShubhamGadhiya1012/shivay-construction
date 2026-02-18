@@ -22,7 +22,7 @@ class DlrReportExcelFile {
 
       int rowIndex = 0;
 
-      // Styles
+      // ── Styles ─────────────────────────────────────────────────────────────
       CellStyle titleStyle = CellStyle(
         bold: true,
         fontSize: 16,
@@ -45,12 +45,30 @@ class DlrReportExcelFile {
         verticalAlign: VerticalAlign.Center,
       );
 
+      // Party group header style (light purple)
+      CellStyle partyHeaderStyle = CellStyle(
+        bold: true,
+        fontSize: 11,
+        horizontalAlign: HorizontalAlign.Left,
+        verticalAlign: VerticalAlign.Center,
+        backgroundColorHex: ExcelColor.fromHexString("#D9D2E9"),
+      );
+
       CellStyle subTotalStyle = CellStyle(
         bold: true,
         fontSize: 10,
         horizontalAlign: HorizontalAlign.Center,
         verticalAlign: VerticalAlign.Center,
         backgroundColorHex: ExcelColor.fromHexString("#E8F4F8"),
+      );
+
+      // Party-wise total style (light green)
+      CellStyle partyTotalStyle = CellStyle(
+        bold: true,
+        fontSize: 10,
+        horizontalAlign: HorizontalAlign.Center,
+        verticalAlign: VerticalAlign.Center,
+        backgroundColorHex: ExcelColor.fromHexString("#D9EAD3"),
       );
 
       CellStyle grandTotalStyle = CellStyle(
@@ -79,7 +97,7 @@ class DlrReportExcelFile {
         columnWidths[i] = headers[i].length.toDouble() + 3;
       }
 
-      // Title
+      // ── Title ──────────────────────────────────────────────────────────────
       sheet.merge(
         CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
         CellIndex.indexByColumnRow(
@@ -94,7 +112,7 @@ class DlrReportExcelFile {
       titleCell.cellStyle = titleStyle;
       rowIndex++;
 
-      // Date Range
+      // ── Date Range ─────────────────────────────────────────────────────────
       sheet.merge(
         CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
         CellIndex.indexByColumnRow(
@@ -109,7 +127,7 @@ class DlrReportExcelFile {
       dateCell.cellStyle = dataStyle;
       rowIndex++;
 
-      // Party and Site info if selected
+      // ── Party / Site info ──────────────────────────────────────────────────
       if (partyName.isNotEmpty || siteName.isNotEmpty) {
         sheet.merge(
           CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
@@ -132,9 +150,9 @@ class DlrReportExcelFile {
         rowIndex++;
       }
 
-      rowIndex++;
+      rowIndex++; // blank row before column headers
 
-      // Headers
+      // ── Column Headers ─────────────────────────────────────────────────────
       for (int i = 0; i < headers.length; i++) {
         var headerCell = sheet.cell(
           CellIndex.indexByColumnRow(columnIndex: i, rowIndex: rowIndex),
@@ -144,109 +162,174 @@ class DlrReportExcelFile {
       }
       rowIndex++;
 
-      // Group data by date
-      Map<String, List<DlrReportDm>> groupedByDate = {};
+      // ── Group data by Party ────────────────────────────────────────────────
+      // Preserve insertion order of parties
+      Map<String, List<DlrReportDm>> groupedByParty = {};
       for (var entry in reportList) {
-        String formattedDate = _formatDate(entry.dlrDate);
-        if (!groupedByDate.containsKey(formattedDate)) {
-          groupedByDate[formattedDate] = [];
+        if (!groupedByParty.containsKey(entry.pName)) {
+          groupedByParty[entry.pName] = [];
         }
-        groupedByDate[formattedDate]!.add(entry);
+        groupedByParty[entry.pName]!.add(entry);
       }
 
-      // Grand totals
+      // ── Grand totals ───────────────────────────────────────────────────────
       double grandTotalSkill = 0;
       double grandTotalSkillAmount = 0;
       double grandTotalUnSkill = 0;
       double grandTotalUnSkillAmount = 0;
 
-      // Process each date group
-      groupedByDate.forEach((date, entries) {
-        double dayTotalSkill = 0;
-        double dayTotalSkillAmount = 0;
-        double dayTotalUnSkill = 0;
-        double dayTotalUnSkillAmount = 0;
+      // ── Process each Party group ───────────────────────────────────────────
+      groupedByParty.forEach((pName, partyEntries) {
+        double partyTotalSkill = 0;
+        double partyTotalSkillAmount = 0;
+        double partyTotalUnSkill = 0;
+        double partyTotalUnSkillAmount = 0;
 
-        // Process entries for this date
-        for (int i = 0; i < entries.length; i++) {
-          var entry = entries[i];
+        // Party Name header row
+        sheet.merge(
+          CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
+          CellIndex.indexByColumnRow(
+            columnIndex: headers.length - 1,
+            rowIndex: rowIndex,
+          ),
+        );
+        var partyCell = sheet.cell(
+          CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
+        );
+        partyCell.value = TextCellValue('Party: $pName');
+        partyCell.cellStyle = partyHeaderStyle;
+        rowIndex++;
 
-          List<dynamic> values = [
-            i == 0 ? date : '', // Show date only on first row
-            entry.shift,
-            entry.skill,
-            entry.skillRate,
-            entry.skillAmount,
-            entry.unSkill,
-            entry.unSkillRate,
-            entry.unSkillAmount,
-            entry.supervisorName,
-          ];
-
-          for (int j = 0; j < values.length; j++) {
-            var dataCell = sheet.cell(
-              CellIndex.indexByColumnRow(columnIndex: j, rowIndex: rowIndex),
-            );
-
-            String cellText = values[j].toString();
-            if (cellText.length > columnWidths[j]!) {
-              columnWidths[j] = cellText.length.toDouble();
-            }
-
-            if (values[j] is num) {
-              dataCell.value = DoubleCellValue(values[j].toDouble());
-            } else {
-              dataCell.value = TextCellValue(values[j].toString());
-            }
-            dataCell.cellStyle = dataStyle;
+        // Group this party's entries by date
+        Map<String, List<DlrReportDm>> groupedByDate = {};
+        for (var entry in partyEntries) {
+          String formattedDate = _formatDate(entry.dlrDate);
+          if (!groupedByDate.containsKey(formattedDate)) {
+            groupedByDate[formattedDate] = [];
           }
-
-          dayTotalSkill += entry.skill;
-          dayTotalSkillAmount += entry.skillAmount;
-          dayTotalUnSkill += entry.unSkill;
-          dayTotalUnSkillAmount += entry.unSkillAmount;
-
-          rowIndex++;
+          groupedByDate[formattedDate]!.add(entry);
         }
 
-        // Day-wise total row
-        List<dynamic> dayTotalValues = [
-          'DAY WISE TOTAL',
+        // Process each date group within this party
+        groupedByDate.forEach((date, entries) {
+          double dayTotalSkill = 0;
+          double dayTotalSkillAmount = 0;
+          double dayTotalUnSkill = 0;
+          double dayTotalUnSkillAmount = 0;
+
+          for (int i = 0; i < entries.length; i++) {
+            var entry = entries[i];
+
+            List<dynamic> values = [
+              i == 0 ? date : '',
+              entry.shift,
+              entry.skill,
+              entry.skillRate,
+              entry.skillAmount,
+              entry.unSkill,
+              entry.unSkillRate,
+              entry.unSkillAmount,
+              entry.supervisorName,
+            ];
+
+            for (int j = 0; j < values.length; j++) {
+              var dataCell = sheet.cell(
+                CellIndex.indexByColumnRow(columnIndex: j, rowIndex: rowIndex),
+              );
+
+              String cellText = values[j].toString();
+              if (cellText.length > (columnWidths[j] ?? 0)) {
+                columnWidths[j] = cellText.length.toDouble();
+              }
+
+              if (values[j] is num) {
+                dataCell.value = DoubleCellValue((values[j] as num).toDouble());
+              } else {
+                dataCell.value = TextCellValue(values[j].toString());
+              }
+              dataCell.cellStyle = dataStyle;
+            }
+
+            dayTotalSkill += entry.skill;
+            dayTotalSkillAmount += entry.skillAmount;
+            dayTotalUnSkill += entry.unSkill;
+            dayTotalUnSkillAmount += entry.unSkillAmount;
+
+            rowIndex++;
+          }
+
+          // Day-wise total row
+          List<dynamic> dayTotalValues = [
+            'DAY WISE TOTAL',
+            '',
+            dayTotalSkill,
+            '',
+            dayTotalSkillAmount,
+            dayTotalUnSkill,
+            '',
+            dayTotalUnSkillAmount,
+            '',
+          ];
+
+          for (int j = 0; j < dayTotalValues.length; j++) {
+            var totalCell = sheet.cell(
+              CellIndex.indexByColumnRow(columnIndex: j, rowIndex: rowIndex),
+            );
+            if (dayTotalValues[j] is num) {
+              totalCell.value = DoubleCellValue(
+                (dayTotalValues[j] as num).toDouble(),
+              );
+            } else {
+              totalCell.value = TextCellValue(dayTotalValues[j].toString());
+            }
+            totalCell.cellStyle = subTotalStyle;
+          }
+
+          partyTotalSkill += dayTotalSkill;
+          partyTotalSkillAmount += dayTotalSkillAmount;
+          partyTotalUnSkill += dayTotalUnSkill;
+          partyTotalUnSkillAmount += dayTotalUnSkillAmount;
+
+          rowIndex++;
+        });
+
+        // Party-wise total row
+        List<dynamic> partyTotalValues = [
+          'PARTY TOTAL ($pName)',
           '',
-          dayTotalSkill,
+          partyTotalSkill,
           '',
-          dayTotalSkillAmount,
-          dayTotalUnSkill,
+          partyTotalSkillAmount,
+          partyTotalUnSkill,
           '',
-          dayTotalUnSkillAmount,
+          partyTotalUnSkillAmount,
           '',
         ];
 
-        for (int j = 0; j < dayTotalValues.length; j++) {
-          var totalCell = sheet.cell(
+        for (int j = 0; j < partyTotalValues.length; j++) {
+          var ptCell = sheet.cell(
             CellIndex.indexByColumnRow(columnIndex: j, rowIndex: rowIndex),
           );
-
-          if (dayTotalValues[j] is num) {
-            totalCell.value = DoubleCellValue(
-              (dayTotalValues[j] as num).toDouble(),
+          if (partyTotalValues[j] is num) {
+            ptCell.value = DoubleCellValue(
+              (partyTotalValues[j] as num).toDouble(),
             );
           } else {
-            totalCell.value = TextCellValue(dayTotalValues[j].toString());
+            ptCell.value = TextCellValue(partyTotalValues[j].toString());
           }
-          totalCell.cellStyle = subTotalStyle;
+          ptCell.cellStyle = partyTotalStyle;
         }
 
-        grandTotalSkill += dayTotalSkill;
-        grandTotalSkillAmount += dayTotalSkillAmount;
-        grandTotalUnSkill += dayTotalUnSkill;
-        grandTotalUnSkillAmount += dayTotalUnSkillAmount;
+        grandTotalSkill += partyTotalSkill;
+        grandTotalSkillAmount += partyTotalSkillAmount;
+        grandTotalUnSkill += partyTotalUnSkill;
+        grandTotalUnSkillAmount += partyTotalUnSkillAmount;
 
         rowIndex++;
-        rowIndex++; // Empty row between days
+        rowIndex++; // blank row between parties
       });
 
-      // Grand Total Row
+      // ── Grand Total Row ────────────────────────────────────────────────────
       List<dynamic> grandTotalValues = [
         'GRAND TOTAL',
         '',
@@ -263,7 +346,6 @@ class DlrReportExcelFile {
         var grandCell = sheet.cell(
           CellIndex.indexByColumnRow(columnIndex: j, rowIndex: rowIndex),
         );
-
         if (grandTotalValues[j] is num) {
           grandCell.value = DoubleCellValue(
             (grandTotalValues[j] as num).toDouble(),
@@ -274,12 +356,12 @@ class DlrReportExcelFile {
         grandCell.cellStyle = grandTotalStyle;
       }
 
-      // Set column widths
+      // ── Set column widths ──────────────────────────────────────────────────
       columnWidths.forEach((colIndex, width) {
         sheet.setColumnWidth(colIndex, width + 3);
       });
 
-      // Save and open file
+      // ── Save & open ────────────────────────────────────────────────────────
       final bytes = excel.encode()!;
       await _saveAndOpenExcel(bytes, 'DLR_Entry_Report');
 
