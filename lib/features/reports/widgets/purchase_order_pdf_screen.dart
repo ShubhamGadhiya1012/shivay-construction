@@ -63,6 +63,8 @@ class PurchaseOrderPdfScreen {
     }
   }
 
+  // ─── Header ───────────────────────────────────────────────────────────────
+
   static pw.Widget _buildHeader(
     PdfColor headerColor,
     String fromDate,
@@ -118,21 +120,21 @@ class PurchaseOrderPdfScreen {
     );
   }
 
+  // ─── Party Wise ───────────────────────────────────────────────────────────
+
   static pw.Widget _buildPartyWiseGroupedTable(
     List<PurchaseOrderReportDm> data,
     PdfColor headerBgColor,
     PdfColor groupHeaderColor,
     PdfColor textColor,
   ) {
+    // Group by party code, preserving insertion order
     final Map<String, List<PurchaseOrderReportDm>> groupedData = {};
     for (var item in data) {
-      if (!groupedData.containsKey(item.pCode)) {
-        groupedData[item.pCode] = [];
-      }
-      groupedData[item.pCode]!.add(item);
+      groupedData.putIfAbsent(item.pCode, () => []).add(item);
     }
 
-    final detailHeaders = [
+    const detailHeaders = [
       'PO No',
       'PO Date',
       'Item Name',
@@ -143,37 +145,74 @@ class PurchaseOrderPdfScreen {
       'Rate',
       'Amount',
       'Site Name',
-      'Req Date', // ADD THIS
+      'Req Date',
       'Status',
       'Authorized',
     ];
 
-    final columnWidths = {
-      0: const pw.FlexColumnWidth(2.0),
-      1: const pw.FlexColumnWidth(1.5),
-      2: const pw.FlexColumnWidth(3.0),
-      3: const pw.FlexColumnWidth(1.0),
-      4: const pw.FlexColumnWidth(1.2),
-      5: const pw.FlexColumnWidth(1.2),
-      6: const pw.FlexColumnWidth(1.2),
-      7: const pw.FlexColumnWidth(1.2),
-      8: const pw.FlexColumnWidth(1.5),
-      9: const pw.FlexColumnWidth(2.0),
-      10: const pw.FlexColumnWidth(1.5), // ADD THIS for Req Date
-      11: const pw.FlexColumnWidth(1.2),
-      12: const pw.FlexColumnWidth(1.2),
+    const columnWidths = {
+      0: pw.FlexColumnWidth(2.0),
+      1: pw.FlexColumnWidth(1.5),
+      2: pw.FlexColumnWidth(3.0),
+      3: pw.FlexColumnWidth(1.0),
+      4: pw.FlexColumnWidth(1.2),
+      5: pw.FlexColumnWidth(1.2),
+      6: pw.FlexColumnWidth(1.2),
+      7: pw.FlexColumnWidth(1.2),
+      8: pw.FlexColumnWidth(1.5),
+      9: pw.FlexColumnWidth(2.0),
+      10: pw.FlexColumnWidth(1.5),
+      11: pw.FlexColumnWidth(1.2),
+      12: pw.FlexColumnWidth(1.2),
     };
 
-    List<pw.Widget> widgets = [];
+    final List<pw.Widget> widgets = [];
 
     groupedData.forEach((partyCode, items) {
-      // ... existing group header code remains same ...
+      final partyName = items.first.partyName;
 
+      // ── Group header: Party Name ──────────────────────────────────────────
+      widgets.add(
+        pw.Container(
+          width: double.infinity,
+          padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: pw.BoxDecoration(
+            color: groupHeaderColor,
+            border: pw.Border.all(color: PdfColors.grey, width: 0.5),
+            borderRadius: pw.BorderRadius.circular(4),
+          ),
+          child: pw.Row(
+            children: [
+              pw.Text(
+                'Party: ',
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColor.fromHex('#1D5B86'),
+                ),
+              ),
+              pw.Text(
+                partyName,
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.black,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      widgets.add(pw.SizedBox(height: 4));
+
+      // ── Detail table ──────────────────────────────────────────────────────
       widgets.add(
         pw.Table(
           border: pw.TableBorder.all(color: PdfColors.grey, width: 0.5),
           columnWidths: columnWidths,
           children: [
+            // Column header row
             pw.TableRow(
               decoration: pw.BoxDecoration(color: headerBgColor),
               children: detailHeaders
@@ -193,6 +232,7 @@ class PurchaseOrderPdfScreen {
                   .toList(),
             ),
 
+            // Data rows
             ...items.asMap().entries.map((entry) {
               final item = entry.value;
               return pw.TableRow(
@@ -234,7 +274,6 @@ class PurchaseOrderPdfScreen {
                     align: pw.TextAlign.right,
                   ),
                   _cell(item.siteName, textColor),
-                  // ADD THIS for Req Date
                   _cell(
                     item.reqDate.isNotEmpty
                         ? convertyyyyMMddToddMMyyyy(item.reqDate)
@@ -255,14 +294,20 @@ class PurchaseOrderPdfScreen {
                 ],
               );
             }),
+
+            // Sub-total row for this party
+            _buildSubTotalRow(items, columnWidths.length),
           ],
         ),
       );
 
       widgets.add(pw.SizedBox(height: 15));
     });
+
     return pw.Column(children: widgets);
   }
+
+  // ─── Item Wise ────────────────────────────────────────────────────────────
 
   static pw.Widget _buildItemWiseGroupedTable(
     List<PurchaseOrderReportDm> data,
@@ -270,15 +315,13 @@ class PurchaseOrderPdfScreen {
     PdfColor groupHeaderColor,
     PdfColor textColor,
   ) {
+    // Group by item code, preserving insertion order
     final Map<String, List<PurchaseOrderReportDm>> groupedData = {};
     for (var item in data) {
-      if (!groupedData.containsKey(item.iCode)) {
-        groupedData[item.iCode] = [];
-      }
-      groupedData[item.iCode]!.add(item);
+      groupedData.putIfAbsent(item.iCode, () => []).add(item);
     }
 
-    final detailHeaders = [
+    const detailHeaders = [
       'PO No',
       'PO Date',
       'Party Name',
@@ -289,37 +332,85 @@ class PurchaseOrderPdfScreen {
       'Rate',
       'Amount',
       'Site Name',
-      'Req Date', // ADD THIS
+      'Req Date',
       'Status',
       'Authorized',
     ];
 
-    final columnWidths = {
-      0: const pw.FlexColumnWidth(2.0),
-      1: const pw.FlexColumnWidth(1.5),
-      2: const pw.FlexColumnWidth(2.5),
-      3: const pw.FlexColumnWidth(1.0),
-      4: const pw.FlexColumnWidth(1.2),
-      5: const pw.FlexColumnWidth(1.2),
-      6: const pw.FlexColumnWidth(1.2),
-      7: const pw.FlexColumnWidth(1.2),
-      8: const pw.FlexColumnWidth(1.5),
-      9: const pw.FlexColumnWidth(2.0),
-      10: const pw.FlexColumnWidth(1.5), // ADD THIS for Req Date
-      11: const pw.FlexColumnWidth(1.2),
-      12: const pw.FlexColumnWidth(1.2),
+    const columnWidths = {
+      0: pw.FlexColumnWidth(2.0),
+      1: pw.FlexColumnWidth(1.5),
+      2: pw.FlexColumnWidth(2.5),
+      3: pw.FlexColumnWidth(1.0),
+      4: pw.FlexColumnWidth(1.2),
+      5: pw.FlexColumnWidth(1.2),
+      6: pw.FlexColumnWidth(1.2),
+      7: pw.FlexColumnWidth(1.2),
+      8: pw.FlexColumnWidth(1.5),
+      9: pw.FlexColumnWidth(2.0),
+      10: pw.FlexColumnWidth(1.5),
+      11: pw.FlexColumnWidth(1.2),
+      12: pw.FlexColumnWidth(1.2),
     };
 
-    List<pw.Widget> widgets = [];
+    final List<pw.Widget> widgets = [];
 
     groupedData.forEach((itemCode, items) {
-      // ... existing group header code remains same ...
+      final itemName = items.first.iName;
+      final unit = items.first.unit;
 
+      // ── Group header: Item Name ───────────────────────────────────────────
+      widgets.add(
+        pw.Container(
+          width: double.infinity,
+          padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: pw.BoxDecoration(
+            color: groupHeaderColor,
+            border: pw.Border.all(color: PdfColors.grey, width: 0.5),
+            borderRadius: pw.BorderRadius.circular(4),
+          ),
+          child: pw.Row(
+            children: [
+              pw.Text(
+                'Item: ',
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColor.fromHex('#1D5B86'),
+                ),
+              ),
+              pw.Text(
+                itemName,
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.black,
+                ),
+              ),
+              pw.SizedBox(width: 20),
+              pw.Text(
+                'Unit: ',
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColor.fromHex('#1D5B86'),
+                ),
+              ),
+              pw.Text(unit, style: const pw.TextStyle(fontSize: 10)),
+            ],
+          ),
+        ),
+      );
+
+      widgets.add(pw.SizedBox(height: 4));
+
+      // ── Detail table ──────────────────────────────────────────────────────
       widgets.add(
         pw.Table(
           border: pw.TableBorder.all(color: PdfColors.grey, width: 0.5),
           columnWidths: columnWidths,
           children: [
+            // Column header row
             pw.TableRow(
               decoration: pw.BoxDecoration(color: headerBgColor),
               children: detailHeaders
@@ -339,6 +430,7 @@ class PurchaseOrderPdfScreen {
                   .toList(),
             ),
 
+            // Data rows
             ...items.asMap().entries.map((entry) {
               final item = entry.value;
               return pw.TableRow(
@@ -380,7 +472,6 @@ class PurchaseOrderPdfScreen {
                     align: pw.TextAlign.right,
                   ),
                   _cell(item.siteName, textColor),
-                  // ADD THIS for Req Date
                   _cell(
                     item.reqDate.isNotEmpty
                         ? convertyyyyMMddToddMMyyyy(item.reqDate)
@@ -401,29 +492,86 @@ class PurchaseOrderPdfScreen {
                 ],
               );
             }),
+
+            // Sub-total row for this item
+            _buildSubTotalRow(items, columnWidths.length),
           ],
         ),
       );
 
       widgets.add(pw.SizedBox(height: 15));
     });
+
     return pw.Column(children: widgets);
   }
+
+  // ─── Sub-total row (shared by both views) ─────────────────────────────────
+
+  static pw.TableRow _buildSubTotalRow(
+    List<PurchaseOrderReportDm> items,
+    int totalColumns,
+  ) {
+    final subPoQty = items.fold(0.0, (s, i) => s + i.poQty);
+    final subReceived = items.fold(0.0, (s, i) => s + i.receivedQty);
+    final subPending = items.fold(0.0, (s, i) => s + i.pendingQty);
+    final subAmount = items.fold(0.0, (s, i) => s + i.amount);
+
+    pw.Widget labelCell(String text) => pw.Padding(
+      padding: const pw.EdgeInsets.all(5),
+      child: pw.Text(
+        text,
+        textAlign: pw.TextAlign.right,
+        style: pw.TextStyle(
+          fontSize: 8.5,
+          fontWeight: pw.FontWeight.bold,
+          color: PdfColors.black,
+        ),
+      ),
+    );
+
+    pw.Widget emptyCell() =>
+        pw.Padding(padding: const pw.EdgeInsets.all(5), child: pw.Text(''));
+
+    return pw.TableRow(
+      children: [
+        // Col 0: PO No  → "Sub Total"
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(5),
+          child: pw.Text(
+            'Sub Total',
+            style: pw.TextStyle(
+              fontSize: 8.5,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.black,
+            ),
+          ),
+        ),
+        emptyCell(), // PO Date
+        emptyCell(), // Item/Party Name
+        emptyCell(), // Unit
+        labelCell(subPoQty.toStringAsFixed(2)), // PO Qty
+        labelCell(subReceived.toStringAsFixed(2)), // Received Qty
+        labelCell(subPending.toStringAsFixed(2)), // Pending Qty
+        emptyCell(), // Rate
+        labelCell(subAmount.toStringAsFixed(2)), // Amount
+        emptyCell(), // Site Name
+        emptyCell(), // Req Date
+        emptyCell(), // Status
+        emptyCell(), // Authorized
+      ],
+    );
+  }
+
+  // ─── Summary ──────────────────────────────────────────────────────────────
 
   static pw.Widget _buildSummary(
     List<PurchaseOrderReportDm> data,
     PdfColor textColor,
   ) {
-    final totalPOQty = data.fold(0.0, (sum, item) => sum + item.poQty);
-    final totalReceivedQty = data.fold(
-      0.0,
-      (sum, item) => sum + item.receivedQty,
-    );
-    final totalPendingQty = data.fold(
-      0.0,
-      (sum, item) => sum + item.pendingQty,
-    );
-    final totalAmount = data.fold(0.0, (sum, item) => sum + item.amount);
+    final totalPOQty = data.fold(0.0, (s, i) => s + i.poQty);
+    final totalReceivedQty = data.fold(0.0, (s, i) => s + i.receivedQty);
+    final totalPendingQty = data.fold(0.0, (s, i) => s + i.pendingQty);
+    final totalAmount = data.fold(0.0, (s, i) => s + i.amount);
 
     final statusCounts = <String, int>{};
     for (var item in data) {
@@ -483,6 +631,8 @@ class PurchaseOrderPdfScreen {
     );
   }
 
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
   static pw.Widget _summaryRow(String label, String value, {PdfColor? color}) {
     return pw.Row(
       children: [
@@ -535,7 +685,10 @@ class PurchaseOrderPdfScreen {
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text('Purchase Order Report', style: pw.TextStyle(fontSize: 9)),
+          pw.Text(
+            'Purchase Order Report',
+            style: const pw.TextStyle(fontSize: 9),
+          ),
           pw.Text(
             'Page ${context.pageNumber}',
             style: const pw.TextStyle(fontSize: 9),
@@ -549,7 +702,6 @@ class PurchaseOrderPdfScreen {
     final bytes = await pdf.save();
     final dir = await getTemporaryDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-
     final file = File(
       '${dir.path}/PurchaseOrder_Report_${reportType}_$timestamp.pdf',
     );
