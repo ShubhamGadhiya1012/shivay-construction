@@ -103,7 +103,7 @@ class AppDrawer extends StatelessWidget {
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    padding: tablet ? AppPaddings.p10 : AppPaddings.p8,
+                    padding: tablet ? AppPaddings.p10 : AppPaddings.p4,
                     child: Image.asset(
                       kImagelogo,
                       fit: BoxFit.contain,
