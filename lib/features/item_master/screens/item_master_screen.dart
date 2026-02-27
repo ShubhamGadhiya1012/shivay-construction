@@ -253,11 +253,14 @@ class ItemMasterScreen extends StatelessWidget {
                                       ),
                                     ],
                                     validator: (value) {
-                                      if (value == null || value.trim().isEmpty)
+                                      if (value == null ||
+                                          value.trim().isEmpty) {
                                         return 'Please enter rent rate';
+                                      }
                                       final r = double.tryParse(value.trim());
-                                      if (r == null || r <= 0)
+                                      if (r == null || r <= 0) {
                                         return 'Please enter valid rent rate';
+                                      }
                                       return null;
                                     },
                                   ),
