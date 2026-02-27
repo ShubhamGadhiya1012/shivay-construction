@@ -3,7 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
-import 'package:shivay_construction/features/item_master/models/item_master_dm.dart';
+import 'package:shivay_construction/features/hsn_master/models/hsn_master_dm.dart';
+import 'package:shivay_construction/features/hsn_master/models/hsn_master_detail_dm.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
@@ -11,21 +12,23 @@ import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
 import 'package:shivay_construction/widgets/app_button.dart';
 
-class ItemMasterCard extends StatelessWidget {
-  const ItemMasterCard({
+class HsnMasterCard extends StatelessWidget {
+  const HsnMasterCard({
     super.key,
-    required this.item,
+    required this.hsn,
     required this.onEdit,
+    required this.onDelete,
     required this.isExpanded,
     required this.onTap,
-    required this.onDelete,
+    required this.hsnDetails,
   });
 
-  final ItemMasterDm item;
+  final HsnMasterDm hsn;
   final VoidCallback onEdit;
+  final VoidCallback onDelete;
   final bool isExpanded;
   final VoidCallback onTap;
-  final VoidCallback onDelete;
+  final List<HsnMasterDetailDm> hsnDetails;
 
   Widget _buildInfoRow({
     required String label,
@@ -87,7 +90,7 @@ class ItemMasterCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Header Row ──
+                // Header Row
                 Row(
                   children: [
                     Expanded(
@@ -95,7 +98,7 @@ class ItemMasterCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            item.iName,
+                            hsn.hsnNo,
                             style: TextStyles.kBoldOutfit(
                               fontSize: tablet
                                   ? FontSizes.k20FontSize
@@ -103,10 +106,10 @@ class ItemMasterCard extends StatelessWidget {
                               color: kColorPrimary,
                             ),
                           ),
-                          if (item.description.isNotEmpty) ...[
+                          if (hsn.description.isNotEmpty) ...[
                             AppSpaces.v4,
                             Text(
-                              item.description,
+                              hsn.description,
                               style: TextStyles.kRegularOutfit(
                                 fontSize: tablet
                                     ? FontSizes.k14FontSize
@@ -146,7 +149,7 @@ class ItemMasterCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    tablet ? AppSpaces.h12 : AppSpaces.h8,
+                    tablet ? AppSpaces.h8 : AppSpaces.h6,
                     // Delete Button
                     Material(
                       color: Colors.red.withOpacity(0.1),
@@ -188,13 +191,13 @@ class ItemMasterCard extends StatelessWidget {
                 Divider(height: 1, color: kColorLightGrey.withOpacity(0.5)),
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
 
-                // ── Always Visible: Rate, Unit ──
+                // Basic Info Row
                 Row(
                   children: [
                     Expanded(
                       child: _buildInfoRow(
-                        label: 'Rate',
-                        value: '₹${item.rate.toStringAsFixed(2)}',
+                        label: 'Chapter No',
+                        value: hsn.chapterNo,
                         tablet: tablet,
                       ),
                     ),
@@ -202,136 +205,173 @@ class ItemMasterCard extends StatelessWidget {
                     Expanded(
                       child: _buildInfoRow(
                         label: 'Unit',
-                        value: item.unit,
+                        value: hsn.unit,
+                        tablet: tablet,
+                      ),
+                    ),
+                    tablet ? AppSpaces.h16 : AppSpaces.h12,
+                    Expanded(
+                      child: _buildInfoRow(
+                        label: 'EWB Unit',
+                        value: hsn.ewbUnit,
                         tablet: tablet,
                       ),
                     ),
                   ],
                 ),
+                tablet ? AppSpaces.v12 : AppSpaces.v8,
 
-                // ── Rent Item Badge (always visible if rentItem true) ──
-                if (item.rentItem) ...[
-                  tablet ? AppSpaces.v12 : AppSpaces.v8,
-                  Container(
-                    padding: tablet
-                        ? AppPaddings.combined(horizontal: 12, vertical: 6)
-                        : AppPaddings.combined(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: kColorSecondary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: kColorSecondary.withOpacity(0.3),
+                // SAC Badge
+                Row(
+                  children: [
+                    Container(
+                      padding: tablet
+                          ? AppPaddings.combined(horizontal: 12, vertical: 6)
+                          : AppPaddings.combined(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: hsn.sac
+                            ? kColorGreen.withOpacity(0.1)
+                            : kColorDarkGrey.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: hsn.sac
+                              ? kColorGreen.withOpacity(0.3)
+                              : kColorDarkGrey.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Text(
+                        hsn.sac ? 'SAC: Yes' : 'SAC: No',
+                        style: TextStyles.kMediumOutfit(
+                          fontSize: tablet
+                              ? FontSizes.k14FontSize
+                              : FontSizes.k12FontSize,
+                          color: hsn.sac ? kColorGreen : kColorDarkGrey,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      'Rent Item',
-                      style: TextStyles.kMediumOutfit(
-                        fontSize: tablet
-                            ? FontSizes.k14FontSize
-                            : FontSizes.k12FontSize,
-                        color: kColorSecondary,
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
 
-                // ── Expanded Section ──
+                // Expanded Details
                 AnimatedCrossFade(
                   firstChild: const SizedBox.shrink(),
                   secondChild: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      tablet ? AppSpaces.v12 : AppSpaces.v10,
-
-                      // HSN No
-                      if (item.hsnNo.isNotEmpty) ...[
-                        _buildInfoRow(
-                          label: 'HSN No',
-                          value: item.hsnNo,
-                          tablet: tablet,
+                      tablet ? AppSpaces.v16 : AppSpaces.v12,
+                      Divider(
+                        height: 1,
+                        color: kColorLightGrey.withOpacity(0.5),
+                      ),
+                      tablet ? AppSpaces.v16 : AppSpaces.v12,
+                      Text(
+                        'Tax Details',
+                        style: TextStyles.kSemiBoldOutfit(
+                          fontSize: tablet
+                              ? FontSizes.k18FontSize
+                              : FontSizes.k16FontSize,
+                          color: kColorTextPrimary,
                         ),
-                        tablet ? AppSpaces.v12 : AppSpaces.v10,
-                      ],
-
-                      // Category
-                      if (item.cName.isNotEmpty) ...[
-                        _buildInfoRow(
-                          label: 'Category',
-                          value: item.cName,
-                          tablet: tablet,
-                        ),
-                        tablet ? AppSpaces.v12 : AppSpaces.v10,
-                      ],
-
-                      // Item Group & Sub Group
-                      if (item.igName.isNotEmpty || item.icName.isNotEmpty) ...[
-                        Row(
-                          children: [
-                            if (item.igName.isNotEmpty)
-                              Expanded(
-                                child: _buildInfoRow(
-                                  label: 'Item Group',
-                                  value: item.igName,
-                                  tablet: tablet,
-                                ),
-                              ),
-                            if (item.igName.isNotEmpty &&
-                                item.icName.isNotEmpty)
-                              tablet ? AppSpaces.h16 : AppSpaces.h12,
-                            if (item.icName.isNotEmpty)
-                              Expanded(
-                                child: _buildInfoRow(
-                                  label: 'Item Sub Group',
-                                  value: item.icName,
-                                  tablet: tablet,
-                                ),
-                              ),
-                          ],
-                        ),
-                        tablet ? AppSpaces.v12 : AppSpaces.v10,
-                      ],
-
-                      // Rent Details (only if rentItem is true)
-                      if (item.rentItem) ...[
-                        Divider(
-                          height: 1,
-                          color: kColorLightGrey.withOpacity(0.5),
-                        ),
-                        tablet ? AppSpaces.v12 : AppSpaces.v10,
-                        Text(
-                          'Rent Details',
-                          style: TextStyles.kSemiBoldOutfit(
-                            fontSize: tablet
-                                ? FontSizes.k16FontSize
-                                : FontSizes.k14FontSize,
-                            color: kColorTextPrimary,
-                          ),
-                        ),
-                        tablet ? AppSpaces.v12 : AppSpaces.v8,
-                        Row(
-                          children: [
-                            if (item.frequency.isNotEmpty)
-                              Expanded(
-                                child: _buildInfoRow(
-                                  label: 'Frequency',
-                                  value: item.frequency,
-                                  tablet: tablet,
-                                  valueColor: kColorPrimary,
-                                ),
-                              ),
-                            if (item.frequency.isNotEmpty)
-                              tablet ? AppSpaces.h16 : AppSpaces.h12,
-                            Expanded(
-                              child: _buildInfoRow(
-                                label: 'Rent Rate',
-                                value: '₹${item.rentRate.toStringAsFixed(2)}',
-                                tablet: tablet,
-                                valueColor: kColorPrimary,
+                      ),
+                      tablet ? AppSpaces.v12 : AppSpaces.v8,
+                      if (hsnDetails.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: AppPaddings.pv12,
+                            child: Text(
+                              'No tax details found',
+                              style: TextStyles.kRegularOutfit(
+                                fontSize: tablet
+                                    ? FontSizes.k14FontSize
+                                    : FontSizes.k12FontSize,
+                                color: kColorDarkGrey,
                               ),
                             ),
-                          ],
+                          ),
+                        )
+                      else
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: hsnDetails.length,
+                          itemBuilder: (context, index) {
+                            final detail = hsnDetails[index];
+                            return Container(
+                              margin: AppPaddings.custom(bottom: 8),
+                              padding: tablet
+                                  ? AppPaddings.p12
+                                  : AppPaddings.p10,
+                              decoration: BoxDecoration(
+                                color: kColorPrimary.withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: kColorPrimary.withOpacity(0.2),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _buildInfoRow(
+                                          label: 'Effect Date',
+                                          value: _formatDate(detail.effectDate),
+                                          tablet: tablet,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  tablet ? AppSpaces.v12 : AppSpaces.v8,
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _buildInfoRow(
+                                          label: 'IGST',
+                                          value:
+                                              '${detail.igst.toStringAsFixed(2)}%',
+                                          tablet: tablet,
+                                          valueColor: kColorPrimary,
+                                        ),
+                                      ),
+                                      AppSpaces.h12,
+                                      Expanded(
+                                        child: _buildInfoRow(
+                                          label: 'SGST',
+                                          value:
+                                              '${detail.sgst.toStringAsFixed(2)}%',
+                                          tablet: tablet,
+                                          valueColor: kColorPrimary,
+                                        ),
+                                      ),
+
+                                      Expanded(
+                                        child: _buildInfoRow(
+                                          label: 'CGST',
+                                          value:
+                                              '${detail.cgst.toStringAsFixed(2)}%',
+                                          tablet: tablet,
+                                          valueColor: kColorPrimary,
+                                        ),
+                                      ),
+                                      if (detail.lgst > 0) ...[
+                                        AppSpaces.h12,
+                                        Expanded(
+                                          child: _buildInfoRow(
+                                            label: 'LGST',
+                                            value:
+                                                '${detail.lgst.toStringAsFixed(2)}%',
+                                            tablet: tablet,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
-                      ],
                     ],
                   ),
                   crossFadeState: isExpanded
@@ -345,6 +385,13 @@ class ItemMasterCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatDate(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    final parts = dateStr.split('-');
+    if (parts.length < 3) return dateStr;
+    return '${parts[2]}-${parts[1]}-${parts[0]}';
   }
 
   void _showDeleteDialog(BuildContext context, bool tablet) {
@@ -404,7 +451,7 @@ class ItemMasterCard extends StatelessWidget {
                     tablet ? AppSpaces.h12 : AppSpaces.h10,
                     Expanded(
                       child: Text(
-                        'Delete Item',
+                        'Delete HSN Master',
                         style: TextStyles.kSemiBoldOutfit(
                           fontSize: tablet
                               ? FontSizes.k22FontSize
@@ -422,7 +469,7 @@ class ItemMasterCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Are you sure you want to delete "${item.iName}"?',
+                      'Are you sure you want to delete HSN "${hsn.hsnNo}"?',
                       style: TextStyles.kRegularOutfit(
                         fontSize: tablet
                             ? FontSizes.k16FontSize

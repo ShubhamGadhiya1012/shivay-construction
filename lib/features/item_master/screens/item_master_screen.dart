@@ -12,6 +12,7 @@ import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
 import 'package:shivay_construction/widgets/app_appbar.dart';
 import 'package:shivay_construction/widgets/app_button.dart';
+import 'package:shivay_construction/widgets/app_checkbox_row.dart';
 import 'package:shivay_construction/widgets/app_dropdown.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
@@ -192,7 +193,77 @@ class ItemMasterScreen extends StatelessWidget {
                                 validatorText:
                                     'Please select an item sub group',
                               ),
+                            ), // After unit row, add HSN dropdown:
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
+                            Obx(
+                              () => AppDropdown(
+                                hintText: 'HSN No',
+                                items: _controller.hsnNumbers,
+                                selectedItem:
+                                    _controller.selectedHsnNo.value.isNotEmpty
+                                    ? _controller.selectedHsnNo.value
+                                    : null,
+                                onChanged: _controller.onHsnSelected,
+                              ),
                             ),
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
+
+                            // Rent Item checkbox:
+                            Obx(
+                              () => AppCheckboxRow(
+                                title: 'Rent Item',
+                                value: _controller.rentItem.value,
+                                onChanged: _controller.toggleRentItem,
+                              ),
+                            ),
+
+                            // Frequency + Rent Rate (visible only when rentItem is true):
+                            Obx(() {
+                              if (!_controller.rentItem.value) {
+                                return const SizedBox.shrink();
+                              }
+                              return Column(
+                                children: [
+                                  tablet ? AppSpaces.v16 : AppSpaces.v10,
+                                  AppDropdown(
+                                    hintText: 'Frequency *',
+                                    items:
+                                        ItemMasterController.frequencyOptions,
+                                    selectedItem:
+                                        _controller
+                                            .frequencyController
+                                            .text
+                                            .isNotEmpty
+                                        ? _controller.frequencyController.text
+                                        : null,
+                                    onChanged: _controller.onFrequencySelected,
+                                    validatorText: 'Please select frequency',
+                                  ),
+                                  tablet ? AppSpaces.v16 : AppSpaces.v10,
+                                  AppTextFormField(
+                                    controller: _controller.rentRateController,
+                                    hintText: 'Rent Rate *',
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(
+                                        RegExp(r'^\d+\.?\d{0,2}'),
+                                      ),
+                                    ],
+                                    validator: (value) {
+                                      if (value == null || value.trim().isEmpty)
+                                        return 'Please enter rent rate';
+                                      final r = double.tryParse(value.trim());
+                                      if (r == null || r <= 0)
+                                        return 'Please enter valid rent rate';
+                                      return null;
+                                    },
+                                  ),
+                                ],
+                              );
+                            }),
                             tablet ? AppSpaces.v20 : AppSpaces.v16,
                           ],
                         ),

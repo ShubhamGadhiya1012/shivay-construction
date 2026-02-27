@@ -11,6 +11,7 @@ import 'package:shivay_construction/features/home/widgets/version_and_developer_
 import 'package:shivay_construction/features/category_master/screens/category_master_screen.dart';
 import 'package:shivay_construction/features/department_master/screens/department_master_screen.dart';
 import 'package:shivay_construction/features/godown_master/screens/godown_master_screen.dart';
+import 'package:shivay_construction/features/hsn_master/screens/hsn_master_list_screen.dart';
 import 'package:shivay_construction/features/indent_entry/screens/indents_screen.dart';
 import 'package:shivay_construction/features/item_group_master/screens/item_group_master_screen.dart';
 import 'package:shivay_construction/features/item_help/screens/item_help_search_screen.dart';
@@ -103,7 +104,7 @@ class AppDrawer extends StatelessWidget {
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    padding: tablet ? AppPaddings.p10 : AppPaddings.p4,
+                    padding: tablet ? AppPaddings.p10 : AppPaddings.p8,
                     child: Image.asset(
                       kImagelogo,
                       fit: BoxFit.contain,
@@ -470,6 +471,9 @@ class AppDrawer extends StatelessWidget {
         break;
       case 'godown master':
         Get.to(() => GodownMasterScreen());
+        break;
+      case 'hsn master':
+        Get.to(() => HsnMasterListScreen());
         break;
       case 'opening stock entry':
         Get.to(() => OpeningStocksScreen());

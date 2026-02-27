@@ -10,6 +10,10 @@ class ItemMasterDm {
   final String cName;
   final String unit;
   final double rate;
+  final String hsnNo;
+  final bool rentItem;
+  final String frequency;
+  final double rentRate;
 
   ItemMasterDm({
     required this.iCode,
@@ -23,6 +27,10 @@ class ItemMasterDm {
     required this.cName,
     required this.unit,
     required this.rate,
+    required this.hsnNo,
+    required this.rentItem,
+    required this.frequency,
+    required this.rentRate,
   });
 
   factory ItemMasterDm.fromJson(Map<String, dynamic> json) {
@@ -40,6 +48,10 @@ class ItemMasterDm {
       rate: json['Rate'] != null
           ? double.tryParse(json['Rate'].toString()) ?? 0.0
           : 0.0,
+      hsnNo: json['HsnNo'] ?? '',
+      rentItem: json['RentItem'] ?? false,
+      frequency: json['Frequency'] ?? '',
+      rentRate: (json['RentRate'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -53,6 +65,10 @@ class ItemMasterDm {
       'CCode': cCode,
       'Unit': unit,
       'Rate': rate,
+      'HsnNo': hsnNo,
+      'RentItem': rentItem,
+      'Frequency': frequency,
+      'RentRate': rentRate,
     };
   }
 }
