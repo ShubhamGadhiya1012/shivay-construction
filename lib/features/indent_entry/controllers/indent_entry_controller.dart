@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:shivay_construction/features/godown_master/models/godown_master_dm.dart';
+import 'package:shivay_construction/features/godown_master/repos/godown_master_repo.dart';
 import 'package:shivay_construction/features/indent_entry/controllers/indents_controller.dart';
 import 'package:shivay_construction/features/indent_entry/repos/indent_entry_repo.dart';
 import 'package:shivay_construction/features/item_master/models/item_master_dm.dart';
@@ -20,11 +22,18 @@ class IndentEntryController extends GetxController {
   final indentItemFormKey = GlobalKey<FormState>();
 
   var dateController = TextEditingController();
+  var remarkController = TextEditingController();
 
   var sites = <SiteMasterDm>[].obs;
   var siteNames = <String>[].obs;
   var selectedSiteName = ''.obs;
   var selectedSiteCode = ''.obs;
+
+  // Add after site variables:
+  var godowns = <GodownMasterDm>[].obs;
+  var godownNames = <String>[].obs;
+  var selectedGodownName = ''.obs;
+  var selectedGodownCode = ''.obs;
 
   var items = <ItemMasterDm>[].obs;
   var itemNames = <String>[].obs;
@@ -58,10 +67,43 @@ class IndentEntryController extends GetxController {
     }
   }
 
-  void onSiteSelected(String? siteName) {
+  void onSiteSelected(String? siteName) async {
     selectedSiteName.value = siteName!;
     var selectedSiteObj = sites.firstWhere((s) => s.siteName == siteName);
     selectedSiteCode.value = selectedSiteObj.siteCode;
+
+    selectedGodownName.value = '';
+    selectedGodownCode.value = '';
+    godowns.clear();
+    godownNames.clear();
+
+    if (selectedSiteCode.value.isNotEmpty) {
+      await getGodowns(selectedSiteCode.value);
+    }
+  }
+
+  // Add new method:
+  Future<void> getGodowns([String siteCode = '']) async {
+    try {
+      isLoading.value = true;
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(
+        siteCode: siteCode,
+      );
+      godowns.assignAll(fetchedGodowns);
+      godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void onGodownSelected(String? godownName) {
+    selectedGodownName.value = godownName ?? '';
+    var selectedGodownObj = godowns.firstWhereOrNull(
+      (gd) => gd.gdName == godownName,
+    );
+    selectedGodownCode.value = selectedGodownObj?.gdCode ?? '';
   }
 
   Future<void> getItems() async {
@@ -99,6 +141,7 @@ class IndentEntryController extends GetxController {
       selectedItemCode.value = item['icode'] ?? item['ICode'] ?? '';
       selectedUnit.value = item['unit'] ?? item['Unit'] ?? '';
       qtyController.text = (item['qty'] ?? item['Qty'] ?? 0).toString();
+      remarkController.text = item['Remark']?.toString() ?? '';
 
       final reqDate = item['ReqDate']?.toString() ?? '';
       reqDateController.text = reqDate.isNotEmpty
@@ -119,6 +162,7 @@ class IndentEntryController extends GetxController {
     selectedUnit.value = '';
     qtyController.clear();
     reqDateController.clear();
+    remarkController.clear();
   }
 
   void addOrUpdateItem() {
@@ -147,6 +191,7 @@ class IndentEntryController extends GetxController {
       "Unit": selectedUnit.value,
       "Qty": qty,
       "ReqDate": _convertToApiDateFormat(reqDateController.text),
+      "Remark": remarkController.text.trim(), // ADD THIS
     };
 
     if (isEditingItem.value) {
@@ -271,6 +316,7 @@ class IndentEntryController extends GetxController {
         date: _convertToApiDateFormat(dateController.text),
 
         siteCode: selectedSiteCode.value,
+        gdCode: selectedGodownCode.value,
         itemData: itemsToSend.toList(),
         newFiles: attachmentFiles.toList(),
         existingAttachments: existingAttachmentUrls.toList(),
@@ -304,7 +350,8 @@ class IndentEntryController extends GetxController {
     itemsToSend.clear();
     attachmentFiles.clear();
     existingAttachmentUrls.clear();
-
+    selectedGodownName.value = '';
+    selectedGodownCode.value = '';
     isEditMode.value = false;
   }
 }

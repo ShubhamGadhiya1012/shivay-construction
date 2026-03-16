@@ -72,6 +72,15 @@ class IndentItemCard extends StatelessWidget {
                         tablet: tablet,
                       ),
                     ],
+                    if (item['Remark'] != null &&
+                        item['Remark'].toString().isNotEmpty) ...[
+                      tablet ? AppSpaces.v6 : AppSpaces.v4,
+                      _buildDetailRow(
+                        label: 'Remark',
+                        value: item['Remark'].toString(),
+                        tablet: tablet,
+                      ),
+                    ],
                   ],
                 ),
               ),

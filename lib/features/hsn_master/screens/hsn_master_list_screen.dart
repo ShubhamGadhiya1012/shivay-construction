@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, unrelated_type_equality_checks
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

@@ -198,18 +198,34 @@ class _IndentCardState extends State<IndentCard> {
                   ],
                 ),
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
-                Divider(height: 1, color: kColorLightGrey.withOpacity(0.5)),
+                Divider(
+                  height: 1,
+                  color: const Color.fromARGB(
+                    255,
+                    218,
+                    180,
+                    180,
+                  ).withOpacity(0.5),
+                ),
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
-                // _buildInfoRow(
-                //   label: 'Godown',
-                //   value: widget.indent.gdName,
-                //   tablet: tablet,
-                // ),
-                // tablet ? AppSpaces.v12 : AppSpaces.v10,
-                _buildInfoRow(
-                  label: 'Site',
-                  value: widget.indent.siteName,
-                  tablet: tablet,
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildInfoRow(
+                        label: 'Godown',
+                        value: widget.indent.gdName,
+                        tablet: tablet,
+                      ),
+                    ),
+                    tablet ? AppSpaces.h12 : AppSpaces.h10,
+                    Expanded(
+                      child: _buildInfoRow(
+                        label: 'Site',
+                        value: widget.indent.siteName,
+                        tablet: tablet,
+                      ),
+                    ),
+                  ],
                 ),
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
                 Row(
@@ -490,6 +506,14 @@ class _IndentCardState extends State<IndentCard> {
                                       ],
                                     ],
                                   ),
+                                  if (detail.remark.isNotEmpty) ...[
+                                    AppSpaces.v8,
+                                    _buildDetailRow(
+                                      label: 'Remark',
+                                      value: detail.remark,
+                                      tablet: tablet,
+                                    ),
+                                  ],
                                 ],
                               ),
                             );

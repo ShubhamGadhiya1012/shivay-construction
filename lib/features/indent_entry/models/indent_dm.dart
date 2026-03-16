@@ -25,7 +25,6 @@ class IndentDm {
     return IndentDm(
       invNo: json['InvNo'] ?? '',
       date: json['Date'] ?? '',
-
       gdCode: json['GDCode'] ?? '',
       gdName: json['GDName'] ?? '',
       siteCode: json['SiteCode'] ?? '',
