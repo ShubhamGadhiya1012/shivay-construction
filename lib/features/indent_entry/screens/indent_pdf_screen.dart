@@ -167,8 +167,25 @@ class IndentPdfScreen {
     bool isAuthorized,
   ) {
     final headers = isAuthorized
-        ? ['Sr.', 'Item Name', 'Unit', 'Indent Qty', 'Auth. Qty', 'Req. Date']
-        : ['Sr.', 'Item Name', 'Unit', 'Indent Qty', 'Req. Date'];
+        ? [
+            'Sr.',
+            'Item Name',
+            'Unit',
+            'Indent Qty',
+            'Auth. Qty',
+            'Req. Date',
+            'Head',
+            'Remark',
+          ]
+        : [
+            'Sr.',
+            'Item Name',
+            'Unit',
+            'Indent Qty',
+            'Req. Date',
+            'Head',
+            'Remark',
+          ];
 
     final rows = indentDetails.map((item) {
       final baseRow = [
@@ -183,25 +200,33 @@ class IndentPdfScreen {
       }
 
       baseRow.add(convertyyyyMMddToddMMyyyy(item.reqDate));
+      baseRow.add(item.gdName); // NEW: Head column
+      baseRow.add(
+        item.remark.isNotEmpty ? item.remark : '-',
+      ); // NEW: Remark column
 
       return baseRow;
     }).toList();
 
     final columnWidths = isAuthorized
         ? {
-            0: const pw.FlexColumnWidth(1),
-            1: const pw.FlexColumnWidth(4),
-            2: const pw.FlexColumnWidth(1.5),
-            3: const pw.FlexColumnWidth(2),
-            4: const pw.FlexColumnWidth(2),
-            5: const pw.FlexColumnWidth(2),
+            0: const pw.FlexColumnWidth(1), // Sr.
+            1: const pw.FlexColumnWidth(4), // Item Name
+            2: const pw.FlexColumnWidth(1.5), // Unit
+            3: const pw.FlexColumnWidth(2), // Indent Qty
+            4: const pw.FlexColumnWidth(2), // Auth. Qty
+            5: const pw.FlexColumnWidth(2), // Req. Date
+            6: const pw.FlexColumnWidth(2), // Head
+            7: const pw.FlexColumnWidth(2.5), // Remark
           }
         : {
-            0: const pw.FlexColumnWidth(1),
-            1: const pw.FlexColumnWidth(4),
-            2: const pw.FlexColumnWidth(1.5),
-            3: const pw.FlexColumnWidth(2),
-            4: const pw.FlexColumnWidth(2),
+            0: const pw.FlexColumnWidth(1), // Sr.
+            1: const pw.FlexColumnWidth(4), // Item Name
+            2: const pw.FlexColumnWidth(1.5), // Unit
+            3: const pw.FlexColumnWidth(2), // Indent Qty
+            4: const pw.FlexColumnWidth(2), // Req. Date
+            5: const pw.FlexColumnWidth(2), // Head
+            6: const pw.FlexColumnWidth(2.5), // Remark
           };
 
     return pw.Table(
