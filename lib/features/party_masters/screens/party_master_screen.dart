@@ -8,6 +8,7 @@ import 'package:shivay_construction/features/party_masters/controllers/party_mas
 import 'package:shivay_construction/features/party_masters/models/party_master_dm.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
+import 'package:shivay_construction/utils/formatters/text_input_formatters.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
@@ -69,6 +70,7 @@ class PartyMasterScreen extends StatelessWidget {
                             AppTextFormField(
                               controller: _controller.accountNameController,
                               hintText: 'Account Name *',
+                              inputFormatters: [UpperCaseTextInputFormatter()],
                               validator: (value) =>
                                   (value == null || value.trim().isEmpty)
                                   ? 'Please enter account name'

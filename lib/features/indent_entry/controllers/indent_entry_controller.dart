@@ -72,14 +72,10 @@ class IndentEntryController extends GetxController {
     var selectedSiteObj = sites.firstWhere((s) => s.siteName == siteName);
     selectedSiteCode.value = selectedSiteObj.siteCode;
 
+    // Remove godown loading - no longer needed here
+    // Just reset selection
     selectedGodownName.value = '';
     selectedGodownCode.value = '';
-    godowns.clear();
-    godownNames.clear();
-
-    if (selectedSiteCode.value.isNotEmpty) {
-      await getGodowns(selectedSiteCode.value);
-    }
   }
 
   // Add new method:
@@ -131,6 +127,10 @@ class IndentEntryController extends GetxController {
     clearItemForm();
     isEditingItem.value = false;
     editingItemIndex.value = -1;
+
+    // Reset godown selection
+    selectedGodownName.value = '';
+    selectedGodownCode.value = '';
   }
 
   void prepareEditItem(int index) {
@@ -142,6 +142,10 @@ class IndentEntryController extends GetxController {
       selectedUnit.value = item['unit'] ?? item['Unit'] ?? '';
       qtyController.text = (item['qty'] ?? item['Qty'] ?? 0).toString();
       remarkController.text = item['Remark']?.toString() ?? '';
+
+      // Load godown selection
+      selectedGodownCode.value = item['GDCode']?.toString() ?? '';
+      selectedGodownName.value = item['GDName']?.toString() ?? '';
 
       final reqDate = item['ReqDate']?.toString() ?? '';
       reqDateController.text = reqDate.isNotEmpty
@@ -163,6 +167,8 @@ class IndentEntryController extends GetxController {
     qtyController.clear();
     reqDateController.clear();
     remarkController.clear();
+    selectedGodownName.value = ''; // ADD
+    selectedGodownCode.value = ''; // ADD
   }
 
   void addOrUpdateItem() {
@@ -191,7 +197,9 @@ class IndentEntryController extends GetxController {
       "Unit": selectedUnit.value,
       "Qty": qty,
       "ReqDate": _convertToApiDateFormat(reqDateController.text),
-      "Remark": remarkController.text.trim(), // ADD THIS
+      "Remark": remarkController.text.trim(),
+      "GDCode": selectedGodownCode.value, // ADD
+      "GDName": selectedGodownName.value, // ADD
     };
 
     if (isEditingItem.value) {
@@ -316,7 +324,7 @@ class IndentEntryController extends GetxController {
         date: _convertToApiDateFormat(dateController.text),
 
         siteCode: selectedSiteCode.value,
-        gdCode: selectedGodownCode.value,
+
         itemData: itemsToSend.toList(),
         newFiles: attachmentFiles.toList(),
         existingAttachments: existingAttachmentUrls.toList(),
@@ -352,6 +360,8 @@ class IndentEntryController extends GetxController {
     existingAttachmentUrls.clear();
     selectedGodownName.value = '';
     selectedGodownCode.value = '';
+    godowns.clear(); // ADD
+    godownNames.clear(); // ADD
     isEditMode.value = false;
   }
 }

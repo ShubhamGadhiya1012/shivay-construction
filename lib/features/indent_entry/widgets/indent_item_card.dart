@@ -181,6 +181,18 @@ class IndentItemCard extends StatelessWidget {
                     tablet: tablet,
                   ),
                 ),
+                // ADD THIS:
+                if (item['GDName'] != null &&
+                    item['GDName'].toString().isNotEmpty) ...[
+                  AppSpaces.h12,
+                  Expanded(
+                    child: _buildDetailColumn(
+                      label: 'Godown',
+                      value: item['GDName'].toString(),
+                      tablet: tablet,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

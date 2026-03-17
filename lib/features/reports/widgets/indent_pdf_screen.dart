@@ -139,24 +139,26 @@ class IndentPdfScreen {
       'Indent Date',
       'Indent Qty',
       'Indent No',
-      // 'Godown Name',
       'Order Qty',
       'Pending Qty',
       'Ref PO No',
       'Status',
+      'Head', // NEW: Second to last
+      'Remark', // NEW: Last column
     ];
 
     final columnWidths = {
-      0: const pw.FlexColumnWidth(2.5),
-      1: const pw.FlexColumnWidth(1.5),
-      2: const pw.FlexColumnWidth(1.5),
-      3: const pw.FlexColumnWidth(1.5),
-      4: const pw.FlexColumnWidth(2.5),
-      // 5: const pw.FlexColumnWidth(2.5),
-      6: const pw.FlexColumnWidth(1.5),
-      7: const pw.FlexColumnWidth(1.5),
-      8: const pw.FlexColumnWidth(2.0),
-      9: const pw.FlexColumnWidth(1.5),
+      0: const pw.FlexColumnWidth(2.5), // Site Name
+      1: const pw.FlexColumnWidth(1.5), // Req Date
+      2: const pw.FlexColumnWidth(1.5), // Indent Date
+      3: const pw.FlexColumnWidth(1.5), // Indent Qty
+      4: const pw.FlexColumnWidth(2.5), // Indent No
+      5: const pw.FlexColumnWidth(1.5), // Order Qty
+      6: const pw.FlexColumnWidth(1.5), // Pending Qty
+      7: const pw.FlexColumnWidth(2.0), // Ref PO No
+      8: const pw.FlexColumnWidth(1.5), // Status
+      9: const pw.FlexColumnWidth(2.0), // Head (GDName)
+      10: const pw.FlexColumnWidth(2.5), // Remark
     };
 
     List<pw.Widget> widgets = [];
@@ -246,7 +248,6 @@ class IndentPdfScreen {
                     align: pw.TextAlign.right,
                   ),
                   _cell(item.invno, textColor),
-                  // _cell(item.gdName, textColor),
                   _cell(
                     item.orderQty.toStringAsFixed(2),
                     textColor,
@@ -265,6 +266,16 @@ class IndentPdfScreen {
                     item.indentStatus,
                     _getStatusColor(item.indentStatus),
                     align: pw.TextAlign.center,
+                  ),
+                  _cell(
+                    item.gdName,
+                    textColor,
+                  ), // NEW: Head column (second to last)
+                  _cell(
+                    item.remark.isNotEmpty
+                        ? item.remark
+                        : '-', // NEW: Remark column (last)
+                    textColor,
                   ),
                 ],
               );
@@ -300,24 +311,26 @@ class IndentPdfScreen {
       'Indent Date',
       'Indent Qty',
       'Indent No',
-      // 'Godown Name',
       'Order Qty',
       'Pending Qty',
       'Ref PO No',
       'Status',
+      'Head', // NEW: Second to last
+      'Remark', // NEW: Last column
     ];
 
     final columnWidths = {
-      0: const pw.FlexColumnWidth(3.0),
-      1: const pw.FlexColumnWidth(1.5),
-      2: const pw.FlexColumnWidth(1.5),
-      3: const pw.FlexColumnWidth(1.5),
-      4: const pw.FlexColumnWidth(2.5),
-      5: const pw.FlexColumnWidth(2.5),
-      6: const pw.FlexColumnWidth(1.5),
-      7: const pw.FlexColumnWidth(1.5),
-      8: const pw.FlexColumnWidth(2.0),
-      9: const pw.FlexColumnWidth(1.5),
+      0: const pw.FlexColumnWidth(3.0), // Item Name
+      1: const pw.FlexColumnWidth(1.5), // Req Date
+      2: const pw.FlexColumnWidth(1.5), // Indent Date
+      3: const pw.FlexColumnWidth(1.5), // Indent Qty
+      4: const pw.FlexColumnWidth(2.5), // Indent No
+      5: const pw.FlexColumnWidth(1.5), // Order Qty
+      6: const pw.FlexColumnWidth(1.5), // Pending Qty
+      7: const pw.FlexColumnWidth(2.0), // Ref PO No
+      8: const pw.FlexColumnWidth(1.5), // Status
+      9: const pw.FlexColumnWidth(2.0), // Head (GDName)
+      10: const pw.FlexColumnWidth(2.5), // Remark
     };
 
     List<pw.Widget> widgets = [];
@@ -407,7 +420,6 @@ class IndentPdfScreen {
                     align: pw.TextAlign.right,
                   ),
                   _cell(item.invno, textColor),
-                  // _cell(item.gdName, textColor),
                   _cell(
                     item.orderQty.toStringAsFixed(2),
                     textColor,
@@ -426,6 +438,16 @@ class IndentPdfScreen {
                     item.indentStatus,
                     _getStatusColor(item.indentStatus),
                     align: pw.TextAlign.center,
+                  ),
+                  _cell(
+                    item.gdName,
+                    textColor,
+                  ), // NEW: Head column (second to last)
+                  _cell(
+                    item.remark.isNotEmpty
+                        ? item.remark
+                        : '-', // NEW: Remark column (last)
+                    textColor,
                   ),
                 ],
               );

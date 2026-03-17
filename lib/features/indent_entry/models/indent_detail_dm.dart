@@ -7,6 +7,8 @@ class IndentDetailDm {
   final double indentQty;
   final String reqDate;
   final String remark;
+  final String gdCode; // ADD
+  final String gdName;
 
   IndentDetailDm({
     required this.srNo,
@@ -17,6 +19,8 @@ class IndentDetailDm {
     required this.indentQty,
     required this.reqDate,
     required this.remark,
+    required this.gdCode, // ADD
+    required this.gdName,
   });
 
   factory IndentDetailDm.fromJson(Map<String, dynamic> json) {
@@ -29,6 +33,8 @@ class IndentDetailDm {
       indentQty: (json['IndentQty'] as num?)?.toDouble() ?? 0.0,
       reqDate: json['ReqDate'] ?? '',
       remark: json['Remark'] ?? '',
+      gdCode: json['GDCode'] ?? '', // ADD
+      gdName: json['GDName'] ?? '', // ADD
     );
   }
 }

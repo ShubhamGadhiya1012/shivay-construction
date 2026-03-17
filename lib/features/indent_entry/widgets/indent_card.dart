@@ -208,24 +208,10 @@ class _IndentCardState extends State<IndentCard> {
                   ).withOpacity(0.5),
                 ),
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildInfoRow(
-                        label: 'Godown',
-                        value: widget.indent.gdName,
-                        tablet: tablet,
-                      ),
-                    ),
-                    tablet ? AppSpaces.h12 : AppSpaces.h10,
-                    Expanded(
-                      child: _buildInfoRow(
-                        label: 'Site',
-                        value: widget.indent.siteName,
-                        tablet: tablet,
-                      ),
-                    ),
-                  ],
+                _buildInfoRow(
+                  label: 'Site',
+                  value: widget.indent.siteName,
+                  tablet: tablet,
                 ),
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
                 Row(
@@ -480,6 +466,15 @@ class _IndentCardState extends State<IndentCard> {
                                       ),
                                     ],
                                   ),
+                                  // ADD THIS AFTER THE ABOVE ROW:
+                                  if (detail.gdName.isNotEmpty) ...[
+                                    AppSpaces.v8,
+                                    _buildDetailRow(
+                                      label: 'Godown',
+                                      value: detail.gdName,
+                                      tablet: tablet,
+                                    ),
+                                  ],
                                   AppSpaces.v8,
                                   Row(
                                     children: [

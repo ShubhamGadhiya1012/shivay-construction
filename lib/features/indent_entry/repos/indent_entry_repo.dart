@@ -7,7 +7,6 @@ class IndentEntryRepo {
   static Future<dynamic> saveIndentEntry({
     required String invNo,
     required String date,
-    required String gdCode,
     required String siteCode,
     required List<Map<String, dynamic>> itemData,
     required List<PlatformFile> newFiles,
@@ -20,7 +19,6 @@ class IndentEntryRepo {
         'Invno': invNo,
         'Date': date,
         'SiteCode': siteCode,
-        'GDCode': gdCode,
       };
 
       for (int i = 0; i < itemData.length; i++) {
@@ -30,6 +28,7 @@ class IndentEntryRepo {
         fields['ItemData[$i].Qty'] = itemData[i]['Qty'].toString();
         fields['ItemData[$i].ReqDate'] = itemData[i]['ReqDate'];
         fields['ItemData[$i].Remark'] = itemData[i]['Remark']?.toString() ?? '';
+        fields['ItemData[$i].GDCode'] = itemData[i]['GDCode']?.toString() ?? '';
       }
 
       if (existingAttachments.isNotEmpty) {

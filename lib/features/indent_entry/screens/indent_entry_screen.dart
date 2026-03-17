@@ -54,6 +54,7 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
     ).format(DateTime.now());
     await _controller.getSites();
     await _controller.getItems();
+    await _controller.getGodowns();
 
     if (widget.isEdit && widget.indent != null) {
       final indent = widget.indent!;
@@ -64,13 +65,6 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
 
       _controller.selectedSiteCode.value = indent.siteCode;
       _controller.selectedSiteName.value = indent.siteName;
-
-      if (indent.siteCode.isNotEmpty) {
-        await _controller.getGodowns(indent.siteCode);
-      }
-
-      _controller.selectedGodownCode.value = indent.gdCode;
-      _controller.selectedGodownName.value = indent.gdName;
 
       if (indent.attachments.isNotEmpty) {
         _controller.existingAttachmentUrls.clear();
@@ -97,6 +91,8 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
                   ? _convertyyyyMMddToddMMyyyy(indentDtl.reqDate)
                   : '',
               "Remark": indentDtl.remark,
+              "GDCode": indentDtl.gdCode,
+              "GDName": indentDtl.gdName,
             };
           }).toList(),
         );
@@ -169,22 +165,6 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
                                 validatorText: 'Please select a site',
                               ),
                             ), // After site dropdown Obx block, add:
-                            tablet ? AppSpaces.v16 : AppSpaces.v10,
-                            Obx(
-                              () => AppDropdown(
-                                items: _controller.godownNames,
-                                hintText: 'Godown',
-                                onChanged: _controller.onGodownSelected,
-                                selectedItem:
-                                    _controller
-                                        .selectedGodownName
-                                        .value
-                                        .isNotEmpty
-                                    ? _controller.selectedGodownName.value
-                                    : null,
-                              ),
-                            ),
-                            tablet ? AppSpaces.v16 : AppSpaces.v10,
 
                             tablet ? AppSpaces.v20 : AppSpaces.v14,
                             Obx(
@@ -851,6 +831,18 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
                               ),
                             ),
                           ],
+                        ),
+                        tablet ? AppSpaces.v16 : AppSpaces.v12,
+                        Obx(
+                          () => AppDropdown(
+                            items: _controller.godownNames,
+                            hintText: 'Godown',
+                            onChanged: _controller.onGodownSelected,
+                            selectedItem:
+                                _controller.selectedGodownName.value.isNotEmpty
+                                ? _controller.selectedGodownName.value
+                                : null,
+                          ),
                         ),
                         tablet ? AppSpaces.v16 : AppSpaces.v12,
                         AppTextFormField(

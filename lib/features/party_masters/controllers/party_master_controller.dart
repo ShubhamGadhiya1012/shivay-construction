@@ -44,6 +44,10 @@ class PartyMasterController extends GetxController {
   void onInit() async {
     super.onInit();
     await fetchDropdownData();
+
+    accountNameController.addListener(() {
+      printNameController.text = accountNameController.text;
+    });
   }
 
   Future<void> fetchDropdownData() async {
@@ -192,8 +196,6 @@ class PartyMasterController extends GetxController {
       isLoading.value = false;
     }
   }
-
- 
 
   void clearAll() {
     accountNameController.clear();
