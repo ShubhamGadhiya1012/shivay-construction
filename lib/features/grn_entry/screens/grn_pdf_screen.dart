@@ -44,9 +44,9 @@ class GrnPdfScreen {
       await _savePdf(pdf, grn.invNo);
     } catch (e) {
       showErrorSnackbar('Error', 'Failed to generate GRN PDF: $e');
-      //    print(e);
     }
   }
+
   static pw.Widget _buildHeader(
     PdfColor titleColor,
     PdfColor textPrimaryColor,
@@ -184,9 +184,11 @@ class GrnPdfScreen {
     PdfColor textPrimaryColor,
     bool isDirectGrn,
   ) {
+    // ── Direct GRN: Sr | Item Name | Unit | Rate | Qty | Amount
+    // ── Against PO: Sr | Item Name | PO No | Head | Remark | Unit | Qty
     final headers = isDirectGrn
         ? ['Sr.', 'Item Name', 'Unit', 'Rate', 'Quantity', 'Amount']
-        : ['Sr.', 'Item Name', 'PO No', 'Unit', 'Quantity'];
+        : ['Sr.', 'Item Name', 'PO No', 'Head', 'Remark', 'Unit', 'Qty'];
 
     final List<List<String>> rows = [];
     int srNo = 1;
@@ -196,7 +198,6 @@ class GrnPdfScreen {
       if (isDirectGrn) {
         final amount = detail.qty * detail.rate;
         grandTotal += amount;
-
         rows.add([
           srNo.toString(),
           detail.iName,
@@ -210,6 +211,8 @@ class GrnPdfScreen {
           srNo.toString(),
           detail.iName,
           detail.poInvNo,
+          detail.gdName, // Head
+          detail.poRemark, // Remark
           detail.unit,
           detail.qty.toStringAsFixed(2),
         ]);
@@ -217,22 +220,42 @@ class GrnPdfScreen {
       srNo++;
     }
 
+    // Column widths
     final columnWidths = isDirectGrn
         ? {
-            0: const pw.FlexColumnWidth(1),
-            1: const pw.FlexColumnWidth(4),
-            2: const pw.FlexColumnWidth(1.5),
-            3: const pw.FlexColumnWidth(2),
-            4: const pw.FlexColumnWidth(2),
-            5: const pw.FlexColumnWidth(2),
+            0: const pw.FlexColumnWidth(1), // Sr
+            1: const pw.FlexColumnWidth(4), // Item Name
+            2: const pw.FlexColumnWidth(1.5), // Unit
+            3: const pw.FlexColumnWidth(2), // Rate
+            4: const pw.FlexColumnWidth(2), // Qty
+            5: const pw.FlexColumnWidth(2), // Amount
           }
         : {
-            0: const pw.FlexColumnWidth(1),
-            1: const pw.FlexColumnWidth(4),
-            2: const pw.FlexColumnWidth(2.5),
-            3: const pw.FlexColumnWidth(1.5),
-            4: const pw.FlexColumnWidth(2),
+            0: const pw.FlexColumnWidth(0.8), // Sr
+            1: const pw.FlexColumnWidth(3.5), // Item Name
+            2: const pw.FlexColumnWidth(2), // PO No
+            3: const pw.FlexColumnWidth(2), // Head
+            4: const pw.FlexColumnWidth(2.5), // Remark
+            5: const pw.FlexColumnWidth(1.2), // Unit
+            6: const pw.FlexColumnWidth(1.5), // Qty
           };
+
+    // Right-align numeric columns
+    pw.TextAlign _align(bool isDirect, int colIndex) {
+      if (isDirect) {
+        return colIndex == 0
+            ? pw.TextAlign.center
+            : (colIndex >= 3)
+            ? pw.TextAlign.right
+            : pw.TextAlign.left;
+      }
+      // Against PO: right-align qty (col 6)
+      return colIndex == 0
+          ? pw.TextAlign.center
+          : colIndex == 6
+          ? pw.TextAlign.right
+          : pw.TextAlign.left;
+    }
 
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
@@ -241,6 +264,7 @@ class GrnPdfScreen {
           border: pw.TableBorder.all(color: PdfColors.grey, width: 0.5),
           columnWidths: columnWidths,
           children: [
+            // Header row
             pw.TableRow(
               decoration: pw.BoxDecoration(color: primaryColor),
               children: headers
@@ -251,7 +275,7 @@ class GrnPdfScreen {
                         h,
                         style: pw.TextStyle(
                           fontWeight: pw.FontWeight.bold,
-                          fontSize: 10,
+                          fontSize: 9,
                           color: titleColor,
                         ),
                         textAlign: pw.TextAlign.center,
@@ -261,28 +285,27 @@ class GrnPdfScreen {
                   .toList(),
             ),
 
-            ...rows.map(
-              (r) => pw.TableRow(
-                children: r
+            // Data rows
+            ...rows.asMap().entries.map(
+              (rowEntry) => pw.TableRow(
+                decoration: pw.BoxDecoration(
+                  color: rowEntry.key.isOdd
+                      ? PdfColor.fromHex('#F5F9FF')
+                      : PdfColors.white,
+                ),
+                children: rowEntry.value
                     .asMap()
                     .entries
                     .map(
-                      (entry) => pw.Padding(
+                      (cell) => pw.Padding(
                         padding: const pw.EdgeInsets.all(5),
                         child: pw.Text(
-                          entry.value,
+                          cell.value,
                           style: pw.TextStyle(
-                            fontSize: 9,
+                            fontSize: 8.5,
                             color: textPrimaryColor,
                           ),
-                          textAlign: entry.key == 0
-                              ? pw.TextAlign.center
-                              : (isDirectGrn &&
-                                    (entry.key == 3 ||
-                                        entry.key == 4 ||
-                                        entry.key == 5))
-                              ? pw.TextAlign.right
-                              : pw.TextAlign.left,
+                          textAlign: _align(isDirectGrn, cell.key),
                         ),
                       ),
                     )
@@ -292,6 +315,7 @@ class GrnPdfScreen {
           ],
         ),
 
+        // Grand total for Direct GRN
         if (isDirectGrn) ...[
           pw.SizedBox(height: 10),
           pw.Container(
@@ -331,9 +355,7 @@ class GrnPdfScreen {
     final bytes = await pdf.save();
     final dir = await getTemporaryDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-
     final cleanInvNo = invNo.replaceAll('/', '_').replaceAll('\\', '_');
-
     final file = File('${dir.path}/GRN_${cleanInvNo}_$timestamp.pdf');
     await file.writeAsBytes(bytes);
     await OpenFilex.open(file.path);

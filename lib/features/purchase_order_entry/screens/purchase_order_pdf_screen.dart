@@ -185,9 +185,16 @@ class PurchaseOrderPdfScreen {
     PdfColor titleColor,
     PdfColor textPrimaryColor,
   ) {
-    final headers = ['Sr.', 'Item Name', 'Indent No', 'Unit', 'Order Qty'];
+    final headers = [
+      'Sr.',
+      'Item Name',
+      'Indent No',
+      'Head',
+      'Remark',
+      'Unit',
+      'Order Qty',
+    ];
 
-    // Flatten the structure to create rows
     final List<List<String>> rows = [];
     int srNo = 1;
 
@@ -197,6 +204,8 @@ class PurchaseOrderPdfScreen {
           srNo.toString(),
           item.iName,
           indent.indentInvNo,
+          indent.gdName, // Head
+          indent.indentRemark, // Remark
           indent.unit,
           indent.orderQty.toStringAsFixed(2),
         ]);
@@ -205,18 +214,19 @@ class PurchaseOrderPdfScreen {
     }
 
     final columnWidths = {
-      0: const pw.FlexColumnWidth(1),
-      1: const pw.FlexColumnWidth(4),
-      2: const pw.FlexColumnWidth(2.5),
-      3: const pw.FlexColumnWidth(1.5),
-      4: const pw.FlexColumnWidth(2),
+      0: const pw.FlexColumnWidth(0.8), // Sr
+      1: const pw.FlexColumnWidth(3.5), // Item Name
+      2: const pw.FlexColumnWidth(2), // Indent No
+      3: const pw.FlexColumnWidth(2), // Head
+      4: const pw.FlexColumnWidth(2.5), // Remark
+      5: const pw.FlexColumnWidth(1.2), // Unit
+      6: const pw.FlexColumnWidth(1.5), // Order Qty
     };
 
     return pw.Table(
       border: pw.TableBorder.all(color: PdfColors.grey, width: 0.5),
       columnWidths: columnWidths,
       children: [
-        // Header row
         pw.TableRow(
           decoration: pw.BoxDecoration(color: primaryColor),
           children: headers
@@ -227,7 +237,7 @@ class PurchaseOrderPdfScreen {
                     h,
                     style: pw.TextStyle(
                       fontWeight: pw.FontWeight.bold,
-                      fontSize: 10,
+                      fontSize: 9,
                       color: titleColor,
                     ),
                     textAlign: pw.TextAlign.center,
@@ -236,20 +246,29 @@ class PurchaseOrderPdfScreen {
               )
               .toList(),
         ),
-        // Data rows
-        ...rows.map(
-          (r) => pw.TableRow(
-            children: r
+        ...rows.asMap().entries.map(
+          (rowEntry) => pw.TableRow(
+            decoration: pw.BoxDecoration(
+              color: rowEntry.key.isOdd
+                  ? PdfColor.fromHex('#F5F9FF')
+                  : PdfColors.white,
+            ),
+            children: rowEntry.value
                 .asMap()
                 .entries
                 .map(
-                  (entry) => pw.Padding(
+                  (cell) => pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(
-                      entry.value,
-                      style: pw.TextStyle(fontSize: 9, color: textPrimaryColor),
-                      textAlign: entry.key == 0
+                      cell.value,
+                      style: pw.TextStyle(
+                        fontSize: 8.5,
+                        color: textPrimaryColor,
+                      ),
+                      textAlign: cell.key == 0
                           ? pw.TextAlign.center
+                          : cell.key == 6
+                          ? pw.TextAlign.right
                           : pw.TextAlign.left,
                     ),
                   ),
