@@ -36,6 +36,7 @@ class IndentDm {
   final String gCode;
   final String gdName;
   final String reqDate;
+  final String indentRemark; // ADD
   bool isSelected;
 
   IndentDm({
@@ -49,6 +50,7 @@ class IndentDm {
     required this.gCode,
     required this.gdName,
     required this.reqDate,
+    this.indentRemark = '', // ADD
     this.isSelected = false,
   });
 
@@ -64,6 +66,7 @@ class IndentDm {
       gCode: json['gCode'] ?? '',
       gdName: json['gdName'] ?? '',
       reqDate: json['reqDate'] ?? '',
+      indentRemark: json['indentRemark'] ?? '', // ADD
       isSelected: false,
     );
   }

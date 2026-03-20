@@ -84,11 +84,6 @@ class _GrnEntryScreenState extends State<GrnEntryScreen> {
       );
       _controller.selectedSiteName.value = site?.siteName ?? '';
 
-      // Reload godowns for the selected site
-      if (grn.siteCode.isNotEmpty) {
-        await _controller.getGodowns(grn.siteCode);
-      }
-
       // Set godown after loading site-specific godowns
       _controller.selectedGodownCode.value = grn.gdCode;
       _controller.selectedGodownName.value = grn.gdName;
@@ -198,22 +193,7 @@ class _GrnEntryScreenState extends State<GrnEntryScreen> {
                                   ),
                                 ),
                                 tablet ? AppSpaces.v16 : AppSpaces.v10,
-                                Obx(
-                                  () => AppDropdown(
-                                    items: _controller.godownNames,
-                                    hintText: 'Godown *',
-                                    onChanged: _controller.onGodownSelected,
-                                    selectedItem:
-                                        _controller
-                                            .selectedGodownName
-                                            .value
-                                            .isNotEmpty
-                                        ? _controller.selectedGodownName.value
-                                        : null,
-                                    validatorText: 'Please select a godown',
-                                  ),
-                                ),
-                                tablet ? AppSpaces.v16 : AppSpaces.v10,
+
                                 AppTextFormField(
                                   controller: _controller.remarksController,
                                   hintText: 'Remarks (Optional)',

@@ -187,7 +187,7 @@ class IndentItemCard extends StatelessWidget {
                   AppSpaces.h12,
                   Expanded(
                     child: _buildDetailColumn(
-                      label: 'Godown',
+                      label: 'Head',
                       value: item['GDName'].toString(),
                       tablet: tablet,
                     ),

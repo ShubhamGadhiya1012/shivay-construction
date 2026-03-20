@@ -470,7 +470,7 @@ class _IndentCardState extends State<IndentCard> {
                                   if (detail.gdName.isNotEmpty) ...[
                                     AppSpaces.v8,
                                     _buildDetailRow(
-                                      label: 'Godown',
+                                      label: 'Head',
                                       value: detail.gdName,
                                       tablet: tablet,
                                     ),

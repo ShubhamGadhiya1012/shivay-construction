@@ -94,6 +94,9 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
               : convertyyyyMMddToddMMyyyy(
                   DateTime.now().toString().split(' ')[0],
                 ),
+          'GDCode': indent.gdCode, // ADD
+          'GDName': indent.gdName, // ADD
+          'IndentRemark': indent.indentRemark, // ADD
         });
       }
     }
@@ -118,7 +121,22 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
           text: item['ReqDate'] ?? '',
         );
       }
+
+      // ADD: godown and remark controllers for edit mode
+      if (!_controller.remarkControllers.containsKey(key)) {
+        _controller.remarkControllers[key] = TextEditingController(
+          text: item['IndentRemark'] ?? '',
+        );
+      }
+
+      if (!_controller.selectedGodownCode.containsKey(key)) {
+        _controller.selectedGodownCode[key] = item['GDCode'] ?? '';
+        _controller.selectedGodownName[key] = item['GDName'] ?? '';
+      }
     }
+
+    // ADD: load godowns for edit mode
+    _controller.getGodowns();
   }
 
   @override
@@ -193,7 +211,6 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                           ? 'Please select date'
                           : null,
                     ),
-
                     tablet ? AppSpaces.v16 : AppSpaces.v10,
                     Obx(
                       () => AppDropdown(
@@ -226,7 +243,6 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                       hintText: 'Remarks',
                       maxLines: 3,
                     ),
-
                     tablet ? AppSpaces.v20 : AppSpaces.v14,
                     Obx(
                       () => Row(
@@ -432,7 +448,6 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                       ),
                     ),
                     tablet ? AppSpaces.v10 : AppSpaces.v6,
-
                     Obx(() {
                       if (_controller.selectedPurchaseItems.isNotEmpty) {
                         return Container(
@@ -461,7 +476,9 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                               final priceController =
                                   _controller.priceControllers[key];
                               final dateController =
-                                  _controller.dateControllers[key]; // ADD THIS
+                                  _controller.dateControllers[key];
+                              final remarkController =
+                                  _controller.remarkControllers[key];
 
                               return Padding(
                                 padding: tablet
@@ -476,6 +493,7 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    // Header row with item name + action buttons
                                     Row(
                                       children: [
                                         Icon(
@@ -522,13 +540,11 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                             tablet ? 8 : 6,
                                           ),
                                           child: InkWell(
-                                            onTap: () {
-                                              Get.to(
-                                                () => SiteWiseStockScreen(
-                                                  iCode: item['ICode'],
-                                                ),
-                                              );
-                                            },
+                                            onTap: () => Get.to(
+                                              () => SiteWiseStockScreen(
+                                                iCode: item['ICode'],
+                                              ),
+                                            ),
                                             borderRadius: BorderRadius.circular(
                                               tablet ? 8 : 6,
                                             ),
@@ -559,13 +575,11 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                             tablet ? 8 : 6,
                                           ),
                                           child: InkWell(
-                                            onTap: () {
-                                              Get.to(
-                                                () => LastPurchaseRateScreen(
-                                                  iCode: item['ICode'],
-                                                ),
-                                              );
-                                            },
+                                            onTap: () => Get.to(
+                                              () => LastPurchaseRateScreen(
+                                                iCode: item['ICode'],
+                                              ),
+                                            ),
                                             borderRadius: BorderRadius.circular(
                                               tablet ? 8 : 6,
                                             ),
@@ -620,38 +634,49 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                       ],
                                     ),
                                     tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                                    // Required Date
                                     if (dateController != null) ...[
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          AppDatePickerTextFormField(
-                                            dateController: dateController,
-                                            hintText: 'Required Date',
-                                            validator: (value) {
-                                              if (value == null ||
-                                                  value.isEmpty) {
-                                                return 'Required';
-                                              }
-                                              return null;
-                                            },
-                                            onChanged: (value) {
-                                              if (value.isNotEmpty) {
-                                                _controller
-                                                        .selectedPurchaseItems[index]['ReqDate'] =
-                                                    value;
-                                                _controller
-                                                    .selectedPurchaseItems
-                                                    .refresh();
-                                              }
-                                            },
-                                          ),
-                                        ],
+                                      AppDatePickerTextFormField(
+                                        dateController: dateController,
+                                        hintText: 'Required Date',
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty)
+                                            return 'Required';
+                                          return null;
+                                        },
+                                        onChanged: (value) {
+                                          if (value.isNotEmpty) {
+                                            _controller
+                                                    .selectedPurchaseItems[index]['ReqDate'] =
+                                                value;
+                                            _controller.selectedPurchaseItems
+                                                .refresh();
+                                          }
+                                        },
                                       ),
                                       tablet ? AppSpaces.v12 : AppSpaces.v10,
                                     ],
 
-                                    // EXISTING QUANTITY AND PRICE ROW
+                                    // Godown dropdown
+                                    Obx(() {
+                                      return AppDropdown(
+                                        items: _controller.godownNames,
+                                        hintText: 'Head',
+                                        onChanged: (val) => _controller
+                                            .onGodownSelected(key, val),
+                                        selectedItem:
+                                            (_controller.selectedGodownName[key] ??
+                                                    '')
+                                                .isNotEmpty
+                                            ? _controller
+                                                  .selectedGodownName[key]
+                                            : null,
+                                      );
+                                    }),
+                                    tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                                    // Qty and Price
                                     Row(
                                       children: [
                                         Expanded(
@@ -681,16 +706,13 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                                   floatingLabelRequired: false,
                                                   validator: (value) {
                                                     if (value == null ||
-                                                        value.isEmpty) {
+                                                        value.isEmpty)
                                                       return 'Required';
-                                                    }
                                                     final qty = double.tryParse(
                                                       value,
                                                     );
-                                                    if (qty == null ||
-                                                        qty <= 0) {
+                                                    if (qty == null || qty <= 0)
                                                       return 'Must be > 0';
-                                                    }
                                                     return null;
                                                   },
                                                   onChanged: (value) {
@@ -737,15 +759,13 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                                   floatingLabelRequired: false,
                                                   validator: (value) {
                                                     if (value == null ||
-                                                        value.isEmpty) {
+                                                        value.isEmpty)
                                                       return 'Required';
-                                                    }
                                                     final price =
                                                         double.tryParse(value);
                                                     if (price == null ||
-                                                        price <= 0) {
+                                                        price <= 0)
                                                       return 'Must be > 0';
-                                                    }
                                                     return null;
                                                   },
                                                   onChanged: (value) {
@@ -766,6 +786,35 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                         ),
                                       ],
                                     ),
+                                    tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                                    // Remark - editable
+                                    // After
+                                    if (remarkController != null) ...[
+                                      Text(
+                                        'Remark',
+                                        style: TextStyles.kRegularOutfit(
+                                          fontSize: tablet
+                                              ? FontSizes.k12FontSize
+                                              : FontSizes.k10FontSize,
+                                          color: kColorDarkGrey,
+                                        ),
+                                      ),
+                                      AppSpaces.v4,
+                                      AppTextFormField(
+                                        controller: remarkController,
+                                        hintText: 'Enter Remark',
+                                        maxLines: 2,
+                                        floatingLabelRequired: false,
+                                        onChanged: (value) {
+                                          _controller
+                                                  .selectedPurchaseItems[index]['IndentRemark'] =
+                                              value;
+                                          _controller.selectedPurchaseItems
+                                              .refresh();
+                                        },
+                                      ),
+                                    ],
                                   ],
                                 ),
                               );
@@ -779,12 +828,10 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                 ),
               ),
             ),
-
             Obx(() {
               if (_controller.selectedPurchaseItems.isEmpty) {
                 return const SizedBox.shrink();
               }
-
               return Column(
                 children: [
                   AppButton(

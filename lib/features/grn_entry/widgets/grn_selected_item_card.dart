@@ -68,6 +68,60 @@ class GrnSelectedItemCard extends StatelessWidget {
                         color: kColorDarkGrey,
                       ),
                     ),
+                    // ADD: GDName display
+                    if ((poData['GDName'] ?? '').toString().isNotEmpty) ...[
+                      AppSpaces.v4,
+                      Row(
+                        children: [
+                          Text(
+                            'Head: ',
+                            style: TextStyles.kRegularOutfit(
+                              fontSize: tablet
+                                  ? FontSizes.k12FontSize
+                                  : FontSizes.k10FontSize,
+                              color: kColorDarkGrey,
+                            ),
+                          ),
+                          Text(
+                            poData['GDName'].toString(),
+                            style: TextStyles.kMediumOutfit(
+                              fontSize: tablet
+                                  ? FontSizes.k12FontSize
+                                  : FontSizes.k10FontSize,
+                              color: kColorTextPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    // ADD: IndentRemark display
+                    if ((poData['PORemark'] ?? '').toString().isNotEmpty) ...[
+                      AppSpaces.v4,
+                      Row(
+                        children: [
+                          Text(
+                            'Remark: ',
+                            style: TextStyles.kRegularOutfit(
+                              fontSize: tablet
+                                  ? FontSizes.k12FontSize
+                                  : FontSizes.k10FontSize,
+                              color: kColorDarkGrey,
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              poData['PORemark'].toString(),
+                              style: TextStyles.kMediumOutfit(
+                                fontSize: tablet
+                                    ? FontSizes.k12FontSize
+                                    : FontSizes.k10FontSize,
+                                color: kColorTextPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -101,44 +155,37 @@ class GrnSelectedItemCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: kColorPrimary.withOpacity(0.2)),
             ),
-            child: Column(
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildDetailColumn(
-                        label: 'PO Date',
-                        value: convertyyyyMMddToddMMyyyy(
-                          poData['poDate'] ?? '',
-                        ),
-                        tablet: tablet,
-                      ),
-                    ),
-
-                    Expanded(
-                      child: _buildDetailColumn(
-                        label: 'PO Qty',
-                        value: (poData['poQty'] ?? 0.0).toStringAsFixed(2),
-                        tablet: tablet,
-                      ),
-                    ),
-                    Expanded(
-                      child: _buildDetailColumn(
-                        label: 'Rate',
-                        value: (poData['rate'] ?? 0.0).toStringAsFixed(2),
-                        tablet: tablet,
-                      ),
-                    ),
-                    Expanded(
-                      child: _buildDetailColumn(
-                        label: 'GRN Qty',
-                        value:
-                            '${(poData['grnQty'] ?? 0.0).toStringAsFixed(2)} ${poData['unit']}',
-                        tablet: tablet,
-                        valueColor: kColorGreen,
-                      ),
-                    ),
-                  ],
+                Expanded(
+                  child: _buildDetailColumn(
+                    label: 'PO Date',
+                    value: convertyyyyMMddToddMMyyyy(poData['poDate'] ?? ''),
+                    tablet: tablet,
+                  ),
+                ),
+                Expanded(
+                  child: _buildDetailColumn(
+                    label: 'PO Qty',
+                    value: (poData['poQty'] ?? 0.0).toStringAsFixed(2),
+                    tablet: tablet,
+                  ),
+                ),
+                Expanded(
+                  child: _buildDetailColumn(
+                    label: 'Rate',
+                    value: (poData['rate'] ?? 0.0).toStringAsFixed(2),
+                    tablet: tablet,
+                  ),
+                ),
+                Expanded(
+                  child: _buildDetailColumn(
+                    label: 'GRN Qty',
+                    value:
+                        '${(poData['grnQty'] ?? 0.0).toStringAsFixed(2)} ${poData['unit']}',
+                    tablet: tablet,
+                    valueColor: kColorGreen,
+                  ),
                 ),
               ],
             ),

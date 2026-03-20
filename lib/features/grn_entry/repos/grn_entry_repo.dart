@@ -7,7 +7,7 @@ class GrnEntryRepo {
   static Future<dynamic> saveGrnEntry({
     required String invNo,
     required String date,
-    required String gdCode,
+
     required String remarks,
     required String pCode,
     required String siteCode,
@@ -22,7 +22,7 @@ class GrnEntryRepo {
       final Map<String, String> fields = {
         'Invno': invNo,
         'Date': date,
-        'GDCode': gdCode,
+
         'Remarks': remarks,
         'PCode': pCode,
         'SiteCode': siteCode,
@@ -36,7 +36,12 @@ class GrnEntryRepo {
         fields['ItemData[$i].Qty'] = itemData[i]['Qty'].toString();
         fields['ItemData[$i].Rate'] = itemData[i]['Rate'].toString();
         fields['ItemData[$i].POInvNo'] = itemData[i]['POInvNo'] ?? '';
-        fields['ItemData[$i].POSrNo'] = itemData[i]['POSrNo']?.toString() ?? '';
+        fields['ItemData[$i].POSrNo'] =
+            itemData[i]['POSrNo']?.toString() ??
+            ''; // ADD after POSrNo line in the loop:
+        fields['ItemData[$i].GDCode'] = itemData[i]['GDCode']?.toString() ?? '';
+        fields['ItemData[$i].PORemark'] =
+            itemData[i]['PORemark']?.toString() ?? '';
       }
 
       if (existingAttachments.isNotEmpty) {
@@ -67,25 +72,25 @@ class GrnEntryRepo {
         }
       }
 
-      // // ===== PRINT FULL PAYLOAD =====
-      // print('----- GRN PAYLOAD START -----');
+      // ===== PRINT FULL PAYLOAD =====
+      print('----- GRN PAYLOAD START -----');
 
-      // print('FIELDS:');
-      // fields.forEach((key, value) {
-      //   print('$key : $value');
-      // });
+      print('FIELDS:');
+      fields.forEach((key, value) {
+        print('$key : $value');
+      });
 
-      // print('FILES:');
-      // for (var f in multipartFiles) {
-      //   print({
-      //     'field': f.field,
-      //     'filename': f.filename,
-      //     'contentType': f.contentType.toString(),
-      //     'length': f.length,
-      //   });
-      // }
+      print('FILES:');
+      for (var f in multipartFiles) {
+        print({
+          'field': f.field,
+          'filename': f.filename,
+          'contentType': f.contentType.toString(),
+          'length': f.length,
+        });
+      }
 
-      // print('----- GRN PAYLOAD END -----');
+      print('----- GRN PAYLOAD END -----');
 
       final response = await ApiService.postFormData(
         endpoint: '/GRN/grnEntry',

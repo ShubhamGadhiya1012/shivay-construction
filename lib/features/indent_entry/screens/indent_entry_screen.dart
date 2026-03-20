@@ -836,7 +836,7 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
                         Obx(
                           () => AppDropdown(
                             items: _controller.godownNames,
-                            hintText: 'Godown',
+                            hintText: 'Head',
                             onChanged: _controller.onGodownSelected,
                             selectedItem:
                                 _controller.selectedGodownName.value.isNotEmpty

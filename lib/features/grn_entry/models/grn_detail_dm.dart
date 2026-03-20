@@ -10,6 +10,9 @@ class GrnDetailDm {
   final double poQty;
   final double pendingQty;
   final double rate;
+  final String gdCode; // ADD
+  final String gdName; // ADD
+  final String poRemark;
 
   GrnDetailDm({
     required this.srNo,
@@ -23,6 +26,9 @@ class GrnDetailDm {
     required this.poDate,
     required this.pendingQty,
     required this.rate,
+    this.gdCode = '', // ADD
+    this.gdName = '', // ADD
+    this.poRemark = '',
   });
 
   factory GrnDetailDm.fromJson(Map<String, dynamic> json) {
@@ -38,6 +44,9 @@ class GrnDetailDm {
       poQty: (json['POQty'] as num?)?.toDouble() ?? 0.0,
       pendingQty: (json['PendingQty'] as num?)?.toDouble() ?? 0.0,
       rate: (json['Rate'] as num?)?.toDouble() ?? 0.0,
+      gdCode: json['GDCode'] ?? '', // ADD
+      gdName: json['GDName'] ?? '', // ADD
+      poRemark: json['PORemark'] ?? '', // ADD
     );
   }
 }

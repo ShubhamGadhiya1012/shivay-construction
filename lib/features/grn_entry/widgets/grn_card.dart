@@ -215,14 +215,6 @@ class _GrnCardState extends State<GrnCard> {
                   children: [
                     Expanded(
                       child: _buildInfoRow(
-                        label: 'Godown',
-                        value: widget.grn.gdName,
-                        tablet: tablet,
-                      ),
-                    ),
-                    tablet ? AppSpaces.h12 : AppSpaces.h10,
-                    Expanded(
-                      child: _buildInfoRow(
                         label: 'Site',
                         value: widget.grn.siteName,
                         tablet: tablet,
@@ -353,6 +345,31 @@ class _GrnCardState extends State<GrnCard> {
                                         color: kColorDarkGrey,
                                       ),
                                     ),
+                                  // After the Row with Qty, add:
+                                  if (detail.gdName.isNotEmpty) ...[
+                                    AppSpaces.v4,
+                                    Text(
+                                      'Head: ${detail.gdName}',
+                                      style: TextStyles.kRegularOutfit(
+                                        fontSize: tablet
+                                            ? FontSizes.k12FontSize
+                                            : FontSizes.k10FontSize,
+                                        color: kColorDarkGrey,
+                                      ),
+                                    ),
+                                  ],
+                                  if (detail.poRemark.isNotEmpty) ...[
+                                    AppSpaces.v4,
+                                    Text(
+                                      'Remark: ${detail.poRemark}',
+                                      style: TextStyles.kRegularOutfit(
+                                        fontSize: tablet
+                                            ? FontSizes.k12FontSize
+                                            : FontSizes.k10FontSize,
+                                        color: kColorDarkGrey,
+                                      ),
+                                    ),
+                                  ],
                                   AppSpaces.v8,
                                   Row(
                                     children: [

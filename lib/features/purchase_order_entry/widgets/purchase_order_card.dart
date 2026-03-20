@@ -624,6 +624,76 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                                                           ),
                                                         ],
 
+                                                        if (indent
+                                                            .gdName
+                                                            .isNotEmpty) ...[
+                                                          AppSpaces.v2,
+                                                          Row(
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .warehouse_outlined,
+                                                                size: tablet
+                                                                    ? 10
+                                                                    : 9,
+                                                                color:
+                                                                    kColorDarkGrey,
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 4,
+                                                              ),
+                                                              Text(
+                                                                'Head: ${indent.gdName}',
+                                                                style: TextStyles.kRegularOutfit(
+                                                                  fontSize:
+                                                                      tablet
+                                                                      ? FontSizes
+                                                                            .k10FontSize
+                                                                      : FontSizes
+                                                                            .k10FontSize,
+                                                                  color:
+                                                                      kColorDarkGrey,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                        if (indent
+                                                            .indentRemark
+                                                            .isNotEmpty) ...[
+                                                          AppSpaces.v2,
+                                                          Row(
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .notes_rounded,
+                                                                size: tablet
+                                                                    ? 10
+                                                                    : 9,
+                                                                color:
+                                                                    kColorDarkGrey,
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 4,
+                                                              ),
+                                                              Expanded(
+                                                                child: Text(
+                                                                  'Remark: ${indent.indentRemark}',
+                                                                  style: TextStyles.kRegularOutfit(
+                                                                    fontSize:
+                                                                        tablet
+                                                                        ? FontSizes
+                                                                              .k10FontSize
+                                                                        : FontSizes
+                                                                              .k10FontSize,
+                                                                    color:
+                                                                        kColorDarkGrey,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
                                                         Text(
                                                           'Amt: ₹${indent.amount!.toStringAsFixed(2)}',
                                                           style: TextStyles.kMediumOutfit(

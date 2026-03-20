@@ -11,6 +11,7 @@ import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
+import 'package:shivay_construction/widgets/app_dropdown.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
 class PoOrderCard extends StatelessWidget {
@@ -40,13 +41,11 @@ class PoOrderCard extends StatelessWidget {
 
       return GestureDetector(
         onTap: () {
-          // Single tap only works if selection mode is active
           if (controller.isInSelectionMode.value) {
             controller.togglePoOrderSelection(item, order);
           }
         },
         onLongPress: () {
-          // Long press to enter selection mode and select item
           controller.onPoOrderLongPress(item, order);
         },
         child: Container(
@@ -66,6 +65,7 @@ class PoOrderCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -94,6 +94,31 @@ class PoOrderCard extends StatelessWidget {
                             color: kColorDarkGrey,
                           ),
                         ),
+                        // Show gdName and indentRemark when not selected
+                        if (!isSelected && order.gdName.isNotEmpty) ...[
+                          AppSpaces.v4,
+                          Text(
+                            'Head: ${order.gdName}',
+                            style: TextStyles.kRegularOutfit(
+                              fontSize: tablet
+                                  ? FontSizes.k12FontSize
+                                  : FontSizes.k10FontSize,
+                              color: kColorDarkGrey,
+                            ),
+                          ),
+                        ],
+                        if (!isSelected && order.poRemark.isNotEmpty) ...[
+                          AppSpaces.v4,
+                          Text(
+                            'Remark: ${order.poRemark}',
+                            style: TextStyles.kRegularOutfit(
+                              fontSize: tablet
+                                  ? FontSizes.k12FontSize
+                                  : FontSizes.k10FontSize,
+                              color: kColorDarkGrey,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -113,6 +138,8 @@ class PoOrderCard extends StatelessWidget {
                 ],
               ),
               tablet ? AppSpaces.v10 : AppSpaces.v8,
+
+              // PO Qty, Rate, Received, Pending row
               Row(
                 children: [
                   Expanded(
@@ -126,7 +153,7 @@ class PoOrderCard extends StatelessWidget {
                   Expanded(
                     child: _buildInfoColumn(
                       label: 'Rate',
-                      value: item.rate.toStringAsFixed(2), // Add this
+                      value: item.rate.toStringAsFixed(2),
                       tablet: tablet,
                     ),
                   ),
@@ -150,8 +177,12 @@ class PoOrderCard extends StatelessWidget {
                   ),
                 ],
               ),
+
+              // Selected state - editable fields
               if (isSelected) ...[
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                // GRN Quantity
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -165,13 +196,10 @@ class PoOrderCard extends StatelessWidget {
                       ),
                     ),
                     tablet ? AppSpaces.v6 : AppSpaces.v4,
-                    // Wrap TextField in GestureDetector with behavior to absorb pointer events from parent
                     GestureDetector(
-                      onTap: () {
-                        // Do nothing - let the TextField handle the tap
-                      },
+                      onTap: () {},
                       child: AbsorbPointer(
-                        absorbing: false, // Allow interaction with TextField
+                        absorbing: false,
                         child: AppTextFormField(
                           controller: qtyController,
                           hintText: 'Enter GRN Qty',
@@ -201,7 +229,63 @@ class PoOrderCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                // Godown dropdown
+                Obx(() {
+                  return AppDropdown(
+                    items: controller.godownNames,
+                    hintText: 'Head',
+                    onChanged: (val) => controller.onPoGodownSelected(key, val),
+                    selectedItem:
+                        (controller.selectedPoGodownName[key] ?? '').isNotEmpty
+                        ? controller.selectedPoGodownName[key]
+                        : null,
+                  );
+                }),
+                tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                // Remark
+                Builder(
+                  builder: (context) {
+                    final remarkController =
+                        controller.poRemarkControllers[key];
+                    if (remarkController == null) {
+                      return const SizedBox.shrink();
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Remark',
+                          style: TextStyles.kMediumOutfit(
+                            fontSize: tablet
+                                ? FontSizes.k14FontSize
+                                : FontSizes.k12FontSize,
+                            color: kColorTextPrimary,
+                          ),
+                        ),
+                        tablet ? AppSpaces.v6 : AppSpaces.v4,
+                        AppTextFormField(
+                          controller: remarkController,
+                          hintText: 'Enter Remark',
+                          maxLines: 2,
+                          floatingLabelRequired: false,
+                          onChanged: (value) {
+                            if (controller.selectedPoOrders.containsKey(key)) {
+                              controller.selectedPoOrders[key]!['PORemark'] =
+                                  value;
+                              controller.selectedPoOrders.refresh();
+                            }
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ],
+
+              // Not selected hint
               if (!isSelected) ...[
                 tablet ? AppSpaces.v10 : AppSpaces.v8,
                 Obx(

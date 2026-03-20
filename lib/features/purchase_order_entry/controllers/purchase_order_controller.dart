@@ -16,6 +16,8 @@ import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../godown_master/repos/godown_master_repo.dart';
+
 class PurchaseOrderController extends GetxController {
   var isLoading = false.obs;
   final purchaseOrderFormKey = GlobalKey<FormState>();
@@ -49,6 +51,13 @@ class PurchaseOrderController extends GetxController {
   var qtyControllers = <String, TextEditingController>{}.obs;
   var priceControllers = <String, TextEditingController>{}.obs;
   var dateControllers = <String, TextEditingController>{}.obs;
+
+  // ADD these godown variables
+  var godowns = <dynamic>[].obs; // use your GodownMasterDm type
+  var godownNames = <String>[].obs;
+  var selectedGodownName = <String, String>{}.obs; // key: indent key
+  var selectedGodownCode = <String, String>{}.obs; // key: indent key
+  var remarkControllers = <String, TextEditingController>{}.obs;
 
   Future<void> getSites() async {
     try {
@@ -98,6 +107,24 @@ class PurchaseOrderController extends GetxController {
       (p) => p.accountName == partyName,
     );
     selectedPartyCode.value = selectedPartyObj.pCode;
+  }
+
+  Future<void> getGodowns() async {
+    try {
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(siteCode: '');
+      godowns.assignAll(fetchedGodowns);
+      godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    }
+  }
+
+  void onGodownSelected(String key, String? godownName) {
+    selectedGodownName[key] = godownName ?? '';
+    final obj = godowns.firstWhereOrNull((gd) => gd.gdName == godownName);
+    selectedGodownCode[key] = obj?.gdCode ?? '';
+    selectedGodownName.refresh();
+    selectedGodownCode.refresh();
   }
 
   Future<void> pickFromCamera() async {
@@ -215,9 +242,21 @@ class PurchaseOrderController extends GetxController {
               priceControllers[key]?.text = (selectedItem['Price'] ?? 0.0)
                   .toStringAsFixed(2);
 
-              // ADD THIS BLOCK
               if (selectedItem.containsKey('ReqDate')) {
                 dateControllers[key]?.text = selectedItem['ReqDate'];
+              }
+              // ADD
+              if (selectedItem.containsKey('GDCode')) {
+                selectedGodownCode[key] = selectedItem['GDCode'] ?? '';
+                // find name from godowns list
+                final obj = godowns.firstWhereOrNull(
+                  (gd) => gd.gdCode == selectedItem['GDCode'],
+                );
+                selectedGodownName[key] = obj?.gdName ?? '';
+              }
+              if (selectedItem.containsKey('IndentRemark')) {
+                remarkControllers[key]?.text =
+                    selectedItem['IndentRemark'] ?? '';
               }
             }
           }
@@ -261,8 +300,10 @@ class PurchaseOrderController extends GetxController {
         if (index != -1) {
           selectedPurchaseItems[index]['Qty'] = newItem['Qty'];
           selectedPurchaseItems[index]['Price'] = newItem['Price'];
-          selectedPurchaseItems[index]['ReqDate'] =
-              newItem['ReqDate']; // ADD THIS
+          selectedPurchaseItems[index]['ReqDate'] = newItem['ReqDate'];
+          selectedPurchaseItems[index]['GDCode'] = newItem['GDCode']; // ADD
+          selectedPurchaseItems[index]['IndentRemark'] =
+              newItem['IndentRemark']; // ADD
         }
       }
     }
@@ -315,14 +356,29 @@ class PurchaseOrderController extends GetxController {
             );
           }
 
-          // ADD THIS BLOCK
           if (!dateControllers.containsKey(key)) {
             dateControllers[key] = TextEditingController(
               text: convertyyyyMMddToddMMyyyy(indent.reqDate),
             );
           }
+
+          // ADD: auto-fill godown from indent
+          if (!selectedGodownCode.containsKey(key)) {
+            selectedGodownCode[key] = indent.gCode;
+            selectedGodownName[key] = indent.gdName;
+          }
+
+          // ADD: remark controller pre-filled with indentRemark
+          if (!remarkControllers.containsKey(key)) {
+            remarkControllers[key] = TextEditingController(
+              text: indent.indentRemark,
+            );
+          }
         }
       }
+
+      // ADD: load all godowns
+      await getGodowns();
 
       preselectExistingItems();
     } catch (e) {
@@ -406,7 +462,9 @@ class PurchaseOrderController extends GetxController {
               double.tryParse(priceControllers[key]?.text ?? '') ?? 0.0;
           final reqDate =
               dateControllers[key]?.text ??
-              convertyyyyMMddToddMMyyyy(indent.reqDate); // ADD THIS
+              convertyyyyMMddToddMMyyyy(indent.reqDate);
+          final gdCode = selectedGodownCode[key] ?? ''; // ADD
+          final indentRemark = remarkControllers[key]?.text ?? ''; // ADD
 
           selectedData.add({
             'SrNo': srNo,
@@ -416,7 +474,9 @@ class PurchaseOrderController extends GetxController {
             'Price': price,
             'IndentNo': indent.indentNo,
             'IndentSrNo': indent.indentSrNo,
-            'ReqDate': reqDate, // ADD THIS
+            'ReqDate': reqDate,
+            'GDCode': gdCode, // ADD
+            'IndentRemark': indentRemark, // ADD
           });
           srNo++;
         }
@@ -490,6 +550,14 @@ class PurchaseOrderController extends GetxController {
     existingAttachmentUrls.clear();
     authIndentItems.clear();
     selectedPurchaseItems.clear();
+    remarkControllers.clear();
+    selectedGodownName.clear();
+    selectedGodownCode.clear();
+    godowns.clear();
+    godownNames.clear();
+    for (var controller in remarkControllers.values) {
+      controller.dispose();
+    }
 
     for (var controller in qtyControllers.values) {
       controller.dispose();
