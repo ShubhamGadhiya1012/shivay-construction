@@ -6,16 +6,14 @@ import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
 class PurchaseOrderRepo {
-  static Future<List<AuthIndentItemDm>> getAuthIndentItems({
-    required String siteCode,
-  }) async {
+  static Future<List<AuthIndentItemDm>> getAuthIndentItems() async {
     String? token = await SecureStorageHelper.read('token');
     // print(siteCode);
     // print(gdCode);
     try {
       final response = await ApiService.getRequest(
         endpoint: '/Order/getAuthIndentItems',
-        queryParams: {'SiteCode': siteCode},
+
         token: token,
       );
 
@@ -123,7 +121,7 @@ class PurchaseOrderRepo {
         token: token,
       );
 
-      //  print(response);
+      print(response);
 
       return response;
     } catch (e) {

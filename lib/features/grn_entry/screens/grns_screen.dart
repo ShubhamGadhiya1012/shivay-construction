@@ -76,7 +76,9 @@ class _GrnsScreenState extends State<GrnsScreen> {
                       Get.to(
                         () =>
                             const GrnEntryScreen(isEdit: false, isDirect: true),
-                      );
+                      )?.then((_) {
+                        _controller.getGrns();
+                      });
                     }
                   },
                   itemBuilder: (context) => [
@@ -138,7 +140,7 @@ class _GrnsScreenState extends State<GrnsScreen> {
                         _controller.searchQuery.value = query;
 
                         setState(() {
-                          expandedIndex = null; // Reset expansion
+                          expandedIndex = null;
                         });
                       },
                     ),

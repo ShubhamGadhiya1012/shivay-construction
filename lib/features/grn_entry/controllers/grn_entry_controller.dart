@@ -27,39 +27,50 @@ class GrnEntryController extends GetxController {
 
   var dateController = TextEditingController();
   var remarksController = TextEditingController();
-  var siteNameController = TextEditingController();
+
+  var currentStep = 0.obs;
 
   var parties = <PartyMasterDm>[].obs;
   var partyNames = <String>[].obs;
   var selectedPartyName = ''.obs;
   var selectedPartyCode = ''.obs;
 
+  var sites = <SiteMasterDm>[].obs;
+  var selectedSiteName = ''.obs;
+  var selectedSiteCode = ''.obs;
+
+  var selectedDirectPartyName = ''.obs;
+  var selectedDirectPartyCode = ''.obs;
+  var selectedDirectSiteName = ''.obs;
+  var selectedDirectSiteCode = ''.obs;
+
+  var selectedDirectGodownName = ''.obs;
+  var selectedDirectGodownCode = ''.obs;
+
+  var lockedSiteCode = ''.obs;
+  var lockedSiteName = ''.obs;
+  var lockedPartyCode = ''.obs;
+  var lockedPartyName = ''.obs;
+
   var godowns = <GodownMasterDm>[].obs;
   var godownNames = <String>[].obs;
-  var selectedGodownName = ''.obs;
-  var selectedGodownCode = ''.obs;
 
   var selectedPoGodownName = <String, String>{}.obs;
   var selectedPoGodownCode = <String, String>{}.obs;
   var poRemarkControllers = <String, TextEditingController>{}.obs;
 
-  var sites = <SiteMasterDm>[].obs;
-  var siteNames = <String>[].obs;
-  var selectedSiteName = ''.obs;
-  var selectedSiteCode = ''.obs;
-
   var poAuthItems = <PoAuthItemDm>[].obs;
   var selectedPoOrders = <String, Map<String, dynamic>>{}.obs;
   var qtyControllers = <String, TextEditingController>{}.obs;
+
+  var expandedItemIndices = <int>[].obs;
+  var isInSelectionMode = false.obs;
 
   var attachmentFiles = <PlatformFile>[].obs;
   var existingAttachmentUrls = <String>[].obs;
 
   var isEditMode = false.obs;
   var currentInvNo = ''.obs;
-
-  var isItemSelectionMode = false.obs;
-  var isInSelectionMode = false.obs;
 
   var isDirectGrn = false.obs;
   var directGrnItems = <Map<String, dynamic>>[].obs;
@@ -70,8 +81,8 @@ class GrnEntryController extends GetxController {
   var selectedDirectItemName = ''.obs;
   var selectedDirectItemCode = ''.obs;
   var selectedDirectUnit = ''.obs;
-  var directRateController = TextEditingController();
   var directQtyController = TextEditingController();
+  var directRateController = TextEditingController();
 
   var isEditingDirectItem = false.obs;
   var editingDirectItemIndex = (-1).obs;
@@ -86,22 +97,97 @@ class GrnEntryController extends GetxController {
   void onClose() {
     dateController.dispose();
     remarksController.dispose();
-    siteNameController.dispose();
-
-    for (var controller in qtyControllers.values) {
-      controller.dispose();
+    directRateController.dispose();
+    directQtyController.dispose();
+    for (var c in qtyControllers.values) {
+      c.dispose();
+    }
+    for (var c in poRemarkControllers.values) {
+      c.dispose();
     }
     qtyControllers.clear();
-
+    poRemarkControllers.clear();
     super.onClose();
   }
 
-  Future<void> getSites() async {
+  void cancelItemSelection() {
+    if (!isEditMode.value) {
+      selectedPoOrders.clear();
+      _disposeQtyControllers();
+    }
+    isInSelectionMode.value = false;
+  }
+
+  void confirmItemSelection() {
+    if (selectedPoOrders.isEmpty) {
+      showErrorSnackbar('Error', 'Please select at least one PO');
+      return;
+    }
+    bool hasError = false;
+    for (var entry in selectedPoOrders.entries) {
+      final grnQty = entry.value['grnQty'] as double;
+      final pendingQty = entry.value['pendingQty'] as double;
+      if (grnQty <= 0) {
+        showErrorSnackbar('Error', 'GRN quantity must be greater than 0');
+        hasError = true;
+        break;
+      }
+      if (grnQty > pendingQty) {
+        showErrorSnackbar(
+          'Error',
+          'GRN quantity cannot exceed pending quantity',
+        );
+        hasError = true;
+        break;
+      }
+    }
+    if (!hasError) {
+      isInSelectionMode.value = false;
+    }
+  }
+
+  Future<void> getPoAuthItems() async {
+    if (isDirectGrn.value) {
+      return;
+    }
+
     try {
       isLoading.value = true;
-      final fetchedSites = await SiteMasterListRepo.getSites();
-      sites.assignAll(fetchedSites);
-      siteNames.assignAll(fetchedSites.map((site) => site.siteName).toList());
+      final fetchedItems = await PoAuthItemsRepo.getPoAuthItems();
+      poAuthItems.assignAll(fetchedItems);
+
+      if (fetchedItems.isEmpty) {
+        showErrorSnackbar('Info', 'No authorized PO items available');
+        return;
+      }
+
+      expandedItemIndices.clear();
+      for (int i = 0; i < fetchedItems.length; i++) {
+        expandedItemIndices.add(i);
+      }
+
+      for (var item in fetchedItems) {
+        for (var order in item.orders) {
+          final key = '${order.poInvNo}_${order.poSrNo}';
+          if (!qtyControllers.containsKey(key)) {
+            qtyControllers[key] = TextEditingController(
+              text: order.pendingQty.toStringAsFixed(2),
+            );
+          }
+          if (!selectedPoGodownCode.containsKey(key)) {
+            selectedPoGodownCode[key] = order.gdCode;
+            selectedPoGodownName[key] = order.gdName;
+          }
+          if (!poRemarkControllers.containsKey(key)) {
+            poRemarkControllers[key] = TextEditingController(
+              text: order.poRemark,
+            );
+          }
+        }
+      }
+
+      await getGodowns();
+      _reapplySelectionsFromOrders();
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
@@ -109,34 +195,191 @@ class GrnEntryController extends GetxController {
     }
   }
 
-  void onSiteSelected(String? siteName) {
-    selectedSiteName.value = siteName ?? '';
-    var selectedSiteObj = sites.firstWhereOrNull(
-      (site) => site.siteName == siteName,
-    );
-    selectedSiteCode.value = selectedSiteObj?.siteCode ?? '';
-    siteNameController.clear();
+  void onDirectGodownSelected(String? godownName) {
+    selectedDirectGodownName.value = godownName ?? '';
+    final godown = godowns.firstWhereOrNull((gd) => gd.gdName == godownName);
+    selectedDirectGodownCode.value = godown?.gdCode ?? '';
   }
 
-  Future<void> getParties() async {
-    try {
-      isLoading.value = true;
-      final fetchedParties = await PartyMasterListRepo.getParties();
-      parties.assignAll(fetchedParties);
-      partyNames.assignAll(fetchedParties.map((p) => p.accountName).toList());
-    } catch (e) {
-      showErrorSnackbar('Error', e.toString());
-    } finally {
-      isLoading.value = false;
+  void _reapplySelectionsFromOrders() {
+    for (var selectedEntry in selectedPoOrders.entries) {
+      final selectedData = selectedEntry.value;
+      for (var item in poAuthItems) {
+        for (var order in item.orders) {
+          if (order.poInvNo == selectedData['poInvNo'] &&
+              order.poSrNo == selectedData['poSrNo']) {
+            final key = '${order.poInvNo}_${order.poSrNo}';
+            qtyControllers[key]?.text = (selectedData['grnQty'] as double)
+                .toStringAsFixed(2);
+            if (selectedData['GDCode'] != null) {
+              selectedPoGodownCode[key] = selectedData['GDCode'];
+              final obj = godowns.firstWhereOrNull(
+                (gd) => gd.gdCode == selectedData['GDCode'],
+              );
+              selectedPoGodownName[key] =
+                  obj?.gdName ?? selectedData['GDName'] ?? '';
+            }
+            if (selectedData['PORemark'] != null) {
+              poRemarkControllers[key]?.text = selectedData['PORemark'];
+            }
+          }
+        }
+      }
+    }
+    if (selectedPoOrders.isNotEmpty) {
+      isInSelectionMode.value = true;
+    }
+    poAuthItems.refresh();
+  }
+
+  void toggleItemExpansion(int index) {
+    if (expandedItemIndices.contains(index)) {
+      expandedItemIndices.remove(index);
+    } else {
+      expandedItemIndices.add(index);
     }
   }
 
-  void onPartySelected(String? partyName) {
-    selectedPartyName.value = partyName!;
-    var selectedPartyObj = parties.firstWhere(
-      (p) => p.accountName == partyName,
-    );
-    selectedPartyCode.value = selectedPartyObj.pCode;
+  bool togglePoOrderSelection(PoAuthItemDm item, PoOrderDm order) {
+    final key = '${order.poInvNo}_${order.poSrNo}';
+
+    if (selectedPoOrders.containsKey(key)) {
+      selectedPoOrders.remove(key);
+      _updateLockIfNoSelection();
+      if (selectedPoOrders.isEmpty) {
+        isInSelectionMode.value = false;
+      }
+      return true;
+    }
+
+    if (lockedSiteCode.value.isEmpty) {
+      lockedSiteCode.value = order.siteCode;
+      lockedSiteName.value = order.siteName;
+      lockedPartyCode.value = order.pCode;
+      lockedPartyName.value = order.pName;
+    } else {
+      if (order.siteCode != lockedSiteCode.value) {
+        showErrorSnackbar(
+          'Site Mismatch',
+          'You can only select orders from "${lockedSiteName.value}". Deselect all to change.',
+        );
+        return false;
+      }
+
+      if (order.pCode != lockedPartyCode.value) {
+        showErrorSnackbar(
+          'Party Mismatch',
+          'You can only select orders from "${lockedPartyName.value}". Deselect all to change.',
+        );
+        return false;
+      }
+    }
+
+    final qtyController = qtyControllers[key];
+    final grnQty =
+        double.tryParse(qtyController?.text ?? '') ?? order.pendingQty;
+
+    selectedPoOrders[key] = {
+      'iCode': item.iCode,
+      'iName': item.iName,
+      'unit': item.unit,
+      'rate': item.rate,
+      'poInvNo': order.poInvNo,
+      'poSrNo': order.poSrNo,
+      'poDate': order.poDate,
+      'poQty': order.poQty,
+      'pendingQty': order.pendingQty,
+      'grnQty': grnQty,
+      'GDCode': selectedPoGodownCode[key] ?? order.gdCode,
+      'GDName': selectedPoGodownName[key] ?? order.gdName,
+      'PORemark': poRemarkControllers[key]?.text ?? order.poRemark,
+    };
+
+    selectedSiteCode.value = lockedSiteCode.value;
+    selectedSiteName.value = lockedSiteName.value;
+    selectedPartyCode.value = lockedPartyCode.value;
+    selectedPartyName.value = lockedPartyName.value;
+
+    return true;
+  }
+
+  void onPoOrderLongPress(PoAuthItemDm item, PoOrderDm order) {
+    if (!isInSelectionMode.value) {
+      isInSelectionMode.value = true;
+    }
+    togglePoOrderSelection(item, order);
+  }
+
+  bool isPoOrderSelected(String poInvNo, int poSrNo) {
+    final key = '${poInvNo}_$poSrNo';
+    return selectedPoOrders.containsKey(key);
+  }
+
+  void deselectAllOrders() {
+    selectedPoOrders.clear();
+    lockedSiteCode.value = '';
+    lockedSiteName.value = '';
+    lockedPartyCode.value = '';
+    lockedPartyName.value = '';
+    selectedSiteCode.value = '';
+    selectedSiteName.value = '';
+    selectedPartyCode.value = '';
+    selectedPartyName.value = '';
+    isInSelectionMode.value = false;
+  }
+
+  void _updateLockIfNoSelection() {
+    if (selectedPoOrders.isEmpty) {
+      lockedSiteCode.value = '';
+      lockedSiteName.value = '';
+      lockedPartyCode.value = '';
+      lockedPartyName.value = '';
+      selectedSiteCode.value = '';
+      selectedSiteName.value = '';
+      selectedPartyCode.value = '';
+      selectedPartyName.value = '';
+    }
+  }
+
+  void updateGrnQty(String poInvNo, int poSrNo, double qty) {
+    final key = '${poInvNo}_$poSrNo';
+    if (selectedPoOrders.containsKey(key)) {
+      selectedPoOrders[key]!['grnQty'] = qty;
+      selectedPoOrders.refresh();
+    }
+  }
+
+  void onPoGodownSelected(String key, String? godownName) {
+    selectedPoGodownName[key] = godownName ?? '';
+    final obj = godowns.firstWhereOrNull((gd) => gd.gdName == godownName);
+    selectedPoGodownCode[key] = obj?.gdCode ?? '';
+    if (selectedPoOrders.containsKey(key)) {
+      selectedPoOrders[key]!['GDCode'] = selectedPoGodownCode[key];
+      selectedPoOrders[key]!['GDName'] = godownName ?? '';
+      selectedPoOrders.refresh();
+    }
+    selectedPoGodownName.refresh();
+    selectedPoGodownCode.refresh();
+  }
+
+  void proceedToForm() {
+    if (selectedPoOrders.isEmpty) {
+      showErrorSnackbar('Error', 'Please select at least one PO order');
+      return;
+    }
+    currentStep.value = 1;
+  }
+
+  void goBackToSelection() {
+    currentStep.value = 0;
+  }
+
+  void removeSelectedPo(String key) {
+    selectedPoOrders.remove(key);
+    _updateLockIfNoSelection();
+    if (selectedPoOrders.isEmpty) {
+      isInSelectionMode.value = false;
+    }
   }
 
   Future<void> getGodowns([String siteCode = '']) async {
@@ -154,64 +397,12 @@ class GrnEntryController extends GetxController {
     }
   }
 
-  void onGodownSelected(String? godownName) {
-    selectedGodownName.value = godownName ?? '';
-    var selectedGodownObj = godowns.firstWhereOrNull(
-      (gd) => gd.gdName == godownName,
-    );
-    selectedGodownCode.value = selectedGodownObj?.gdCode ?? '';
-  }
-
-  void onPoGodownSelected(String key, String? godownName) {
-    selectedPoGodownName[key] = godownName ?? '';
-    final obj = godowns.firstWhereOrNull((gd) => gd.gdName == godownName);
-    selectedPoGodownCode[key] = obj?.gdCode ?? '';
-    selectedPoGodownName.refresh();
-    selectedPoGodownCode.refresh();
-  }
-
-  Future<void> getPoAuthItems() async {
-    if (selectedSiteCode.value.isEmpty) {
-      showErrorSnackbar('Error', 'Please select Site first');
-      return;
-    }
-    if (selectedPartyCode.value.isEmpty) {
-      showErrorSnackbar('Error', 'Please select party first');
-      return;
-    }
-
+  Future<void> getParties() async {
     try {
       isLoading.value = true;
-      final fetchedItems = await PoAuthItemsRepo.getPoAuthItems(
-        siteCode: selectedSiteCode.value,
-        pCode: selectedPartyCode.value,
-      );
-      poAuthItems.assignAll(fetchedItems);
-      isItemSelectionMode.value = true;
-      isInSelectionMode.value = false;
-
-      for (var item in fetchedItems) {
-        for (var order in item.orders) {
-          final key = '${order.poInvNo}_${order.poSrNo}';
-
-          if (!qtyControllers.containsKey(key)) {
-            qtyControllers[key] = TextEditingController(
-              text: order.pendingQty.toStringAsFixed(2),
-            );
-          }
-
-          if (!selectedPoGodownCode.containsKey(key)) {
-            selectedPoGodownCode[key] = order.gdCode;
-            selectedPoGodownName[key] = order.gdName;
-          }
-
-          if (!poRemarkControllers.containsKey(key)) {
-            poRemarkControllers[key] = TextEditingController(
-              text: order.poRemark,
-            );
-          }
-        }
-      }
+      final fetchedParties = await PartyMasterListRepo.getParties();
+      parties.assignAll(fetchedParties);
+      partyNames.assignAll(fetchedParties.map((p) => p.accountName).toList());
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
@@ -219,160 +410,28 @@ class GrnEntryController extends GetxController {
     }
   }
 
-  void populateSelectedItemsFromGrnDetails(List<GrnDetailDm> details) {
-    isLoading.value = true;
+  Future<void> getSites() async {
     try {
-      selectedPoOrders.clear();
-      _disposeQtyControllers();
-
-      for (var detail in details) {
-        final key = '${detail.poInvNo}_${detail.poSrnNo.toInt()}';
-
-        qtyControllers[key] = TextEditingController(
-          text: detail.qty.toStringAsFixed(2),
-        );
-
-        selectedPoGodownCode[key] = detail.gdCode;
-        selectedPoGodownName[key] = detail.gdName;
-        poRemarkControllers[key] = TextEditingController(text: detail.poRemark);
-
-        selectedPoOrders[key] = {
-          'iCode': detail.iCode,
-          'iName': detail.iName,
-          'unit': detail.unit,
-          'rate': detail.rate,
-          'poInvNo': detail.poInvNo,
-          'poSrNo': detail.poSrnNo.toInt(),
-          'poDate': detail.poDate,
-          'poQty': detail.poQty,
-          'pendingQty': detail.pendingQty,
-          'grnQty': detail.qty,
-          'GDCode': detail.gdCode,
-          'GDName': detail.gdName,
-          'PORemark': detail.poRemark,
-        };
-      }
-    } catch (_) {
+      isLoading.value = true;
+      final fetchedSites = await SiteMasterListRepo.getSites();
+      sites.assignAll(fetchedSites);
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
     } finally {
       isLoading.value = false;
     }
   }
 
-  void togglePoOrderSelection(PoAuthItemDm item, PoOrderDm order) {
-    final key = '${order.poInvNo}_${order.poSrNo}';
-
-    if (selectedPoOrders.containsKey(key)) {
-      selectedPoOrders.remove(key);
-      if (selectedPoOrders.isEmpty) {
-        isInSelectionMode.value = false;
-      }
-    } else {
-      final controller = qtyControllers[key];
-      final grnQty =
-          double.tryParse(controller?.text ?? '') ?? order.pendingQty;
-
-      selectedPoOrders[key] = {
-        'iCode': item.iCode,
-        'iName': item.iName,
-        'unit': item.unit,
-        'rate': item.rate,
-        'poInvNo': order.poInvNo,
-        'poSrNo': order.poSrNo,
-        'poDate': order.poDate,
-        'poQty': order.poQty,
-        'pendingQty': order.pendingQty,
-        'grnQty': grnQty,
-        'GDCode': selectedPoGodownCode[key] ?? order.gdCode,
-        'GDName': selectedPoGodownName[key] ?? order.gdName,
-        'PORemark': poRemarkControllers[key]?.text ?? order.poRemark,
-      };
-    }
+  void onDirectPartySelected(String? partyName) {
+    selectedDirectPartyName.value = partyName ?? '';
+    final party = parties.firstWhereOrNull((p) => p.accountName == partyName);
+    selectedDirectPartyCode.value = party?.pCode ?? '';
   }
 
-  void onPoOrderLongPress(PoAuthItemDm item, PoOrderDm order) {
-    if (!isInSelectionMode.value) {
-      isInSelectionMode.value = true;
-    }
-    togglePoOrderSelection(item, order);
-  }
-
-  bool isPoOrderSelected(String poInvNo, int poSrNo) {
-    final key = '${poInvNo}_$poSrNo';
-    return selectedPoOrders.containsKey(key);
-  }
-
-  void updateGrnQty(String poInvNo, int poSrNo, double qty) {
-    final key = '${poInvNo}_$poSrNo';
-    if (selectedPoOrders.containsKey(key)) {
-      selectedPoOrders[key]!['grnQty'] = qty;
-      selectedPoOrders.refresh();
-    }
-  }
-
-  bool handleBackPress() {
-    if (isItemSelectionMode.value) {
-      isItemSelectionMode.value = false;
-      isInSelectionMode.value = false;
-      return false;
-    }
-    return true;
-  }
-
-  void confirmItemSelection() {
-    if (selectedPoOrders.isEmpty) {
-      showErrorSnackbar('Error', 'Please select at least one PO');
-      return;
-    }
-
-    bool hasError = false;
-    for (var entry in selectedPoOrders.entries) {
-      final grnQty = entry.value['grnQty'] as double;
-      final pendingQty = entry.value['pendingQty'] as double;
-
-      if (grnQty <= 0) {
-        showErrorSnackbar('Error', 'GRN quantity must be greater than 0');
-        hasError = true;
-        break;
-      }
-
-      if (grnQty > pendingQty) {
-        showErrorSnackbar(
-          'Error',
-          'GRN quantity cannot exceed pending quantity',
-        );
-        hasError = true;
-        break;
-      }
-    }
-
-    if (!hasError) {
-      isItemSelectionMode.value = false;
-      isInSelectionMode.value = false;
-    }
-  }
-
-  void cancelItemSelection() {
-    if (!isEditMode.value) {
-      selectedPoOrders.clear();
-      _disposeQtyControllers();
-    }
-    isItemSelectionMode.value = false;
-    isInSelectionMode.value = false;
-  }
-
-  void removeSelectedPo(String key) {
-    selectedPoOrders.remove(key);
-
-    if (isItemSelectionMode.value && selectedPoOrders.isEmpty) {
-      isInSelectionMode.value = false;
-    }
-  }
-
-  void _disposeQtyControllers() {
-    for (var controller in qtyControllers.values) {
-      controller.dispose();
-    }
-    qtyControllers.clear();
+  void onDirectSiteSelected(String? siteName) {
+    selectedDirectSiteName.value = siteName ?? '';
+    final site = sites.firstWhereOrNull((s) => s.siteName == siteName);
+    selectedDirectSiteCode.value = site?.siteCode ?? '';
   }
 
   Future<void> pickFromCamera() async {
@@ -382,18 +441,15 @@ class GrnEntryController extends GetxController {
         source: ImageSource.camera,
         imageQuality: 85,
       );
-
       if (photo != null) {
         final File file = File(photo.path);
         final bytes = await file.readAsBytes();
-
         final platformFile = PlatformFile(
           name: photo.name,
           size: bytes.length,
           path: photo.path,
           bytes: bytes,
         );
-
         attachmentFiles.add(platformFile);
       }
     } catch (e) {
@@ -418,7 +474,6 @@ class GrnEntryController extends GetxController {
           'xlsx',
         ],
       );
-
       if (result != null) {
         attachmentFiles.addAll(result.files);
       }
@@ -427,13 +482,9 @@ class GrnEntryController extends GetxController {
     }
   }
 
-  void removeFile(int index) {
-    attachmentFiles.removeAt(index);
-  }
-
-  void removeExistingAttachment(int index) {
-    existingAttachmentUrls.removeAt(index);
-  }
+  void removeFile(int index) => attachmentFiles.removeAt(index);
+  void removeExistingAttachment(int index) =>
+      existingAttachmentUrls.removeAt(index);
 
   Future<void> openAttachment(String fileUrl) async {
     String url =
@@ -458,7 +509,6 @@ class GrnEntryController extends GetxController {
 
   Future<void> getItems() async {
     if (items.isNotEmpty) return;
-
     try {
       isLoading.value = true;
       final fetchedItems = await ItemMasterListRepo.getItems();
@@ -493,7 +543,6 @@ class GrnEntryController extends GetxController {
     selectedDirectUnit.value = item['unit'] ?? '';
     directQtyController.text = (item['qty'] ?? 0).toString();
     directRateController.text = (item['rate'] ?? 0).toString();
-
     isEditingDirectItem.value = true;
     editingDirectItemIndex.value = index;
   }
@@ -502,6 +551,8 @@ class GrnEntryController extends GetxController {
     selectedDirectItemName.value = '';
     selectedDirectItemCode.value = '';
     selectedDirectUnit.value = '';
+    selectedDirectGodownName.value = '';
+    selectedDirectGodownCode.value = '';
     directQtyController.clear();
     directRateController.clear();
   }
@@ -514,7 +565,6 @@ class GrnEntryController extends GetxController {
       final isDuplicate = directGrnItems.any(
         (item) => item['icode'] == selectedDirectItemCode.value,
       );
-
       if (isDuplicate) {
         showErrorSnackbar('Duplicate Item', 'This item is already added.');
         return;
@@ -530,6 +580,8 @@ class GrnEntryController extends GetxController {
       "unit": selectedDirectUnit.value,
       "qty": qty,
       "rate": rate,
+      "gdCode": selectedDirectGodownCode.value,
+      "gdName": selectedDirectGodownName.value,
     };
 
     if (isEditingDirectItem.value) {
@@ -557,7 +609,6 @@ class GrnEntryController extends GetxController {
 
   void populateDirectItemsFromGrnDetails(List<GrnDetailDm> details) {
     directGrnItems.clear();
-
     for (var detail in details) {
       directGrnItems.add({
         "SrNo": detail.srNo,
@@ -566,13 +617,80 @@ class GrnEntryController extends GetxController {
         "unit": detail.unit,
         "qty": detail.qty,
         "rate": detail.rate,
+        "gdCode": detail.gdCode,
+        "gdName": detail.gdName,
       });
     }
+  }
+
+  void populateSelectedItemsFromGrnDetails(List<GrnDetailDm> details) {
+    isLoading.value = true;
+    try {
+      selectedPoOrders.clear();
+      _disposeQtyControllers();
+
+      for (var detail in details) {
+        final key = '${detail.poInvNo}_${detail.poSrnNo.toInt()}';
+
+        qtyControllers[key] = TextEditingController(
+          text: detail.qty.toStringAsFixed(2),
+        );
+        selectedPoGodownCode[key] = detail.gdCode;
+        selectedPoGodownName[key] = detail.gdName;
+        poRemarkControllers[key] = TextEditingController(text: detail.poRemark);
+
+        selectedPoOrders[key] = {
+          'iCode': detail.iCode,
+          'iName': detail.iName,
+          'unit': detail.unit,
+          'rate': detail.rate,
+          'poInvNo': detail.poInvNo,
+          'poSrNo': detail.poSrnNo.toInt(),
+          'poDate': detail.poDate,
+          'poQty': detail.poQty,
+          'pendingQty': detail.pendingQty,
+          'grnQty': detail.qty,
+          'GDCode': detail.gdCode,
+          'GDName': detail.gdName,
+          'PORemark': detail.poRemark,
+        };
+      }
+      if (selectedPoOrders.isNotEmpty) {
+        isInSelectionMode.value = true;
+      }
+    } catch (_) {
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void _disposeQtyControllers() {
+    for (var c in qtyControllers.values) {
+      c.dispose();
+    }
+    qtyControllers.clear();
   }
 
   final GrnsController grnsController = Get.find<GrnsController>();
 
   Future<void> saveGrnEntry() async {
+    if (!grnFormKey.currentState!.validate()) return;
+
+    if (isDirectGrn.value) {
+      if (selectedDirectPartyCode.value.isEmpty) {
+        showErrorSnackbar('Error', 'Please select party');
+        return;
+      }
+      if (selectedDirectSiteCode.value.isEmpty) {
+        showErrorSnackbar('Error', 'Please select site');
+        return;
+      }
+      if (directGrnItems.isEmpty) {
+        showErrorSnackbar('Error', 'Please add at least one item');
+        return;
+      }
+    }
+
     isLoading.value = true;
 
     try {
@@ -589,13 +707,18 @@ class GrnEntryController extends GetxController {
                 "Rate": item['rate'],
                 "POInvNo": "",
                 "POSrNo": "",
+                "GDCode": item['gdCode'] ?? '',
+                "PORemark": "",
               },
             )
             .toList();
       } else {
+        if (selectedPoOrders.isEmpty) {
+          showErrorSnackbar('Error', 'Please select at least one PO order');
+          return;
+        }
         itemData = [];
         int srNo = 1;
-
         for (var entry in selectedPoOrders.entries) {
           final key = entry.key;
           final poData = entry.value;
@@ -618,8 +741,12 @@ class GrnEntryController extends GetxController {
         invNo: isEditMode.value ? currentInvNo.value : '',
         date: _convertToApiDateFormat(dateController.text),
         remarks: remarksController.text,
-        pCode: selectedPartyCode.value,
-        siteCode: selectedSiteCode.value,
+        pCode: isDirectGrn.value
+            ? selectedDirectPartyCode.value
+            : selectedPartyCode.value,
+        siteCode: isDirectGrn.value
+            ? selectedDirectSiteCode.value
+            : selectedSiteCode.value,
         type: isDirectGrn.value ? 'Direct' : 'Against',
         itemData: itemData,
         newFiles: attachmentFiles.toList(),
@@ -648,14 +775,23 @@ class GrnEntryController extends GetxController {
     currentInvNo.value = '';
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
     remarksController.clear();
-    siteNameController.clear();
 
     selectedPartyName.value = '';
     selectedPartyCode.value = '';
-    selectedGodownName.value = '';
-    selectedGodownCode.value = '';
     selectedSiteCode.value = '';
     selectedSiteName.value = '';
+    lockedSiteCode.value = '';
+    lockedSiteName.value = '';
+    lockedPartyCode.value = '';
+    lockedPartyName.value = '';
+
+    selectedDirectPartyName.value = '';
+    selectedDirectPartyCode.value = '';
+    selectedDirectSiteName.value = '';
+    selectedDirectSiteCode.value = '';
+
+    selectedDirectGodownName.value = '';
+    selectedDirectGodownCode.value = '';
     selectedPoOrders.clear();
     poAuthItems.clear();
     directGrnItems.clear();
@@ -664,11 +800,12 @@ class GrnEntryController extends GetxController {
 
     isEditMode.value = false;
     isDirectGrn.value = false;
-    isItemSelectionMode.value = false;
     isInSelectionMode.value = false;
+    currentStep.value = 0;
+    expandedItemIndices.clear();
 
-    for (var controller in poRemarkControllers.values) {
-      controller.dispose();
+    for (var c in poRemarkControllers.values) {
+      c.dispose();
     }
     poRemarkControllers.clear();
     selectedPoGodownName.clear();

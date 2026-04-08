@@ -241,7 +241,7 @@ class GrnPdfScreen {
           };
 
     // Right-align numeric columns
-    pw.TextAlign _align(bool isDirect, int colIndex) {
+    pw.TextAlign align(bool isDirect, int colIndex) {
       if (isDirect) {
         return colIndex == 0
             ? pw.TextAlign.center
@@ -305,7 +305,7 @@ class GrnPdfScreen {
                             fontSize: 8.5,
                             color: textPrimaryColor,
                           ),
-                          textAlign: _align(isDirectGrn, cell.key),
+                          textAlign: align(isDirectGrn, cell.key),
                         ),
                       ),
                     )

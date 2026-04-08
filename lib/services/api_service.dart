@@ -3,10 +3,11 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   // static const String kBaseUrl =
-  //     'http://192.168.0.145:5209/api'; // Dhruvilbhai Debugging
+  // 'http://192.168.0.145:5209/api'; // Dhruvilbhai Debugging
   // static const String kBaseUrl =
   //     'http://192.168.0.145:5020/api'; // Dhruvilbhai Local
-  static const String kBaseUrl = 'http://160.187.80.215:8080/api'; // Live
+  // static const String kBaseUrl = 'http://160.187.80.215:8080/api'; // Live
+  static const String kBaseUrl = 'http://192.168.0.145:5020/api'; // Backup URL
 
   static Future<dynamic> getRequest({
     String? endpoint,
@@ -162,7 +163,6 @@ class ApiService {
       final response = await request.send();
 
       final responseBody = await response.stream.bytesToString();
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         return json.decode(responseBody);
       } else {

@@ -40,8 +40,16 @@ class PurchaseOrderListController extends GetxController {
   }
 
   Future<void> checkAdminStatus() async {
-    String? userType = await SecureStorageHelper.read('userType');
-    isAdmin.value = userType == '0';
+    isLoading.value = true;
+
+    try {
+      String? userType = await SecureStorageHelper.read('userType');
+      isAdmin.value = userType == '0';
+    } catch (e) {
+      //
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void debounceSearchQuery() {
@@ -131,6 +139,7 @@ class PurchaseOrderListController extends GetxController {
   }
 
   Future<void> getOrderDetailsForCard(String invNo) async {
+    isLoading.value = true;
     try {
       final details = await PurchaseOrderListRepo.getPurchaseOrderDetails(
         invNo: invNo,
@@ -138,6 +147,8 @@ class PurchaseOrderListController extends GetxController {
       orderDetails.assignAll(details);
     } catch (e) {
       orderDetails.clear();
+    } finally {
+      isLoading.value = false;
     }
   }
 

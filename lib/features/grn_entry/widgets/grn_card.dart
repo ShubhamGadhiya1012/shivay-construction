@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/grn_entry/controllers/grns_controller.dart';
 import 'package:shivay_construction/features/grn_entry/models/grn_dm.dart';
-import 'package:shivay_construction/features/grn_entry/screens/grn_entry_screen.dart';
 import 'package:shivay_construction/features/grn_entry/screens/grn_pdf_screen.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
@@ -61,7 +60,7 @@ class _GrnCardState extends State<GrnCard> {
             if (!widget.isExpanded) {
               await widget.controller.getGrnDetails(invNo: widget.grn.invNo);
             }
-            widget.onTap(); // Call parent's handler
+            widget.onTap();
           },
           borderRadius: BorderRadius.circular(tablet ? 14 : 12),
           child: Padding(
@@ -133,46 +132,46 @@ class _GrnCardState extends State<GrnCard> {
                       ),
                     ),
                     AppSpaces.h8,
-                    Material(
-                      color: kColorPrimary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(tablet ? 10 : 8),
-                      child: InkWell(
-                        onTap: () async {
-                          await widget.controller.getGrnDetails(
-                            invNo: widget.grn.invNo,
-                          );
-                          Get.to(
-                            () => GrnEntryScreen(
-                              isEdit: true,
-                              grn: widget.grn,
-                              grnDetails: widget.controller.grnDetails.toList(),
-                              isDirect: widget.grn.type == 'Direct',
-                            ),
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(tablet ? 10 : 8),
-                        child: Container(
-                          padding: tablet
-                              ? AppPaddings.combined(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                )
-                              : AppPaddings.combined(
-                                  horizontal: 10,
-                                  vertical: 6,
-                                ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.edit_rounded,
-                                size: tablet ? 18 : 16,
-                                color: kColorPrimary,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                    // Material(
+                    //   color: kColorPrimary.withOpacity(0.1),
+                    //   borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                    //   child: InkWell(
+                    //     onTap: () async {
+                    //       await widget.controller.getGrnDetails(
+                    //         invNo: widget.grn.invNo,
+                    //       );
+                    //       Get.to(
+                    //         () => GrnEntryScreen(
+                    //           isEdit: true,
+                    //           grn: widget.grn,
+                    //           grnDetails: widget.controller.grnDetails.toList(),
+                    //           isDirect: widget.grn.type == 'Direct',
+                    //         ),
+                    //       );
+                    //     },
+                    //     borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                    //     child: Container(
+                    //       padding: tablet
+                    //           ? AppPaddings.combined(
+                    //               horizontal: 12,
+                    //               vertical: 8,
+                    //             )
+                    //           : AppPaddings.combined(
+                    //               horizontal: 10,
+                    //               vertical: 6,
+                    //             ),
+                    //       child: Row(
+                    //         children: [
+                    //           Icon(
+                    //             Icons.edit_rounded,
+                    //             size: tablet ? 18 : 16,
+                    //             color: kColorPrimary,
+                    //           ),
+                    //         ],
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                     if (widget.controller.isAdmin.value) ...[
                       AppSpaces.h8,
                       Material(
@@ -345,7 +344,7 @@ class _GrnCardState extends State<GrnCard> {
                                         color: kColorDarkGrey,
                                       ),
                                     ),
-                                  // After the Row with Qty, add:
+
                                   if (detail.gdName.isNotEmpty) ...[
                                     AppSpaces.v4,
                                     Text(

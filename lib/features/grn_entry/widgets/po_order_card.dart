@@ -46,16 +46,20 @@ class PoOrderCard extends StatelessWidget {
           }
         },
         onLongPress: () {
-          controller.onPoOrderLongPress(item, order);
+          if (!controller.isInSelectionMode.value) {
+            controller.isInSelectionMode.value = true;
+          }
+          controller.togglePoOrderSelection(item, order);
         },
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            color: isSelected ? kColorPrimary.withOpacity(0.1) : kColorWhite,
+            color: isSelected ? kColorPrimary.withOpacity(0.12) : kColorWhite,
             borderRadius: BorderRadius.circular(tablet ? 10 : 8),
             border: Border.all(
               color: isSelected
                   ? kColorPrimary
-                  : kColorLightGrey.withOpacity(0.3),
+                  : kColorLightGrey.withOpacity(0.4),
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -65,10 +69,16 @@ class PoOrderCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header row
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  if (controller.isInSelectionMode.value) ...[
+                    Icon(
+                      isSelected ? Icons.check_circle : Icons.circle_outlined,
+                      color: isSelected ? kColorPrimary : kColorDarkGrey,
+                      size: tablet ? 22 : 20,
+                    ),
+                    tablet ? AppSpaces.h10 : AppSpaces.h8,
+                  ],
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,9 +104,8 @@ class PoOrderCard extends StatelessWidget {
                             color: kColorDarkGrey,
                           ),
                         ),
-                        // Show gdName and indentRemark when not selected
                         if (!isSelected && order.gdName.isNotEmpty) ...[
-                          AppSpaces.v4,
+                          AppSpaces.v2,
                           Text(
                             'Head: ${order.gdName}',
                             style: TextStyles.kRegularOutfit(
@@ -108,7 +117,7 @@ class PoOrderCard extends StatelessWidget {
                           ),
                         ],
                         if (!isSelected && order.poRemark.isNotEmpty) ...[
-                          AppSpaces.v4,
+                          AppSpaces.v2,
                           Text(
                             'Remark: ${order.poRemark}',
                             style: TextStyles.kRegularOutfit(
@@ -119,27 +128,42 @@ class PoOrderCard extends StatelessWidget {
                             ),
                           ),
                         ],
+
+                        AppSpaces.v2,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'SiteName : ${order.siteName} ',
+                                style: TextStyles.kRegularOutfit(
+                                  fontSize: tablet
+                                      ? FontSizes.k12FontSize
+                                      : FontSizes.k10FontSize,
+                                  color: kColorDarkGrey,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                'PartyName: ${order.pName}',
+                                style: TextStyles.kRegularOutfit(
+                                  fontSize: tablet
+                                      ? FontSizes.k12FontSize
+                                      : FontSizes.k10FontSize,
+                                  color: kColorDarkGrey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
-                  if (isSelected)
-                    Container(
-                      padding: tablet ? AppPaddings.p8 : AppPaddings.p6,
-                      decoration: BoxDecoration(
-                        color: kColorPrimary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.check,
-                        color: kColorWhite,
-                        size: tablet ? 18 : 16,
-                      ),
-                    ),
                 ],
               ),
+
               tablet ? AppSpaces.v10 : AppSpaces.v8,
 
-              // PO Qty, Rate, Received, Pending row
               Row(
                 children: [
                   Expanded(
@@ -178,11 +202,9 @@ class PoOrderCard extends StatelessWidget {
                 ],
               ),
 
-              // Selected state - editable fields
               if (isSelected) ...[
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
 
-                // GRN Quantity
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -196,26 +218,21 @@ class PoOrderCard extends StatelessWidget {
                       ),
                     ),
                     tablet ? AppSpaces.v6 : AppSpaces.v4,
-                    GestureDetector(
-                      onTap: () {},
-                      child: AbsorbPointer(
-                        absorbing: false,
-                        child: AppTextFormField(
-                          controller: qtyController,
-                          hintText: 'Enter GRN Qty',
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            final qty = double.tryParse(value);
-                            if (qty != null) {
-                              controller.updateGrnQty(
-                                order.poInvNo,
-                                order.poSrNo,
-                                qty,
-                              );
-                            }
-                          },
-                        ),
-                      ),
+                    AppTextFormField(
+                      controller: qtyController,
+                      hintText: 'Enter GRN Qty',
+                      keyboardType: TextInputType.number,
+                      floatingLabelRequired: false,
+                      onChanged: (value) {
+                        final qty = double.tryParse(value);
+                        if (qty != null) {
+                          controller.updateGrnQty(
+                            order.poInvNo,
+                            order.poSrNo,
+                            qty,
+                          );
+                        }
+                      },
                     ),
                     tablet ? AppSpaces.v4 : AppSpaces.v2,
                     Text(
@@ -231,7 +248,6 @@ class PoOrderCard extends StatelessWidget {
                 ),
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
 
-                // Godown dropdown
                 Obx(() {
                   return AppDropdown(
                     items: controller.godownNames,
@@ -245,7 +261,6 @@ class PoOrderCard extends StatelessWidget {
                 }),
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
 
-                // Remark
                 Builder(
                   builder: (context) {
                     final remarkController =
@@ -285,9 +300,8 @@ class PoOrderCard extends StatelessWidget {
                 ),
               ],
 
-              // Not selected hint
               if (!isSelected) ...[
-                tablet ? AppSpaces.v10 : AppSpaces.v8,
+                tablet ? AppSpaces.v8 : AppSpaces.v6,
                 Obx(
                   () => Text(
                     controller.isInSelectionMode.value

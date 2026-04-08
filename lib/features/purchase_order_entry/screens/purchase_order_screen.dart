@@ -28,6 +28,7 @@ class PurchaseOrderScreen extends StatefulWidget {
   const PurchaseOrderScreen({super.key, this.order, this.orderDetails});
   final PurchaseOrderListDm? order;
   final List<PurchaseOrderDetailDm>? orderDetails;
+
   @override
   State<PurchaseOrderScreen> createState() => _PurchaseOrderScreenState();
 }
@@ -47,13 +48,14 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
     _controller.dateController.text = DateFormat(
       'dd-MM-yyyy',
     ).format(DateTime.now());
-
-    await _controller.getSites();
     await _controller.getParties();
 
     if (widget.order != null && widget.orderDetails != null) {
       _loadEditData();
     }
+
+    // Load auth indent items (no site code needed)
+    await _controller.getAuthIndentItems();
   }
 
   void _loadEditData() {
@@ -67,6 +69,8 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
 
     _controller.selectedSiteCode.value = order.siteCode;
     _controller.selectedSiteName.value = order.siteName;
+    _controller.lockedSiteCode.value = order.siteCode;
+    _controller.lockedSiteName.value = order.siteName;
 
     _controller.selectedPartyCode.value = order.pCode;
     _controller.selectedPartyName.value = order.pName;
@@ -94,49 +98,14 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
               : convertyyyyMMddToddMMyyyy(
                   DateTime.now().toString().split(' ')[0],
                 ),
-          'GDCode': indent.gdCode, // ADD
-          'GDName': indent.gdName, // ADD
-          'IndentRemark': indent.indentRemark, // ADD
+          'GDCode': indent.gdCode,
+          'GDName': indent.gdName,
+          'IndentRemark': indent.indentRemark,
+          'SiteCode': order.siteCode,
+          'SiteName': order.siteName,
         });
       }
     }
-
-    for (var item in _controller.selectedPurchaseItems) {
-      final key = '${item['IndentNo']}_${item['IndentSrNo']}';
-
-      if (!_controller.qtyControllers.containsKey(key)) {
-        _controller.qtyControllers[key] = TextEditingController(
-          text: item['Qty'].toStringAsFixed(2),
-        );
-      }
-
-      if (!_controller.priceControllers.containsKey(key)) {
-        _controller.priceControllers[key] = TextEditingController(
-          text: (item['Price'] ?? 0.0).toStringAsFixed(2),
-        );
-      }
-
-      if (!_controller.dateControllers.containsKey(key)) {
-        _controller.dateControllers[key] = TextEditingController(
-          text: item['ReqDate'] ?? '',
-        );
-      }
-
-      // ADD: godown and remark controllers for edit mode
-      if (!_controller.remarkControllers.containsKey(key)) {
-        _controller.remarkControllers[key] = TextEditingController(
-          text: item['IndentRemark'] ?? '',
-        );
-      }
-
-      if (!_controller.selectedGodownCode.containsKey(key)) {
-        _controller.selectedGodownCode[key] = item['GDCode'] ?? '';
-        _controller.selectedGodownName[key] = item['GDName'] ?? '';
-      }
-    }
-
-    // ADD: load godowns for edit mode
-    _controller.getGodowns();
   }
 
   @override
@@ -152,9 +121,7 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
       child: Stack(
         children: [
           GestureDetector(
-            onTap: () {
-              FocusManager.instance.primaryFocus?.unfocus();
-            },
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
             child: Scaffold(
               appBar: AppAppbar(
                 title: widget.order != null
@@ -171,8 +138,8 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
               ),
               body: Obx(() {
                 return _controller.currentStep.value == 0
-                    ? _buildStepOne(tablet)
-                    : _buildStepTwo(tablet);
+                    ? _buildStepZero(tablet) // Selection card screen
+                    : _buildStepOne(tablet); // Form screen
               }),
             ),
           ),
@@ -184,11 +151,222 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
 
   void _handleBackPress() {
     if (_controller.currentStep.value == 1) {
-      _controller.previousStep();
+      _controller.goBackToSelection();
     } else {
       Get.back();
     }
   }
+
+  // ─── STEP 0: Selection Card Screen ─────────────────────────────────────────
+
+  Widget _buildStepZero(bool tablet) {
+    return Padding(
+      padding: tablet
+          ? AppPaddings.combined(horizontal: 24, vertical: 12)
+          : AppPaddings.p12,
+      child: Column(
+        children: [
+          // Selection mode header
+          Obx(() {
+            if (_controller.isSelectionMode.value) {
+              return Container(
+                padding: tablet ? AppPaddings.p12 : AppPaddings.p10,
+                decoration: BoxDecoration(
+                  color: kColorPrimary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Selection Mode',
+                          style: TextStyles.kSemiBoldOutfit(
+                            fontSize: tablet
+                                ? FontSizes.k16FontSize
+                                : FontSizes.k14FontSize,
+                            color: kColorPrimary,
+                          ),
+                        ),
+                        Obx(() {
+                          if (_controller.lockedSiteName.value.isNotEmpty) {
+                            return Text(
+                              'Site: ${_controller.lockedSiteName.value}',
+                              style: TextStyles.kRegularOutfit(
+                                fontSize: tablet
+                                    ? FontSizes.k12FontSize
+                                    : FontSizes.k10FontSize,
+                                color: kColorDarkGrey,
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        }),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        TextButton(
+                          onPressed: () => _controller.selectAllIndents(),
+                          child: Text(
+                            'Select All',
+                            style: TextStyles.kMediumOutfit(
+                              fontSize: tablet
+                                  ? FontSizes.k14FontSize
+                                  : FontSizes.k12FontSize,
+                              color: kColorPrimary,
+                            ),
+                          ),
+                        ),
+                        tablet ? AppSpaces.h8 : AppSpaces.h4,
+                        TextButton(
+                          onPressed: () => _controller.deselectAllIndents(),
+                          child: Text(
+                            'Deselect All',
+                            style: TextStyles.kMediumOutfit(
+                              fontSize: tablet
+                                  ? FontSizes.k14FontSize
+                                  : FontSizes.k12FontSize,
+                              color: kColorRed,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+
+          // Hint banner
+          Obx(() {
+            if (!_controller.isSelectionMode.value &&
+                _controller.authIndentItems.isNotEmpty) {
+              return Container(
+                margin: tablet
+                    ? AppPaddings.custom(top: 12, bottom: 4)
+                    : AppPaddings.custom(top: 10, bottom: 4),
+                padding: tablet
+                    ? AppPaddings.combined(horizontal: 14, vertical: 10)
+                    : AppPaddings.combined(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      kColorPrimary.withOpacity(0.08),
+                      kColorPrimary.withOpacity(0.03),
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: kColorPrimary.withOpacity(0.2)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: tablet ? AppPaddings.p8 : AppPaddings.p6,
+                      decoration: BoxDecoration(
+                        color: kColorPrimary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.info_outline,
+                        color: kColorWhite,
+                        size: tablet ? 18 : 16,
+                      ),
+                    ),
+                    tablet ? AppSpaces.h12 : AppSpaces.h10,
+                    Expanded(
+                      child: Text(
+                        'Long press on an indent to start selection. Only indents from the same site can be selected.',
+                        style: TextStyles.kMediumOutfit(
+                          fontSize: tablet
+                              ? FontSizes.k14FontSize
+                              : FontSizes.k12FontSize,
+                          color: kColorTextPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+
+          tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+          // List of auth indent items
+          Expanded(
+            child: Obx(() {
+              if (_controller.authIndentItems.isEmpty &&
+                  !_controller.isLoading.value) {
+                return Center(
+                  child: Text(
+                    'No authorized indent items found',
+                    style: TextStyles.kMediumOutfit(
+                      fontSize: tablet
+                          ? FontSizes.k18FontSize
+                          : FontSizes.k16FontSize,
+                    ),
+                  ),
+                );
+              }
+              return ListView.builder(
+                itemCount: _controller.authIndentItems.length,
+                itemBuilder: (context, index) {
+                  final item = _controller.authIndentItems[index];
+                  return Obx(() {
+                    return AuthIndentItemCard(
+                      item: item,
+                      isExpanded: _controller.expandedItemIndices.contains(
+                        index,
+                      ),
+                      isSelectionMode: _controller.isSelectionMode.value,
+                      onTap: () => _controller.toggleItemExpansion(index),
+                      onIndentTap: (indentIndex) {
+                        if (_controller.isSelectionMode.value) {
+                          _controller.toggleIndentSelection(index, indentIndex);
+                        }
+                      },
+                      onIndentLongPress: (indentIndex) {
+                        _controller.enableSelectionMode(index, indentIndex);
+                      },
+                      controller: _controller,
+                    );
+                  });
+                },
+              );
+            }),
+          ),
+
+          // Proceed button
+          Obx(() {
+            if (_controller.selectedPurchaseItems.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            return Column(
+              children: [
+                AppButton(
+                  title:
+                      'Proceed (${_controller.selectedPurchaseItems.length} items)',
+                  buttonHeight: tablet ? 54 : 48,
+                  onPressed: () => _controller.proceedToForm(),
+                ),
+                tablet ? AppSpaces.v10 : AppSpaces.v8,
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  // ─── STEP 1: Form Screen ────────────────────────────────────────────────────
 
   Widget _buildStepOne(bool tablet) {
     return Padding(
@@ -204,6 +382,8 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                 child: Column(
                   children: [
                     AppSpaces.v10,
+
+                    // Date
                     AppDatePickerTextFormField(
                       dateController: _controller.dateController,
                       hintText: 'Date *',
@@ -212,19 +392,69 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                           : null,
                     ),
                     tablet ? AppSpaces.v16 : AppSpaces.v10,
-                    Obx(
-                      () => AppDropdown(
-                        items: _controller.siteNames,
-                        hintText: 'Site *',
-                        onChanged: _controller.onSiteSelected,
-                        selectedItem:
-                            _controller.selectedSiteName.value.isNotEmpty
-                            ? _controller.selectedSiteName.value
-                            : null,
-                        validatorText: 'Please select a site',
-                      ),
-                    ),
+
+                    Obx(() {
+                      return Container(
+                        padding: tablet
+                            ? AppPaddings.combined(horizontal: 12, vertical: 12)
+                            : AppPaddings.combined(horizontal: 8, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: kColorPrimary.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: kColorPrimary.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.location_on_outlined,
+                              color: kColorPrimary,
+                              size: tablet ? 20 : 18,
+                            ),
+                            AppSpaces.h8,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Site',
+                                    style: TextStyles.kRegularOutfit(
+                                      fontSize: tablet
+                                          ? FontSizes.k12FontSize
+                                          : FontSizes.k10FontSize,
+                                      color: kColorDarkGrey,
+                                    ),
+                                  ),
+                                  Text(
+                                    _controller
+                                            .selectedSiteName
+                                            .value
+                                            .isNotEmpty
+                                        ? _controller.selectedSiteName.value
+                                        : '—',
+                                    style: TextStyles.kMediumOutfit(
+                                      fontSize: tablet
+                                          ? FontSizes.k14FontSize
+                                          : FontSizes.k12FontSize,
+                                      color: kColorTextPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(
+                              Icons.lock_outline,
+                              color: kColorDarkGrey,
+                              size: tablet ? 16 : 14,
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
                     tablet ? AppSpaces.v16 : AppSpaces.v10,
+
+                    // Party dropdown
                     Obx(
                       () => AppDropdown(
                         items: _controller.partyNames,
@@ -238,12 +468,16 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                       ),
                     ),
                     tablet ? AppSpaces.v16 : AppSpaces.v10,
+
+                    // Remarks
                     AppTextFormField(
                       controller: _controller.remarksController,
                       hintText: 'Remarks',
                       maxLines: 3,
                     ),
                     tablet ? AppSpaces.v20 : AppSpaces.v14,
+
+                    // Attachments
                     Obx(
                       () => Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -274,6 +508,8 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                       ),
                     ),
                     tablet ? AppSpaces.v10 : AppSpaces.v6,
+
+                    // New attachments list
                     Obx(() {
                       if (_controller.attachmentFiles.isNotEmpty) {
                         return Container(
@@ -335,6 +571,8 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                       return const SizedBox.shrink();
                     }),
                     tablet ? AppSpaces.v16 : AppSpaces.v10,
+
+                    // Existing attachments
                     Obx(() {
                       if (_controller.existingAttachmentUrls.isNotEmpty) {
                         return Column(
@@ -417,7 +655,10 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                       }
                       return const SizedBox.shrink();
                     }),
+
                     tablet ? AppSpaces.v20 : AppSpaces.v14,
+
+                    // Items header with "Edit Selection" button
                     Obx(
                       () => Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -437,17 +678,18 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                 : 0.45.screenWidth,
                             buttonHeight: tablet ? 40 : 35,
                             buttonColor: kColorPrimary,
-                            title: '+ Add Item',
+                            title: '+ Add / Edit Items',
                             titleSize: tablet
                                 ? FontSizes.k14FontSize
                                 : FontSizes.k12FontSize,
-                            onPressed: () =>
-                                _controller.openItemSelectionScreen(),
+                            onPressed: () => _controller.goBackToSelection(),
                           ),
                         ],
                       ),
                     ),
                     tablet ? AppSpaces.v10 : AppSpaces.v6,
+
+                    // Selected items list
                     Obx(() {
                       if (_controller.selectedPurchaseItems.isNotEmpty) {
                         return Container(
@@ -475,8 +717,7 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                   _controller.qtyControllers[key];
                               final priceController =
                                   _controller.priceControllers[key];
-                              final dateController =
-                                  _controller.dateControllers[key];
+                              final dateCtrl = _controller.dateControllers[key];
                               final remarkController =
                                   _controller.remarkControllers[key];
 
@@ -493,7 +734,6 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Header row with item name + action buttons
                                     Row(
                                       children: [
                                         Icon(
@@ -520,7 +760,7 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                               ),
                                               AppSpaces.v2,
                                               Text(
-                                                'Indent: ${item['IndentNo']}',
+                                                'Indent: ${item['IndentNo']} | Site: ${item['SiteName'] ?? ''}',
                                                 style:
                                                     TextStyles.kRegularOutfit(
                                                       fontSize: tablet
@@ -635,16 +875,14 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                     ),
                                     tablet ? AppSpaces.v12 : AppSpaces.v10,
 
-                                    // Required Date
-                                    if (dateController != null) ...[
+                                    if (dateCtrl != null) ...[
                                       AppDatePickerTextFormField(
-                                        dateController: dateController,
+                                        dateController: dateCtrl,
                                         hintText: 'Required Date',
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty)
-                                            return 'Required';
-                                          return null;
-                                        },
+                                        validator: (value) =>
+                                            (value == null || value.isEmpty)
+                                            ? 'Required'
+                                            : null,
                                         onChanged: (value) {
                                           if (value.isNotEmpty) {
                                             _controller
@@ -658,9 +896,8 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                       tablet ? AppSpaces.v12 : AppSpaces.v10,
                                     ],
 
-                                    // Godown dropdown
-                                    Obx(() {
-                                      return AppDropdown(
+                                    Obx(
+                                      () => AppDropdown(
                                         items: _controller.godownNames,
                                         hintText: 'Head',
                                         onChanged: (val) => _controller
@@ -672,11 +909,10 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                             ? _controller
                                                   .selectedGodownName[key]
                                             : null,
-                                      );
-                                    }),
+                                      ),
+                                    ),
                                     tablet ? AppSpaces.v12 : AppSpaces.v10,
 
-                                    // Qty and Price
                                     Row(
                                       children: [
                                         Expanded(
@@ -706,13 +942,16 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                                   floatingLabelRequired: false,
                                                   validator: (value) {
                                                     if (value == null ||
-                                                        value.isEmpty)
+                                                        value.isEmpty) {
                                                       return 'Required';
+                                                    }
                                                     final qty = double.tryParse(
                                                       value,
                                                     );
-                                                    if (qty == null || qty <= 0)
+                                                    if (qty == null ||
+                                                        qty <= 0) {
                                                       return 'Must be > 0';
+                                                    }
                                                     return null;
                                                   },
                                                   onChanged: (value) {
@@ -759,13 +998,15 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                                   floatingLabelRequired: false,
                                                   validator: (value) {
                                                     if (value == null ||
-                                                        value.isEmpty)
+                                                        value.isEmpty) {
                                                       return 'Required';
+                                                    }
                                                     final price =
                                                         double.tryParse(value);
                                                     if (price == null ||
-                                                        price <= 0)
+                                                        price <= 0) {
                                                       return 'Must be > 0';
+                                                    }
                                                     return null;
                                                   },
                                                   onChanged: (value) {
@@ -788,8 +1029,6 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                                     ),
                                     tablet ? AppSpaces.v12 : AppSpaces.v10,
 
-                                    // Remark - editable
-                                    // After
                                     if (remarkController != null) ...[
                                       Text(
                                         'Remark',
@@ -828,6 +1067,8 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                 ),
               ),
             ),
+
+            // Submit button
             Obx(() {
               if (_controller.selectedPurchaseItems.isEmpty) {
                 return const SizedBox.shrink();
@@ -849,215 +1090,8 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
     );
   }
 
-  Widget _buildStepTwo(bool tablet) {
-    return Padding(
-      padding: tablet
-          ? AppPaddings.combined(horizontal: 24, vertical: 12)
-          : AppPaddings.p12,
-      child: Column(
-        children: [
-          Obx(() {
-            if (_controller.isSelectionMode.value) {
-              return Container(
-                padding: tablet ? AppPaddings.p12 : AppPaddings.p10,
-                decoration: BoxDecoration(
-                  color: kColorPrimary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Selection Mode',
-                      style: TextStyles.kSemiBoldOutfit(
-                        fontSize: tablet
-                            ? FontSizes.k16FontSize
-                            : FontSizes.k14FontSize,
-                        color: kColorPrimary,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        TextButton(
-                          onPressed: () => _controller.selectAllIndents(),
-                          child: Text(
-                            'Select All',
-                            style: TextStyles.kMediumOutfit(
-                              fontSize: tablet
-                                  ? FontSizes.k14FontSize
-                                  : FontSizes.k12FontSize,
-                              color: kColorPrimary,
-                            ),
-                          ),
-                        ),
-                        tablet ? AppSpaces.h8 : AppSpaces.h4,
-                        TextButton(
-                          onPressed: () => _controller.deselectAllIndents(),
-                          child: Text(
-                            'Deselect All',
-                            style: TextStyles.kMediumOutfit(
-                              fontSize: tablet
-                                  ? FontSizes.k14FontSize
-                                  : FontSizes.k12FontSize,
-                              color: kColorRed,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            }
-            return const SizedBox.shrink();
-          }),
-
-          Obx(() {
-            if (!_controller.isSelectionMode.value &&
-                _controller.authIndentItems.isNotEmpty) {
-              return Container(
-                margin: tablet
-                    ? AppPaddings.custom(top: 12, bottom: 4)
-                    : AppPaddings.custom(top: 10, bottom: 4),
-                padding: tablet
-                    ? AppPaddings.combined(horizontal: 14, vertical: 10)
-                    : AppPaddings.combined(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      kColorPrimary.withOpacity(0.08),
-                      kColorPrimary.withOpacity(0.03),
-                    ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: kColorPrimary.withOpacity(0.2),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: tablet ? AppPaddings.p8 : AppPaddings.p6,
-                      decoration: BoxDecoration(
-                        color: kColorPrimary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.info_outline,
-                        color: kColorWhite,
-                        size: tablet ? 18 : 16,
-                      ),
-                    ),
-                    tablet ? AppSpaces.h12 : AppSpaces.h10,
-                    Expanded(
-                      child: Text(
-                        'Long press on Authorized indent to select multiple Indents for the Purchase Order.',
-                        style: TextStyles.kMediumOutfit(
-                          fontSize: tablet
-                              ? FontSizes.k14FontSize
-                              : FontSizes.k12FontSize,
-                          color: kColorTextPrimary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return const SizedBox.shrink();
-          }),
-          tablet ? AppSpaces.v16 : AppSpaces.v12,
-          tablet ? AppSpaces.v16 : AppSpaces.v12,
-
-          Expanded(
-            child: Obx(() {
-              if (_controller.authIndentItems.isEmpty &&
-                  !_controller.isLoading.value) {
-                return Center(
-                  child: Text(
-                    'No authorized indent items found',
-                    style: TextStyles.kMediumOutfit(
-                      fontSize: tablet
-                          ? FontSizes.k18FontSize
-                          : FontSizes.k16FontSize,
-                    ),
-                  ),
-                );
-              }
-
-              return ListView.builder(
-                itemCount: _controller.authIndentItems.length,
-                itemBuilder: (context, index) {
-                  final item = _controller.authIndentItems[index];
-                  return Obx(() {
-                    return AuthIndentItemCard(
-                      item: item,
-                      isExpanded: _controller.expandedItemIndices.contains(
-                        index,
-                      ),
-                      isSelectionMode: _controller.isSelectionMode.value,
-                      onTap: () => _controller.toggleItemExpansion(index),
-                      onIndentTap: (indentIndex) {
-                        if (_controller.isSelectionMode.value) {
-                          _controller.toggleIndentSelection(index, indentIndex);
-                        }
-                      },
-                      onIndentLongPress: (indentIndex) {
-                        _controller.enableSelectionMode(index, indentIndex);
-                      },
-                      controller: _controller,
-                    );
-                  });
-                },
-              );
-            }),
-          ),
-
-          Obx(() {
-            bool hasSelection = _controller.authIndentItems.any(
-              (item) => item.indents.any((indent) => indent.isSelected),
-            );
-
-            if (_controller.authIndentItems.isEmpty || !hasSelection) {
-              return const SizedBox.shrink();
-            }
-
-            return Column(
-              children: [
-                Obx(() {
-                  bool hasSelection = _controller.authIndentItems.any(
-                    (item) => item.indents.any((indent) => indent.isSelected),
-                  );
-
-                  if (_controller.authIndentItems.isEmpty || !hasSelection) {
-                    return const SizedBox.shrink();
-                  }
-
-                  return Column(
-                    children: [
-                      AppButton(
-                        title: 'Save',
-                        buttonHeight: tablet ? 54 : 48,
-                        onPressed: () => _controller.saveSelectedItems(),
-                      ),
-                      tablet ? AppSpaces.v10 : AppSpaces.v8,
-                    ],
-                  );
-                }),
-              ],
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
   void _showAttachmentSourceDialog(BuildContext context) {
     final bool tablet = AppScreenUtils.isTablet(context);
-
     showDialog(
       context: context,
       builder: (_) => Dialog(
@@ -1119,170 +1153,112 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                 textAlign: TextAlign.center,
               ),
               tablet ? AppSpaces.v24 : AppSpaces.v20,
-              InkWell(
+              _buildAttachmentOption(
+                context: context,
+                tablet: tablet,
+                icon: Icons.camera_alt_rounded,
+                title: 'Take Photo',
+                subtitle: 'Capture using camera',
                 onTap: () {
                   Get.back();
                   _controller.pickFromCamera();
                 },
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: tablet ? AppPaddings.p16 : AppPaddings.p12,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        kColorPrimary.withOpacity(0.1),
-                        kColorPrimary.withOpacity(0.05),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: kColorPrimary.withOpacity(0.3),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: tablet ? AppPaddings.p12 : AppPaddings.p10,
-                        decoration: BoxDecoration(
-                          color: kColorPrimary,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: kColorPrimary.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.camera_alt_rounded,
-                          color: kColorWhite,
-                          size: tablet ? 28 : 24,
-                        ),
-                      ),
-                      tablet ? AppSpaces.h16 : AppSpaces.h12,
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Take Photo',
-                              style: TextStyles.kSemiBoldOutfit(
-                                fontSize: tablet
-                                    ? FontSizes.k16FontSize
-                                    : FontSizes.k14FontSize,
-                                color: kColorTextPrimary,
-                              ),
-                            ),
-                            AppSpaces.v4,
-                            Text(
-                              'Capture using camera',
-                              style: TextStyles.kRegularOutfit(
-                                fontSize: tablet
-                                    ? FontSizes.k12FontSize
-                                    : FontSizes.k10FontSize,
-                                color: kColorDarkGrey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        color: kColorPrimary,
-                        size: tablet ? 20 : 18,
-                      ),
-                    ],
-                  ),
-                ),
               ),
               tablet ? AppSpaces.v16 : AppSpaces.v12,
-              InkWell(
+              _buildAttachmentOption(
+                context: context,
+                tablet: tablet,
+                icon: Icons.upload_file_rounded,
+                title: 'Upload File',
+                subtitle: 'Choose from device storage',
                 onTap: () {
                   Get.back();
                   _controller.pickFiles();
                 },
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: tablet ? AppPaddings.p16 : AppPaddings.p12,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        kColorPrimary.withOpacity(0.1),
-                        kColorPrimary.withOpacity(0.05),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: kColorPrimary.withOpacity(0.3),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: tablet ? AppPaddings.p12 : AppPaddings.p10,
-                        decoration: BoxDecoration(
-                          color: kColorPrimary,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: kColorPrimary.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.upload_file_rounded,
-                          color: kColorWhite,
-                          size: tablet ? 28 : 24,
-                        ),
-                      ),
-                      tablet ? AppSpaces.h16 : AppSpaces.h12,
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Upload File',
-                              style: TextStyles.kSemiBoldOutfit(
-                                fontSize: tablet
-                                    ? FontSizes.k16FontSize
-                                    : FontSizes.k14FontSize,
-                                color: kColorTextPrimary,
-                              ),
-                            ),
-                            AppSpaces.v4,
-                            Text(
-                              'Choose from device storage',
-                              style: TextStyles.kRegularOutfit(
-                                fontSize: tablet
-                                    ? FontSizes.k12FontSize
-                                    : FontSizes.k10FontSize,
-                                color: kColorDarkGrey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        color: kColorPrimary,
-                        size: tablet ? 20 : 18,
-                      ),
-                    ],
-                  ),
-                ),
               ),
               tablet ? AppSpaces.v12 : AppSpaces.v8,
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAttachmentOption({
+    required BuildContext context,
+    required bool tablet,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: tablet ? AppPaddings.p16 : AppPaddings.p12,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              kColorPrimary.withOpacity(0.1),
+              kColorPrimary.withOpacity(0.05),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: kColorPrimary.withOpacity(0.3), width: 1.5),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: tablet ? AppPaddings.p12 : AppPaddings.p10,
+              decoration: BoxDecoration(
+                color: kColorPrimary,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: kColorPrimary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(icon, color: kColorWhite, size: tablet ? 28 : 24),
+            ),
+            tablet ? AppSpaces.h16 : AppSpaces.h12,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyles.kSemiBoldOutfit(
+                      fontSize: tablet
+                          ? FontSizes.k16FontSize
+                          : FontSizes.k14FontSize,
+                      color: kColorTextPrimary,
+                    ),
+                  ),
+                  AppSpaces.v4,
+                  Text(
+                    subtitle,
+                    style: TextStyles.kRegularOutfit(
+                      fontSize: tablet
+                          ? FontSizes.k12FontSize
+                          : FontSizes.k10FontSize,
+                      color: kColorDarkGrey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: kColorPrimary,
+              size: tablet ? 20 : 18,
+            ),
+          ],
         ),
       ),
     );

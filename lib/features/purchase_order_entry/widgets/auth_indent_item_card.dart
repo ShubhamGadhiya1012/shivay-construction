@@ -248,21 +248,62 @@ class AuthIndentItemCard extends StatelessWidget {
                                                 color: kColorDarkGrey,
                                               ),
                                             ),
-                                            if (indent.gdName.isNotEmpty) ...[
-                                              AppSpaces.v4,
-                                              Text(
-                                                'Head: ${indent.gdName}',
-                                                style:
-                                                    TextStyles.kRegularOutfit(
-                                                      fontSize: tablet
-                                                          ? FontSizes
-                                                                .k12FontSize
-                                                          : FontSizes
-                                                                .k10FontSize,
-                                                      color: kColorDarkGrey,
-                                                    ),
+                                            if (indent.gdName.isNotEmpty ||
+                                                indent.siteName.isNotEmpty)
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 4,
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    if (indent
+                                                        .gdName
+                                                        .isNotEmpty)
+                                                      Expanded(
+                                                        child: Text(
+                                                          'Head: ${indent.gdName}',
+                                                          style: TextStyles.kRegularOutfit(
+                                                            fontSize: tablet
+                                                                ? FontSizes
+                                                                      .k12FontSize
+                                                                : FontSizes
+                                                                      .k10FontSize,
+                                                            color:
+                                                                kColorDarkGrey,
+                                                          ),
+                                                        ),
+                                                      ),
+
+                                                    if (indent
+                                                            .gdName
+                                                            .isNotEmpty &&
+                                                        indent
+                                                            .siteName
+                                                            .isNotEmpty)
+                                                      const SizedBox(width: 8),
+
+                                                    if (indent
+                                                        .siteName
+                                                        .isNotEmpty)
+                                                      Expanded(
+                                                        child: Text(
+                                                          'Site Name: ${indent.siteName}',
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style: TextStyles.kRegularOutfit(
+                                                            fontSize: tablet
+                                                                ? FontSizes
+                                                                      .k12FontSize
+                                                                : FontSizes
+                                                                      .k10FontSize,
+                                                            color:
+                                                                kColorDarkGrey,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
                                               ),
-                                            ],
                                             if (indent
                                                 .indentRemark
                                                 .isNotEmpty) ...[
