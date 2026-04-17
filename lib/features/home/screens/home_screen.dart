@@ -8,6 +8,7 @@ import 'package:shivay_construction/features/grn_entry/screens/grns_screen.dart'
 import 'package:shivay_construction/features/home/controllers/home_controller.dart';
 import 'package:shivay_construction/features/home/widgets/app_drawer.dart';
 import 'package:shivay_construction/features/indent_entry/screens/indents_screen.dart';
+import 'package:shivay_construction/features/issue_entry/screens/issues_screen.dart';
 import 'package:shivay_construction/features/item_help/screens/item_help_search_screen.dart';
 import 'package:shivay_construction/features/profile/screens/profile_screen.dart';
 import 'package:shivay_construction/features/purchase_order_entry/screens/purchase_order_list_screen.dart';
@@ -338,6 +339,9 @@ class HomeScreen extends StatelessWidget {
         break;
       case 'grn entry':
         Get.to(() => GrnsScreen());
+        break;
+      case 'issue entry':
+        Get.to(() => IssuesScreen());
         break;
       case 'opening stock report':
         Get.to(() => OpeningStockReportScreen());

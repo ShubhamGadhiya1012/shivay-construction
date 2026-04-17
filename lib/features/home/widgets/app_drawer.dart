@@ -13,6 +13,7 @@ import 'package:shivay_construction/features/department_master/screens/departmen
 import 'package:shivay_construction/features/godown_master/screens/godown_master_screen.dart';
 import 'package:shivay_construction/features/hsn_master/screens/hsn_master_list_screen.dart';
 import 'package:shivay_construction/features/indent_entry/screens/indents_screen.dart';
+import 'package:shivay_construction/features/issue_entry/screens/issues_screen.dart';
 import 'package:shivay_construction/features/item_group_master/screens/item_group_master_screen.dart';
 import 'package:shivay_construction/features/item_help/screens/item_help_search_screen.dart';
 import 'package:shivay_construction/features/item_sub_group_master/screens/item_sub_group_master_screen.dart';
@@ -486,6 +487,9 @@ class AppDrawer extends StatelessWidget {
         break;
       case 'grn entry':
         Get.to(() => GrnsScreen());
+        break;
+      case 'issue entry':
+        Get.to(() => IssuesScreen()); // Your Issue Entry screen
         break;
       case 'site transfer entry':
         Get.to(() => SiteTransferListScreen());
