@@ -469,7 +469,7 @@ class AppDrawer extends StatelessWidget {
       case 'item sub group master':
         Get.to(() => ItemSubGroupMasterScreen());
         break;
-      case 'godown master':
+      case 'head master':
         Get.to(() => GodownMasterScreen());
         break;
       case 'hsn master':

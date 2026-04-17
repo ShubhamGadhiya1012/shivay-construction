@@ -23,11 +23,9 @@ class PurchaseOrderController extends GetxController {
   var dateController = TextEditingController();
   var remarksController = TextEditingController();
 
-  // Site is auto-filled from selection, not a dropdown anymore
   var selectedSiteName = ''.obs;
   var selectedSiteCode = ''.obs;
 
-  // Party dropdown (user selects)
   var parties = <PartyMasterDm>[].obs;
   var partyNames = <String>[].obs;
   var selectedPartyName = ''.obs;
@@ -39,7 +37,6 @@ class PurchaseOrderController extends GetxController {
   var isEditMode = false.obs;
   var currentInvNo = ''.obs;
 
-  // Step 0 = selection card screen, Step 1 = form screen
   var currentStep = 0.obs;
 
   var authIndentItems = <AuthIndentItemDm>[].obs;
@@ -57,7 +54,6 @@ class PurchaseOrderController extends GetxController {
   var selectedGodownCode = <String, String>{}.obs;
   var remarkControllers = <String, TextEditingController>{}.obs;
 
-  // Track the site locked by first selection
   var lockedSiteCode = ''.obs;
   var lockedSiteName = ''.obs;
 
@@ -176,7 +172,6 @@ class PurchaseOrderController extends GetxController {
     return '${parts[2]}-${parts[1]}-${parts[0]}';
   }
 
-  /// Called when user presses "Proceed" from selection card screen
   void proceedToForm() {
     if (selectedPurchaseItems.isEmpty) {
       showErrorSnackbar('Error', 'Please select at least one indent');
@@ -189,11 +184,9 @@ class PurchaseOrderController extends GetxController {
     currentStep.value = 0;
   }
 
-  /// Toggle indent selection — enforces same-site rule
   bool toggleIndentSelection(int itemIndex, int indentIndex) {
-    final indent = authIndentItems[itemIndex].indents[indentIndex];
+    final indent = authIndentItems[itemIndex].items[indentIndex];
 
-    // If no site locked yet, lock it
     if (lockedSiteCode.value.isEmpty) {
       lockedSiteCode.value = indent.siteCode;
       lockedSiteName.value = indent.siteName;
@@ -215,7 +208,7 @@ class PurchaseOrderController extends GetxController {
   }
 
   void enableSelectionMode(int itemIndex, int indentIndex) {
-    final indent = authIndentItems[itemIndex].indents[indentIndex];
+    final indent = authIndentItems[itemIndex].items[indentIndex];
     if (lockedSiteCode.value.isNotEmpty &&
         indent.siteCode != lockedSiteCode.value) {
       showErrorSnackbar(
@@ -236,9 +229,8 @@ class PurchaseOrderController extends GetxController {
   }
 
   void selectAllIndents() {
-    // Only select indents matching the locked site (or lock to first indent's site)
     for (var item in authIndentItems) {
-      for (var indent in item.indents) {
+      for (var indent in item.items) {
         if (lockedSiteCode.value.isEmpty) {
           lockedSiteCode.value = indent.siteCode;
           lockedSiteName.value = indent.siteName;
@@ -255,7 +247,7 @@ class PurchaseOrderController extends GetxController {
 
   void deselectAllIndents() {
     for (var item in authIndentItems) {
-      for (var indent in item.indents) {
+      for (var indent in item.items) {
         indent.isSelected = false;
       }
     }
@@ -268,14 +260,14 @@ class PurchaseOrderController extends GetxController {
 
   void _updateSelectionMode() {
     bool anySelected = authIndentItems.any(
-      (item) => item.indents.any((indent) => indent.isSelected),
+      (item) => item.items.any((indent) => indent.isSelected),
     );
     isSelectionMode.value = anySelected;
   }
 
   void _updateLockIfNoSelection() {
     bool anySelected = authIndentItems.any(
-      (item) => item.indents.any((indent) => indent.isSelected),
+      (item) => item.items.any((indent) => indent.isSelected),
     );
     if (!anySelected) {
       lockedSiteCode.value = '';
@@ -283,26 +275,26 @@ class PurchaseOrderController extends GetxController {
     }
   }
 
-  /// Sync selectedPurchaseItems from current selection state
   void _syncSelectedPurchaseItems() {
     selectedPurchaseItems.clear();
     int srNo = 1;
     for (var item in authIndentItems) {
-      for (var indent in item.indents) {
+      for (var indent in item.items) {
         if (indent.isSelected) {
-          final key = '${indent.indentNo}_${indent.indentSrNo}';
-          _ensureControllers(key, item, indent);
+          final key = '${item.indentNo}_${indent.indentSrNo}';
+          _ensureControllers(key, indent);
           selectedPurchaseItems.add({
             'SrNo': srNo++,
-            'ICode': item.iCode,
-            'iName': item.iName,
+            'ICode': indent.iCode,
+            'iName': indent.iName,
             'Unit': 'Nos',
             'Qty':
                 double.tryParse(qtyControllers[key]?.text ?? '') ??
                 indent.authoriseQty,
             'Price':
-                double.tryParse(priceControllers[key]?.text ?? '') ?? item.rate,
-            'IndentNo': indent.indentNo,
+                double.tryParse(priceControllers[key]?.text ?? '') ??
+                indent.rate,
+            'IndentNo': item.indentNo,
             'IndentSrNo': indent.indentSrNo,
             'ReqDate':
                 dateControllers[key]?.text ??
@@ -318,14 +310,13 @@ class PurchaseOrderController extends GetxController {
     }
     selectedPurchaseItems.refresh();
 
-    // Auto-set site from locked site
     if (lockedSiteCode.value.isNotEmpty) {
       selectedSiteCode.value = lockedSiteCode.value;
       selectedSiteName.value = lockedSiteName.value;
     }
   }
 
-  void _ensureControllers(String key, AuthIndentItemDm item, IndentDm indent) {
+  void _ensureControllers(String key, IndentDm indent) {
     if (!qtyControllers.containsKey(key)) {
       qtyControllers[key] = TextEditingController(
         text: indent.authoriseQty.toStringAsFixed(2),
@@ -333,7 +324,7 @@ class PurchaseOrderController extends GetxController {
     }
     if (!priceControllers.containsKey(key)) {
       priceControllers[key] = TextEditingController(
-        text: item.rate.toStringAsFixed(2),
+        text: indent.rate.toStringAsFixed(2),
       );
     }
     if (!dateControllers.containsKey(key)) {
@@ -352,10 +343,9 @@ class PurchaseOrderController extends GetxController {
 
   void removeSelectedItem(int index) {
     final item = selectedPurchaseItems[index];
-    // Deselect in authIndentItems
     for (var authItem in authIndentItems) {
-      for (var indent in authItem.indents) {
-        if (indent.indentNo == item['IndentNo'] &&
+      for (var indent in authItem.items) {
+        if (authItem.indentNo == item['IndentNo'] &&
             indent.indentSrNo == item['IndentSrNo']) {
           indent.isSelected = false;
         }
@@ -374,7 +364,6 @@ class PurchaseOrderController extends GetxController {
   Future<void> getAuthIndentItems() async {
     isLoading.value = true;
     try {
-      // No siteCode param
       final fetchedItems = await PurchaseOrderRepo.getAuthIndentItems();
       authIndentItems.assignAll(fetchedItems);
 
@@ -384,8 +373,8 @@ class PurchaseOrderController extends GetxController {
       }
 
       for (var item in fetchedItems) {
-        for (var indent in item.indents) {
-          final key = '${indent.indentNo}_${indent.indentSrNo}';
+        for (var indent in item.items) {
+          final key = '${item.indentNo}_${indent.indentSrNo}';
           if (!qtyControllers.containsKey(key)) {
             qtyControllers[key] = TextEditingController(
               text: indent.authoriseQty.toStringAsFixed(2),
@@ -393,7 +382,7 @@ class PurchaseOrderController extends GetxController {
           }
           if (!priceControllers.containsKey(key)) {
             priceControllers[key] = TextEditingController(
-              text: item.rate.toStringAsFixed(2),
+              text: indent.rate.toStringAsFixed(2),
             );
           }
           if (!dateControllers.containsKey(key)) {
@@ -415,7 +404,6 @@ class PurchaseOrderController extends GetxController {
 
       await getGodowns();
 
-      // Re-apply selections from selectedPurchaseItems (for edit mode)
       _reapplySelectionsFromItems();
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
@@ -424,15 +412,14 @@ class PurchaseOrderController extends GetxController {
     }
   }
 
-  /// After loading auth indent items, re-select any already in selectedPurchaseItems
   void _reapplySelectionsFromItems() {
     for (var selectedItem in selectedPurchaseItems) {
       for (var item in authIndentItems) {
-        for (var indent in item.indents) {
-          if (indent.indentNo == selectedItem['IndentNo'] &&
+        for (var indent in item.items) {
+          if (item.indentNo == selectedItem['IndentNo'] &&
               indent.indentSrNo == selectedItem['IndentSrNo']) {
             indent.isSelected = true;
-            final key = '${indent.indentNo}_${indent.indentSrNo}';
+            final key = '${item.indentNo}_${indent.indentSrNo}';
             qtyControllers[key]?.text = selectedItem['Qty'].toStringAsFixed(2);
             priceControllers[key]?.text = (selectedItem['Price'] ?? 0.0)
                 .toStringAsFixed(2);
@@ -450,7 +437,6 @@ class PurchaseOrderController extends GetxController {
             if (selectedItem.containsKey('IndentRemark')) {
               remarkControllers[key]?.text = selectedItem['IndentRemark'] ?? '';
             }
-            // Lock site
             if (lockedSiteCode.value.isEmpty) {
               lockedSiteCode.value = indent.siteCode;
               lockedSiteName.value = indent.siteName;
@@ -506,7 +492,6 @@ class PurchaseOrderController extends GetxController {
         }
       }
 
-      // Sync latest values from controllers before save
       final itemsToSave = selectedPurchaseItems.map((item) {
         final key = '${item['IndentNo']}_${item['IndentSrNo']}';
         return {
