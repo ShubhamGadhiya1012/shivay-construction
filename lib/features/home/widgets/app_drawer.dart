@@ -4,20 +4,25 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/constants/image_constants.dart';
+import 'package:shivay_construction/features/dlr_entry/screens/dlr_list_screen.dart';
 import 'package:shivay_construction/features/grn_entry/screens/grns_screen.dart';
 import 'package:shivay_construction/features/home/controllers/home_controller.dart';
 import 'package:shivay_construction/features/home/widgets/version_and_developer_info.dart';
 import 'package:shivay_construction/features/category_master/screens/category_master_screen.dart';
 import 'package:shivay_construction/features/department_master/screens/department_master_screen.dart';
 import 'package:shivay_construction/features/godown_master/screens/godown_master_screen.dart';
+import 'package:shivay_construction/features/hsn_master/screens/hsn_master_list_screen.dart';
 import 'package:shivay_construction/features/indent_entry/screens/indents_screen.dart';
 import 'package:shivay_construction/features/item_group_master/screens/item_group_master_screen.dart';
+import 'package:shivay_construction/features/item_help/screens/item_help_search_screen.dart';
 import 'package:shivay_construction/features/item_sub_group_master/screens/item_sub_group_master_screen.dart';
 import 'package:shivay_construction/features/item_master/screens/item_master_list_screen.dart';
+import 'package:shivay_construction/features/notification_master/noifications/screens/notifications_screen.dart';
 import 'package:shivay_construction/features/opening_stock_entry/screens/opening_stocks_screen.dart';
 import 'package:shivay_construction/features/party_masters/screens/party_master_list_screen.dart';
 import 'package:shivay_construction/features/purchase_order_entry/screens/purchase_order_list_screen.dart';
 import 'package:shivay_construction/features/repair_entry/screens/repair_issue_list_screen.dart';
+import 'package:shivay_construction/features/reports/screens/dlr_report_screen.dart';
 import 'package:shivay_construction/features/reports/screens/grn_report_screen.dart';
 import 'package:shivay_construction/features/reports/screens/indent_report_screen.dart';
 import 'package:shivay_construction/features/reports/screens/issue_repair_report_screen.dart';
@@ -25,7 +30,8 @@ import 'package:shivay_construction/features/reports/screens/opening_stock_repor
 import 'package:shivay_construction/features/reports/screens/purchase_order_report_screen.dart';
 import 'package:shivay_construction/features/reports/screens/site_transfer_report_screen.dart';
 import 'package:shivay_construction/features/site_master/screens/site_master_list_screen.dart';
-import 'package:shivay_construction/features/site_transfer/screens/site_transfer_screen.dart';
+import 'package:shivay_construction/features/site_transfer/screens/site_transfer_list_screen.dart';
+import 'package:shivay_construction/features/stock_reports/screens/stock_report_screen.dart';
 import 'package:shivay_construction/features/user_settings/models/user_access_dm.dart';
 import 'package:shivay_construction/features/user_settings/screens/unauthorised_users_screen.dart';
 import 'package:shivay_construction/features/user_settings/screens/users_screen.dart';
@@ -98,7 +104,7 @@ class AppDrawer extends StatelessWidget {
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    padding: EdgeInsets.all(tablet ? 10 : 8),
+                    padding: tablet ? AppPaddings.p10 : AppPaddings.p8,
                     child: Image.asset(
                       kImagelogo,
                       fit: BoxFit.contain,
@@ -351,15 +357,13 @@ class AppDrawer extends StatelessWidget {
       case 'reports':
         iconData = Icons.assessment_rounded;
         break;
-      case 'materials':
-        iconData = Icons.inventory_2_rounded;
+      case 'stock reports':
+        iconData = Icons.assessment_rounded;
         break;
-      case 'workers':
-        iconData = Icons.people_rounded;
+      case 'item help':
+        iconData = Icons.help_outline_outlined;
         break;
-      case 'payments':
-        iconData = Icons.payment_rounded;
-        break;
+
       case 'user settings':
         iconData = Icons.settings_rounded;
         break;
@@ -404,6 +408,18 @@ class AppDrawer extends StatelessWidget {
           _navigateToSubMenu(firstAccessible);
         }
         break;
+      case 'stock reports':
+        if (menu.subMenu.isNotEmpty) {
+          final firstAccessible = menu.subMenu.firstWhere(
+            (sub) => sub.subMenuAccess,
+            orElse: () => menu.subMenu.first,
+          );
+          _navigateToSubMenu(firstAccessible);
+        }
+        break;
+      case 'item help':
+        Get.to(() => ItemHelpSearchScreen());
+        break;
       case 'user settings':
         if (menu.subMenu.isNotEmpty) {
           final firstAccessible = menu.subMenu.firstWhere(
@@ -421,6 +437,9 @@ class AppDrawer extends StatelessWidget {
     switch (subMenu.subMenuName.toLowerCase()) {
       case 'user authorization':
         Get.to(() => UnauthorisedUsersScreen());
+        break;
+      case 'notification master':
+        Get.to(() => NotificationsScreen());
         break;
 
       case 'user management':
@@ -450,8 +469,11 @@ class AppDrawer extends StatelessWidget {
       case 'item sub group master':
         Get.to(() => ItemSubGroupMasterScreen());
         break;
-      case 'godown master':
+      case 'head master':
         Get.to(() => GodownMasterScreen());
+        break;
+      case 'hsn master':
+        Get.to(() => HsnMasterListScreen());
         break;
       case 'opening stock entry':
         Get.to(() => OpeningStocksScreen());
@@ -466,10 +488,13 @@ class AppDrawer extends StatelessWidget {
         Get.to(() => GrnsScreen());
         break;
       case 'site transfer entry':
-        Get.to(() => SiteTransferScreen());
+        Get.to(() => SiteTransferListScreen());
         break;
       case 'repair entry':
         Get.to(() => RepairIssueListScreen());
+        break;
+      case 'dlr entry':
+        Get.to(() => DlrListScreen());
         break;
       case 'opening stock report':
         Get.to(() => OpeningStockReportScreen());
@@ -488,6 +513,86 @@ class AppDrawer extends StatelessWidget {
         break;
       case 'issue repair report':
         Get.to(() => IssueRepairReportScreen());
+        break;
+      case 'dlr report':
+        Get.to(() => DlrReportScreen());
+        break;
+
+      case 'stock statement report':
+        Get.to(
+          () => const StockReportScreen(
+            reportName: 'STATEMENT',
+            reportTitle: 'Stock Statement Report',
+            rType: 'STATEMENT',
+            method: '',
+          ),
+        );
+        break;
+
+      case 'fifo - stock valuation':
+        Get.to(
+          () => const StockReportScreen(
+            reportName: 'FIFO',
+            reportTitle: 'FIFO - Stock Valuation',
+            rType: 'STATEMENT',
+            method: 'FIFO',
+          ),
+        );
+        break;
+
+      case 'lifo - stock valuation':
+        Get.to(
+          () => const StockReportScreen(
+            reportName: 'LIFO',
+            reportTitle: 'LIFO - Stock Valuation',
+            rType: 'STATEMENT',
+            method: 'LIFO',
+          ),
+        );
+        break;
+
+      case 'lp - stock valuation':
+        Get.to(
+          () => const StockReportScreen(
+            reportName: 'LP',
+            reportTitle: 'LP - Stock Valuation',
+            rType: 'STATEMENT',
+            method: 'LP',
+          ),
+        );
+        break;
+
+      case 'stock ledger':
+        Get.to(
+          () => const StockReportScreen(
+            reportName: 'LEDGER',
+            reportTitle: 'Stock Ledger',
+            rType: 'LEDGER',
+            method: '',
+          ),
+        );
+        break;
+
+      case 'group stock report':
+        Get.to(
+          () => const StockReportScreen(
+            reportName: 'GROUPSTOCK',
+            reportTitle: 'Group Stock Report',
+            rType: 'GROUPSTOCK',
+            method: '',
+          ),
+        );
+        break;
+
+      case 'site stock report':
+        Get.to(
+          () => const StockReportScreen(
+            reportName: 'SITESTOCK',
+            reportTitle: 'Site Stock Report',
+            rType: 'SITESTOCK',
+            method: '',
+          ),
+        );
         break;
       default:
     }

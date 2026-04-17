@@ -72,6 +72,15 @@ class IndentItemCard extends StatelessWidget {
                         tablet: tablet,
                       ),
                     ],
+                    if (item['Remark'] != null &&
+                        item['Remark'].toString().isNotEmpty) ...[
+                      tablet ? AppSpaces.v6 : AppSpaces.v4,
+                      _buildDetailRow(
+                        label: 'Remark',
+                        value: item['Remark'].toString(),
+                        tablet: tablet,
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -172,6 +181,18 @@ class IndentItemCard extends StatelessWidget {
                     tablet: tablet,
                   ),
                 ),
+                // ADD THIS:
+                if (item['GDName'] != null &&
+                    item['GDName'].toString().isNotEmpty) ...[
+                  AppSpaces.h12,
+                  Expanded(
+                    child: _buildDetailColumn(
+                      label: 'Head',
+                      value: item['GDName'].toString(),
+                      tablet: tablet,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

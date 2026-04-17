@@ -12,6 +12,7 @@ class PoOrderDm {
   final String siteName;
   final String gdCode;
   final String gdName;
+  final String poRemark;
 
   PoOrderDm({
     required this.srNo,
@@ -27,6 +28,7 @@ class PoOrderDm {
     required this.siteName,
     required this.gdCode,
     required this.gdName,
+    this.poRemark = '',
   });
 
   factory PoOrderDm.fromJson(Map<String, dynamic> json) {
@@ -44,6 +46,7 @@ class PoOrderDm {
       siteName: json['siteName'] ?? '',
       gdCode: json['gdCode'] ?? '',
       gdName: json['gdName'] ?? '',
+      poRemark: json['poRemark'] ?? '',
     );
   }
 }

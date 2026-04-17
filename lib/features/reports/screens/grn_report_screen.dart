@@ -15,7 +15,6 @@ import 'package:shivay_construction/widgets/app_dropdown.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_multiple_selection_bottom_sheet.dart';
 import 'package:shivay_construction/widgets/app_multiple_selection_field.dart';
-import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
 class GrnReportScreen extends StatelessWidget {
   GrnReportScreen({super.key});
@@ -120,6 +119,21 @@ class GrnReportScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
+                            Obx(
+                              () => AppDropdown(
+                                items: _controller.siteNames,
+                                hintText: 'Site',
+                                onChanged: _controller.onSiteSelected,
+                                selectedItem:
+                                    _controller
+                                        .selectedSiteName
+                                        .value
+                                        .isNotEmpty
+                                    ? _controller.selectedSiteName.value
+                                    : null,
+                              ),
+                            ),
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
                             // Godown Dropdown
                             Obx(
                               () => AppDropdown(
@@ -136,25 +150,6 @@ class GrnReportScreen extends StatelessWidget {
                               ),
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
-
-                            // Site Name (Auto-filled, disabled)
-                            Obx(() {
-                              if (_controller.selectedSiteCode.value.isEmpty) {
-                                return const SizedBox.shrink();
-                              }
-
-                              return Column(
-                                children: [
-                                  AppTextFormField(
-                                    controller: _controller.siteNameController,
-                                    hintText: 'Site Name',
-                                    enabled: false,
-                                    fillColor: kColorLightGrey,
-                                  ),
-                                  tablet ? AppSpaces.v16 : AppSpaces.v10,
-                                ],
-                              );
-                            }),
 
                             // Items Selection
                             GestureDetector(

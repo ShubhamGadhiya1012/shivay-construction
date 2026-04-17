@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/features/category_master/models/category_master_dm.dart';
 import 'package:shivay_construction/features/category_master/repos/category_master_repo.dart';
+import 'package:shivay_construction/features/hsn_master/models/hsn_master_dm.dart';
+import 'package:shivay_construction/features/hsn_master/repos/hsn_master_list_repo.dart';
 import 'package:shivay_construction/features/item_group_master/models/item_group_master_dm.dart';
 import 'package:shivay_construction/features/item_group_master/repos/item_group_master_repo.dart';
 import 'package:shivay_construction/features/item_sub_group_master/repos/item_sub_group_master_repo.dart';
@@ -34,14 +36,51 @@ class ItemMasterController extends GetxController {
   var itemSubGroupNames = <String>[].obs;
   var selectedItemSubGroup = ''.obs;
   var selectedItemSubGroupCode = ''.obs;
-
   var isEditMode = false.obs;
   var currentICode = ''.obs;
+
+  var hsnList = <HsnMasterDm>[].obs;
+  var hsnNumbers = <String>[].obs;
+  var selectedHsnNo = ''.obs;
+
+  var rentItem = false.obs;
+  var frequencyController = TextEditingController();
+  var rentRateController = TextEditingController();
+
+  static const List<String> frequencyOptions = ['Hourly', 'Daily', 'Monthly'];
+  void toggleRentItem() {
+    rentItem.value = !rentItem.value;
+    if (!rentItem.value) {
+      frequencyController.clear();
+      rentRateController.clear();
+    }
+  }
+
+  void onHsnSelected(String? hsnNo) {
+    if (hsnNo != null && hsnNo.isNotEmpty) {
+      selectedHsnNo.value = hsnNo;
+    }
+  }
+
+  void onFrequencySelected(String? frequency) {
+    if (frequency != null) {
+      frequencyController.text = frequency;
+    }
+  }
 
   @override
   void onInit() async {
     super.onInit();
     await fetchDropdownData();
+
+    iNameController.addListener(() {
+      if (!isEditMode.value) {
+        descriptionController.text = iNameController.text;
+      }
+    });
+    if (!isEditMode.value) {
+      unitController.text = 'NOS';
+    }
   }
 
   Future<void> fetchDropdownData() async {
@@ -49,7 +88,18 @@ class ItemMasterController extends GetxController {
     await getCategories();
     await getItemGroups();
     await getItemSubGroups();
+    await getHsnList(); // ADD THIS
     isLoading.value = false;
+  }
+
+  Future<void> getHsnList() async {
+    try {
+      final data = await HsnMasterListRepo.getHsnList();
+      hsnList.assignAll(data);
+      hsnNumbers.assignAll(data.map((e) => e.hsnNo));
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    }
   }
 
   Future<void> getCategories() async {
@@ -131,6 +181,11 @@ class ItemMasterController extends GetxController {
       selectedItemSubGroup.value = item.icName;
       selectedItemSubGroupCode.value = item.icCode;
     }
+
+    selectedHsnNo.value = item.hsnNo;
+    rentItem.value = item.rentItem;
+    frequencyController.text = item.frequency;
+    rentRateController.text = item.rentRate > 0 ? item.rentRate.toString() : '';
   }
 
   Future<void> addUpdateItemMaster() async {
@@ -145,6 +200,12 @@ class ItemMasterController extends GetxController {
         icCode: selectedItemSubGroupCode.value,
         cCode: selectedCategoryCode.value,
         unit: unitController.text.trim(),
+        hsnNo: selectedHsnNo.value,
+        rentItem: rentItem.value,
+        frequency: rentItem.value ? frequencyController.text.trim() : '',
+        rentRate: rentItem.value
+            ? (double.tryParse(rentRateController.text.trim()) ?? 0.0)
+            : 0.0,
       );
 
       if (response != null && response.containsKey('message')) {
@@ -176,7 +237,7 @@ class ItemMasterController extends GetxController {
     descriptionController.clear();
     rateController.clear();
     unitController.clear();
-
+    unitController.text = 'NOS';
     selectedCategory.value = '';
     selectedCategoryCode.value = '';
     selectedItemGroup.value = '';
@@ -186,5 +247,10 @@ class ItemMasterController extends GetxController {
 
     isEditMode.value = false;
     currentICode.value = '';
+
+    selectedHsnNo.value = '';
+    rentItem.value = false;
+    frequencyController.clear();
+    rentRateController.clear();
   }
 }

@@ -10,6 +10,8 @@ class PurchaseOrderListDm {
   final String gdName;
   final String attachments;
   final bool authorize;
+  final double amount;
+  final String poStatus;
 
   PurchaseOrderListDm({
     required this.invNo,
@@ -23,6 +25,8 @@ class PurchaseOrderListDm {
     required this.gdName,
     required this.attachments,
     required this.authorize,
+    required this.amount,
+    required this.poStatus,
   });
 
   factory PurchaseOrderListDm.fromJson(Map<String, dynamic> json) {
@@ -38,6 +42,8 @@ class PurchaseOrderListDm {
       gdName: json['GDName'] ?? '',
       attachments: json['Attachments'] ?? '',
       authorize: json['Authorize'] ?? false,
+      amount: (json['Amount'] as num?)?.toDouble() ?? 0.0,
+      poStatus: json['POStatus'] ?? '',
     );
   }
 }

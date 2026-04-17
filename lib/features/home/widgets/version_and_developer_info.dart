@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
@@ -17,7 +18,7 @@ class VersionAndDeveloperInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(
+      padding: AppPaddings.combined(
         horizontal: tablet ? 16 : 12,
         vertical: tablet ? 16 : 12,
       ),

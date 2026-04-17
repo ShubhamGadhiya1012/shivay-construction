@@ -39,8 +39,16 @@ class GrnsController extends GetxController {
   }
 
   Future<void> checkAdminStatus() async {
-    String? userType = await SecureStorageHelper.read('userType');
-    isAdmin.value = userType == '0';
+    isLoading.value = true;
+
+    try {
+      String? userType = await SecureStorageHelper.read('userType');
+      isAdmin.value = userType == '0';
+    } catch (e) {
+      //
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> getGrns({bool loadMore = false}) async {

@@ -10,6 +10,7 @@ class PurchaseOrderReportRepo {
     required String pCode,
     required String siteCode,
     required String gdCode,
+    required String type,
 
     required String iCodes,
   }) async {
@@ -25,12 +26,13 @@ class PurchaseOrderReportRepo {
           'PCode': pCode,
           'SiteCode': siteCode,
           'GDCode': gdCode,
-
+          'Type': type,
           'ICode': iCodes,
         },
         token: token,
       );
 
+   //   print(response);
       if (response == null || response['data'] == null) {
         return [];
       }

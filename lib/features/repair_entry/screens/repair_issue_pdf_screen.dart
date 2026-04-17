@@ -49,7 +49,7 @@ class RepairIssuePdfScreen {
       await _savePdf(pdf, issue.invNo);
     } catch (e) {
       showErrorSnackbar('Error', 'Failed to generate Repair Issue PDF: $e');
-      print(e);
+    //  print(e);
     }
   }
 

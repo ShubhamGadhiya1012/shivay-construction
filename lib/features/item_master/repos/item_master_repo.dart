@@ -11,6 +11,10 @@ class ItemMasterRepo {
     required String icCode,
     required String cCode,
     required String unit,
+    required String hsnNo,
+    required bool rentItem,
+    required String frequency,
+    required double rentRate,
   }) async {
     String? token = await SecureStorageHelper.read('token');
 
@@ -23,6 +27,10 @@ class ItemMasterRepo {
       "ICCode": icCode,
       "CCode": cCode,
       "Unit": unit,
+      "HsnNo": hsnNo,
+      "RentItem": rentItem,
+      "Frequency": frequency,
+      "RentRate": rentRate,
     };
 
     try {

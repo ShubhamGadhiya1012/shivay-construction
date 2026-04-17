@@ -22,16 +22,18 @@ class IndentEntryController extends GetxController {
   final indentItemFormKey = GlobalKey<FormState>();
 
   var dateController = TextEditingController();
+  var remarkController = TextEditingController();
 
-  var siteNameController = TextEditingController();
+  var sites = <SiteMasterDm>[].obs;
+  var siteNames = <String>[].obs;
+  var selectedSiteName = ''.obs;
+  var selectedSiteCode = ''.obs;
 
+  // Add after site variables:
   var godowns = <GodownMasterDm>[].obs;
   var godownNames = <String>[].obs;
   var selectedGodownName = ''.obs;
   var selectedGodownCode = ''.obs;
-  var selectedSiteCode = ''.obs;
-
-  var sites = <SiteMasterDm>[].obs;
 
   var items = <ItemMasterDm>[].obs;
   var itemNames = <String>[].obs;
@@ -57,6 +59,7 @@ class IndentEntryController extends GetxController {
       isLoading.value = true;
       final fetchedSites = await SiteMasterListRepo.getSites();
       sites.assignAll(fetchedSites);
+      siteNames.assignAll(fetchedSites.map((s) => s.siteName).toList());
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
@@ -64,11 +67,24 @@ class IndentEntryController extends GetxController {
     }
   }
 
-  Future<void> getGodowns() async {
+  void onSiteSelected(String? siteName) async {
+    selectedSiteName.value = siteName!;
+    var selectedSiteObj = sites.firstWhere((s) => s.siteName == siteName);
+    selectedSiteCode.value = selectedSiteObj.siteCode;
+
+    // Remove godown loading - no longer needed here
+    // Just reset selection
+    selectedGodownName.value = '';
+    selectedGodownCode.value = '';
+  }
+
+  // Add new method:
+  Future<void> getGodowns([String siteCode = '']) async {
     try {
       isLoading.value = true;
-      await getSites();
-      final fetchedGodowns = await GodownMasterRepo.getGodowns();
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(
+        siteCode: siteCode,
+      );
       godowns.assignAll(fetchedGodowns);
       godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
     } catch (e) {
@@ -79,19 +95,11 @@ class IndentEntryController extends GetxController {
   }
 
   void onGodownSelected(String? godownName) {
-    selectedGodownName.value = godownName!;
-    var selectedGodownObj = godowns.firstWhere((gd) => gd.gdName == godownName);
-    selectedGodownCode.value = selectedGodownObj.gdCode;
-    selectedSiteCode.value = selectedGodownObj.siteCode;
-
-    if (selectedGodownObj.siteCode.isNotEmpty) {
-      final site = sites.firstWhereOrNull(
-        (s) => s.siteCode == selectedGodownObj.siteCode,
-      );
-      siteNameController.text = site?.siteName ?? '';
-    } else {
-      siteNameController.clear();
-    }
+    selectedGodownName.value = godownName ?? '';
+    var selectedGodownObj = godowns.firstWhereOrNull(
+      (gd) => gd.gdName == godownName,
+    );
+    selectedGodownCode.value = selectedGodownObj?.gdCode ?? '';
   }
 
   Future<void> getItems() async {
@@ -119,6 +127,10 @@ class IndentEntryController extends GetxController {
     clearItemForm();
     isEditingItem.value = false;
     editingItemIndex.value = -1;
+
+    // Reset godown selection
+    selectedGodownName.value = '';
+    selectedGodownCode.value = '';
   }
 
   void prepareEditItem(int index) {
@@ -129,6 +141,11 @@ class IndentEntryController extends GetxController {
       selectedItemCode.value = item['icode'] ?? item['ICode'] ?? '';
       selectedUnit.value = item['unit'] ?? item['Unit'] ?? '';
       qtyController.text = (item['qty'] ?? item['Qty'] ?? 0).toString();
+      remarkController.text = item['Remark']?.toString() ?? '';
+
+      // Load godown selection
+      selectedGodownCode.value = item['GDCode']?.toString() ?? '';
+      selectedGodownName.value = item['GDName']?.toString() ?? '';
 
       final reqDate = item['ReqDate']?.toString() ?? '';
       reqDateController.text = reqDate.isNotEmpty
@@ -149,6 +166,9 @@ class IndentEntryController extends GetxController {
     selectedUnit.value = '';
     qtyController.clear();
     reqDateController.clear();
+    remarkController.clear();
+    selectedGodownName.value = ''; // ADD
+    selectedGodownCode.value = ''; // ADD
   }
 
   void addOrUpdateItem() {
@@ -177,6 +197,9 @@ class IndentEntryController extends GetxController {
       "Unit": selectedUnit.value,
       "Qty": qty,
       "ReqDate": _convertToApiDateFormat(reqDateController.text),
+      "Remark": remarkController.text.trim(),
+      "GDCode": selectedGodownCode.value, // ADD
+      "GDName": selectedGodownName.value, // ADD
     };
 
     if (isEditingItem.value) {
@@ -299,8 +322,9 @@ class IndentEntryController extends GetxController {
       var response = await IndentEntryRepo.saveIndentEntry(
         invNo: isEditMode.value ? currentInvNo.value : '',
         date: _convertToApiDateFormat(dateController.text),
-        gdCode: selectedGodownCode.value,
+
         siteCode: selectedSiteCode.value,
+
         itemData: itemsToSend.toList(),
         newFiles: attachmentFiles.toList(),
         existingAttachments: existingAttachmentUrls.toList(),
@@ -328,16 +352,16 @@ class IndentEntryController extends GetxController {
     currentInvNo.value = '';
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
 
-    siteNameController.clear();
-
-    selectedGodownName.value = '';
-    selectedGodownCode.value = '';
+    selectedSiteName.value = '';
     selectedSiteCode.value = '';
 
     itemsToSend.clear();
     attachmentFiles.clear();
     existingAttachmentUrls.clear();
-
+    selectedGodownName.value = '';
+    selectedGodownCode.value = '';
+    godowns.clear(); // ADD
+    godownNames.clear(); // ADD
     isEditMode.value = false;
   }
 }

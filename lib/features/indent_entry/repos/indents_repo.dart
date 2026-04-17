@@ -76,11 +76,27 @@ class IndentsRepo {
       "Invno": invNo,
       "ItemAuthData": itemAuthData,
     };
-  //  print(requestBody);
+    //  print(requestBody);
     try {
       var response = await ApiService.postRequest(
         endpoint: '/Indent/indentAuth',
         requestBody: requestBody,
+        token: token,
+      );
+
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<dynamic> closeIndent({required String invNo}) async {
+    String? token = await SecureStorageHelper.read('token');
+
+    try {
+      var response = await ApiService.getRequest(
+        endpoint: '/Indent/indentClose',
+        queryParams: {'Invno': invNo},
         token: token,
       );
 

@@ -1,16 +1,22 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/purchase_order_entry/controllers/purchase_order_controller.dart';
 import 'package:shivay_construction/features/purchase_order_entry/models/auth_indent_item_dm.dart';
+import 'package:shivay_construction/features/purchase_order_entry/screens/last_purchase_rate_screen.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
+import 'package:shivay_construction/widgets/app_date_picker_text_form_field.dart';
+import 'package:shivay_construction/widgets/app_dropdown.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
+
+import '../../indent_entry/screens/site_wise_stock_screen.dart';
 
 class AuthIndentItemCard extends StatelessWidget {
   const AuthIndentItemCard({
@@ -67,19 +73,14 @@ class AuthIndentItemCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.iName,
-                            style: TextStyles.kBoldOutfit(
-                              fontSize: tablet
-                                  ? FontSizes.k20FontSize
-                                  : FontSizes.k18FontSize,
-                              color: kColorPrimary,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        item.indentNo,
+                        style: TextStyles.kBoldOutfit(
+                          fontSize: tablet
+                              ? FontSizes.k20FontSize
+                              : FontSizes.k18FontSize,
+                          color: kColorPrimary,
+                        ),
                       ),
                     ),
                     tablet ? AppSpaces.h12 : AppSpaces.h8,
@@ -106,7 +107,7 @@ class AuthIndentItemCard extends StatelessWidget {
                       ),
                       tablet ? AppSpaces.v16 : AppSpaces.v12,
                       Text(
-                        'Authorized Indents',
+                        'Items (${item.items.length})',
                         style: TextStyles.kSemiBoldOutfit(
                           fontSize: tablet
                               ? FontSizes.k18FontSize
@@ -115,17 +116,20 @@ class AuthIndentItemCard extends StatelessWidget {
                         ),
                       ),
                       tablet ? AppSpaces.v12 : AppSpaces.v8,
-                      // REPLACE the ListView.builder (that builds indent items) with:
                       ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: item.indents.length,
+                        itemCount: item.items.length,
                         itemBuilder: (context, index) {
-                          final indent = item.indents[index];
-                          final key = '${indent.indentNo}_${indent.indentSrNo}';
+                          final indent = item.items[index];
+                          final key = '${item.indentNo}_${indent.indentSrNo}';
                           final qtyController = controller.qtyControllers[key];
                           final priceController =
                               controller.priceControllers[key];
+                          final dateController =
+                              controller.dateControllers[key];
+                          final remarkController =
+                              controller.remarkControllers[key];
 
                           return GestureDetector(
                             onTap: () => onIndentTap(index),
@@ -169,60 +173,253 @@ class AuthIndentItemCard extends StatelessWidget {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Text(
-                                              indent.indentNo,
-                                              style: TextStyles.kSemiBoldOutfit(
-                                                fontSize: tablet
-                                                    ? FontSizes.k16FontSize
-                                                    : FontSizes.k14FontSize,
-                                                color: kColorPrimary,
-                                              ),
-                                            ),
-                                            AppSpaces.v4,
                                             Row(
                                               children: [
                                                 Expanded(
                                                   child: Text(
-                                                    'Date: ${convertyyyyMMddToddMMyyyy(indent.date)}',
+                                                    indent.iName,
                                                     style:
-                                                        TextStyles.kRegularOutfit(
+                                                        TextStyles.kSemiBoldOutfit(
                                                           fontSize: tablet
                                                               ? FontSizes
-                                                                    .k12FontSize
+                                                                    .k16FontSize
                                                               : FontSizes
-                                                                    .k10FontSize,
-                                                          color: kColorDarkGrey,
+                                                                    .k14FontSize,
+                                                          color:
+                                                              kColorTextPrimary,
                                                         ),
+                                                    maxLines: 2,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
                                                 ),
-                                                if (indent.isSelected &&
-                                                    qtyController != null &&
-                                                    priceController != null)
-                                                  Expanded(
-                                                    child: Text(
-                                                      'Authorized Qty: ${indent.indentQty.toStringAsFixed(2)}',
-                                                      style: TextStyles.kRegularOutfit(
-                                                        fontSize: tablet
-                                                            ? FontSizes
-                                                                  .k12FontSize
-                                                            : FontSizes
-                                                                  .k10FontSize,
-                                                        color: kColorDarkGrey,
+                                                Row(
+                                                  children: [
+                                                    Material(
+                                                      color: kColorGreen
+                                                          .withOpacity(0.1),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            tablet ? 6 : 5,
+                                                          ),
+                                                      child: InkWell(
+                                                        onTap: () {
+                                                          Get.to(
+                                                            () =>
+                                                                SiteWiseStockScreen(
+                                                                  iCode: indent
+                                                                      .iCode,
+                                                                ),
+                                                          );
+                                                        },
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              tablet ? 6 : 5,
+                                                            ),
+                                                        child: Container(
+                                                          padding: tablet
+                                                              ? AppPaddings.combined(
+                                                                  horizontal: 8,
+                                                                  vertical: 8,
+                                                                )
+                                                              : AppPaddings.combined(
+                                                                  horizontal: 6,
+                                                                  vertical: 6,
+                                                                ),
+                                                          child: Icon(
+                                                            Icons
+                                                                .visibility_rounded,
+                                                            size: tablet
+                                                                ? 16
+                                                                : 14,
+                                                            color: kColorGreen,
+                                                          ),
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
+                                                    tablet
+                                                        ? AppSpaces.h8
+                                                        : AppSpaces.h6,
+                                                    Material(
+                                                      color: kColorSecondary
+                                                          .withOpacity(0.1),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            tablet ? 6 : 5,
+                                                          ),
+                                                      child: InkWell(
+                                                        onTap: () {
+                                                          Get.to(
+                                                            () =>
+                                                                LastPurchaseRateScreen(
+                                                                  iCode: indent
+                                                                      .iCode,
+                                                                ),
+                                                          );
+                                                        },
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              tablet ? 6 : 5,
+                                                            ),
+                                                        child: Container(
+                                                          padding: tablet
+                                                              ? AppPaddings.combined(
+                                                                  horizontal: 8,
+                                                                  vertical: 8,
+                                                                )
+                                                              : AppPaddings.combined(
+                                                                  horizontal: 6,
+                                                                  vertical: 6,
+                                                                ),
+                                                          child: Icon(
+                                                            Icons
+                                                                .currency_rupee_rounded,
+                                                            size: tablet
+                                                                ? 16
+                                                                : 14,
+                                                            color:
+                                                                kColorSecondary,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ],
                                             ),
+                                            AppSpaces.v4,
+                                            Text(
+                                              'Required Date: ${convertyyyyMMddToddMMyyyy(indent.reqDate)}',
+                                              style: TextStyles.kRegularOutfit(
+                                                fontSize: tablet
+                                                    ? FontSizes.k12FontSize
+                                                    : FontSizes.k10FontSize,
+                                                color: kColorDarkGrey,
+                                              ),
+                                            ),
+                                            if (indent.gdName.isNotEmpty ||
+                                                indent.siteName.isNotEmpty)
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 4,
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    if (indent
+                                                        .gdName
+                                                        .isNotEmpty)
+                                                      Expanded(
+                                                        child: Text(
+                                                          'Head: ${indent.gdName}',
+                                                          style: TextStyles.kRegularOutfit(
+                                                            fontSize: tablet
+                                                                ? FontSizes
+                                                                      .k12FontSize
+                                                                : FontSizes
+                                                                      .k10FontSize,
+                                                            color:
+                                                                kColorDarkGrey,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    if (indent
+                                                            .gdName
+                                                            .isNotEmpty &&
+                                                        indent
+                                                            .siteName
+                                                            .isNotEmpty)
+                                                      const SizedBox(width: 8),
+                                                    if (indent
+                                                        .siteName
+                                                        .isNotEmpty)
+                                                      Expanded(
+                                                        child: Text(
+                                                          'Site: ${indent.siteName}',
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style: TextStyles.kRegularOutfit(
+                                                            fontSize: tablet
+                                                                ? FontSizes
+                                                                      .k12FontSize
+                                                                : FontSizes
+                                                                      .k10FontSize,
+                                                            color:
+                                                                kColorDarkGrey,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
+                                              ),
+                                            if (indent
+                                                .indentRemark
+                                                .isNotEmpty) ...[
+                                              AppSpaces.v4,
+                                              Text(
+                                                'Remark: ${indent.indentRemark}',
+                                                style:
+                                                    TextStyles.kRegularOutfit(
+                                                      fontSize: tablet
+                                                          ? FontSizes
+                                                                .k12FontSize
+                                                          : FontSizes
+                                                                .k10FontSize,
+                                                      color: kColorDarkGrey,
+                                                    ),
+                                              ),
+                                            ],
                                           ],
                                         ),
                                       ),
+                                      if (indent.isSelected &&
+                                          qtyController != null &&
+                                          priceController != null)
+                                        Text(
+                                          'Auth Qty: ${indent.authoriseQty.toStringAsFixed(2)}',
+                                          style: TextStyles.kRegularOutfit(
+                                            fontSize: tablet
+                                                ? FontSizes.k12FontSize
+                                                : FontSizes.k10FontSize,
+                                            color: kColorDarkGrey,
+                                          ),
+                                        ),
                                     ],
                                   ),
 
                                   if (indent.isSelected &&
                                       qtyController != null &&
-                                      priceController != null) ...[
+                                      priceController != null &&
+                                      dateController != null) ...[
                                     tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                                    AppDatePickerTextFormField(
+                                      dateController: dateController,
+                                      hintText: 'Required Date',
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Required';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                                    Obx(() {
+                                      return AppDropdown(
+                                        items: controller.godownNames,
+                                        hintText: 'Head',
+                                        onChanged: (val) => controller
+                                            .onGodownSelected(key, val),
+                                        selectedItem:
+                                            (controller.selectedGodownName[key] ??
+                                                    '')
+                                                .isNotEmpty
+                                            ? controller.selectedGodownName[key]
+                                            : null,
+                                      );
+                                    }),
+                                    tablet ? AppSpaces.v12 : AppSpaces.v10,
+
                                     Row(
                                       children: [
                                         Expanded(
@@ -242,18 +439,28 @@ class AuthIndentItemCard extends StatelessWidget {
                                               tablet
                                                   ? AppSpaces.v6
                                                   : AppSpaces.v4,
-                                              GestureDetector(
-                                                onTap: () {},
-                                                child: AbsorbPointer(
-                                                  absorbing: false,
-                                                  child: AppTextFormField(
-                                                    controller: qtyController,
-                                                    hintText: 'Enter Quantity',
-                                                    keyboardType:
-                                                        TextInputType.number,
-                                                    floatingLabelRequired:
-                                                        false,
-                                                  ),
+                                              AbsorbPointer(
+                                                absorbing: false,
+                                                child: AppTextFormField(
+                                                  controller: qtyController,
+                                                  hintText: 'Enter Quantity',
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  floatingLabelRequired: false,
+                                                  validator: (value) {
+                                                    if (value == null ||
+                                                        value.isEmpty) {
+                                                      return 'Required';
+                                                    }
+                                                    final qty = double.tryParse(
+                                                      value,
+                                                    );
+                                                    if (qty == null ||
+                                                        qty <= 0) {
+                                                      return 'Must be > 0';
+                                                    }
+                                                    return null;
+                                                  },
                                                 ),
                                               ),
                                             ],
@@ -277,18 +484,27 @@ class AuthIndentItemCard extends StatelessWidget {
                                               tablet
                                                   ? AppSpaces.v6
                                                   : AppSpaces.v4,
-                                              GestureDetector(
-                                                onTap: () {},
-                                                child: AbsorbPointer(
-                                                  absorbing: false,
-                                                  child: AppTextFormField(
-                                                    controller: priceController,
-                                                    hintText: 'Enter Price',
-                                                    keyboardType:
-                                                        TextInputType.number,
-                                                    floatingLabelRequired:
-                                                        false,
-                                                  ),
+                                              AbsorbPointer(
+                                                absorbing: false,
+                                                child: AppTextFormField(
+                                                  controller: priceController,
+                                                  hintText: 'Enter Price',
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  floatingLabelRequired: false,
+                                                  validator: (value) {
+                                                    if (value == null ||
+                                                        value.isEmpty) {
+                                                      return 'Required';
+                                                    }
+                                                    final price =
+                                                        double.tryParse(value);
+                                                    if (price == null ||
+                                                        price <= 0) {
+                                                      return 'Must be > 0';
+                                                    }
+                                                    return null;
+                                                  },
                                                 ),
                                               ),
                                             ],
@@ -296,6 +512,26 @@ class AuthIndentItemCard extends StatelessWidget {
                                         ),
                                       ],
                                     ),
+                                    tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                                    if (remarkController != null) ...[
+                                      Text(
+                                        'Remark',
+                                        style: TextStyles.kMediumOutfit(
+                                          fontSize: tablet
+                                              ? FontSizes.k14FontSize
+                                              : FontSizes.k12FontSize,
+                                          color: kColorTextPrimary,
+                                        ),
+                                      ),
+                                      tablet ? AppSpaces.v6 : AppSpaces.v4,
+                                      AppTextFormField(
+                                        controller: remarkController,
+                                        hintText: 'Enter Remark',
+                                        maxLines: 2,
+                                        floatingLabelRequired: false,
+                                      ),
+                                    ],
                                   ] else ...[
                                     tablet ? AppSpaces.v8 : AppSpaces.v6,
                                     _buildDetailRow(

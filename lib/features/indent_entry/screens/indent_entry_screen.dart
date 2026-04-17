@@ -52,9 +52,9 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
     _controller.dateController.text = DateFormat(
       'dd-MM-yyyy',
     ).format(DateTime.now());
-
-    await _controller.getGodowns();
+    await _controller.getSites();
     await _controller.getItems();
+    await _controller.getGodowns();
 
     if (widget.isEdit && widget.indent != null) {
       final indent = widget.indent!;
@@ -63,10 +63,8 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
       _controller.currentInvNo.value = indent.invNo;
       _controller.dateController.text = _convertyyyyMMddToddMMyyyy(indent.date);
 
-      _controller.selectedGodownCode.value = indent.gdCode;
-      _controller.selectedGodownName.value = indent.gdName;
       _controller.selectedSiteCode.value = indent.siteCode;
-      _controller.siteNameController.text = indent.siteName;
+      _controller.selectedSiteName.value = indent.siteName;
 
       if (indent.attachments.isNotEmpty) {
         _controller.existingAttachmentUrls.clear();
@@ -92,6 +90,9 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
               "reqDate": indentDtl.reqDate.isNotEmpty
                   ? _convertyyyyMMddToddMMyyyy(indentDtl.reqDate)
                   : '',
+              "Remark": indentDtl.remark,
+              "GDCode": indentDtl.gdCode,
+              "GDName": indentDtl.gdName,
             };
           }).toList(),
         );
@@ -151,35 +152,19 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
                             Obx(
                               () => AppDropdown(
-                                items: _controller.godownNames,
-                                hintText: 'Godown *',
-                                onChanged: _controller.onGodownSelected,
+                                items: _controller.siteNames,
+                                hintText: 'Site *',
+                                onChanged: _controller.onSiteSelected,
                                 selectedItem:
                                     _controller
-                                        .selectedGodownName
+                                        .selectedSiteName
                                         .value
                                         .isNotEmpty
-                                    ? _controller.selectedGodownName.value
+                                    ? _controller.selectedSiteName.value
                                     : null,
-                                validatorText: 'Please select a godown',
+                                validatorText: 'Please select a site',
                               ),
-                            ),
-                            tablet ? AppSpaces.v16 : AppSpaces.v10,
-                            Obx(() {
-                              if (_controller
-                                  .selectedGodownCode
-                                  .value
-                                  .isEmpty) {
-                                return const SizedBox.shrink();
-                              }
-
-                              return AppTextFormField(
-                                controller: _controller.siteNameController,
-                                hintText: 'Site Name',
-                                enabled: false,
-                                fillColor: kColorLightGrey,
-                              );
-                            }),
+                            ), // After site dropdown Obx block, add:
 
                             tablet ? AppSpaces.v20 : AppSpaces.v14,
                             Obx(
@@ -707,7 +692,7 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => Dialog(
+      builder: (dialogContext) => Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(tablet ? 20 : 16),
         ),
@@ -717,6 +702,7 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
           width: tablet ? 520 : double.infinity,
           constraints: BoxConstraints(
             maxWidth: tablet ? 520 : MediaQuery.of(context).size.width * 0.9,
+            maxHeight: MediaQuery.of(context).size.height * 0.8,
           ),
           decoration: BoxDecoration(
             color: kColorWhite,
@@ -780,134 +766,153 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
                   ],
                 ),
               ),
-              Padding(
-                padding: tablet ? AppPaddings.p24 : AppPaddings.p20,
+              Flexible(
                 child: Form(
                   key: _controller.indentItemFormKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AppDatePickerTextFormField(
-                        dateController: _controller.reqDateController,
-                        hintText: 'Request Date *',
-                        validator: (value) => value == null || value.isEmpty
-                            ? 'Please select request date'
-                            : null,
-                      ),
-                      tablet ? AppSpaces.v16 : AppSpaces.v12,
-                      Obx(
-                        () => AppDropdown(
-                          items: _controller.itemNames,
-                          hintText: 'Select Item *',
-                          onChanged: _controller.onItemSelected,
-                          selectedItem:
-                              _controller.selectedItemName.value.isNotEmpty
-                              ? _controller.selectedItemName.value
+                  child: SingleChildScrollView(
+                    padding: tablet ? AppPaddings.p24 : AppPaddings.p20,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AppDatePickerTextFormField(
+                          dateController: _controller.reqDateController,
+                          hintText: 'Request Date *',
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Please select request date'
                               : null,
-                          validatorText: 'Please select an item',
                         ),
-                      ),
-                      tablet ? AppSpaces.v16 : AppSpaces.v12,
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: AppTextFormField(
-                              controller: _controller.qtyController,
-                              hintText: 'Qty *',
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter qty';
-                                }
-                                final qty = double.tryParse(value);
-                                if (qty == null) {
-                                  return 'Please enter a valid number';
-                                }
-                                if (qty <= 0) {
-                                  return 'Qty must be greater than 0';
-                                }
-                                return null;
-                              },
-                            ),
+                        tablet ? AppSpaces.v16 : AppSpaces.v12,
+                        Obx(
+                          () => AppDropdown(
+                            items: _controller.itemNames,
+                            hintText: 'Select Item *',
+                            onChanged: _controller.onItemSelected,
+                            selectedItem:
+                                _controller.selectedItemName.value.isNotEmpty
+                                ? _controller.selectedItemName.value
+                                : null,
+                            validatorText: 'Please select an item',
                           ),
-                          tablet ? AppSpaces.h16 : AppSpaces.h12,
-                          Expanded(
-                            child: Obx(
-                              () => AppTextFormField(
-                                controller: TextEditingController(
-                                  text: _controller.selectedUnit.value,
-                                ),
-                                hintText: 'Unit',
-                                enabled: false,
-                                fillColor: kColorLightGrey,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      tablet ? AppSpaces.v24 : AppSpaces.v20,
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () {
-                                _controller.clearItemForm();
-                                Get.back();
-                              },
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
-                                  color: kColorLightGrey,
-                                  width: 1.5,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    tablet ? 12 : 10,
-                                  ),
-                                ),
-                                padding: AppPaddings.combined(
-                                  vertical: tablet ? 16 : 14,
-                                  horizontal: 0,
-                                ),
-                              ),
-                              child: Text(
-                                'Cancel',
-                                style: TextStyles.kMediumOutfit(
-                                  color: kColorDarkGrey,
-                                  fontSize: tablet
-                                      ? FontSizes.k16FontSize
-                                      : FontSizes.k14FontSize,
-                                ),
-                              ),
-                            ),
-                          ),
-                          tablet ? AppSpaces.h16 : AppSpaces.h12,
-                          Expanded(
-                            child: Obx(
-                              () => AppButton(
-                                title: _controller.isEditingItem.value
-                                    ? 'Update'
-                                    : 'Add',
-                                buttonColor: kColorPrimary,
-                                titleColor: kColorWhite,
-                                titleSize: tablet
-                                    ? FontSizes.k16FontSize
-                                    : FontSizes.k14FontSize,
-                                buttonHeight: tablet ? 54 : 48,
-                                onPressed: () {
-                                  if (_controller
-                                      .indentItemFormKey
-                                      .currentState!
-                                      .validate()) {
-                                    _controller.addOrUpdateItem();
+                        ),
+                        tablet ? AppSpaces.v16 : AppSpaces.v12,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: AppTextFormField(
+                                controller: _controller.qtyController,
+                                hintText: 'Qty *',
+                                keyboardType: TextInputType.number,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter qty';
                                   }
+                                  final qty = double.tryParse(value);
+                                  if (qty == null) {
+                                    return 'Please enter a valid number';
+                                  }
+                                  if (qty <= 0) {
+                                    return 'Qty must be greater than 0';
+                                  }
+                                  return null;
                                 },
                               ),
                             ),
+                            tablet ? AppSpaces.h16 : AppSpaces.h12,
+                            Expanded(
+                              child: Obx(
+                                () => AppTextFormField(
+                                  controller: TextEditingController(
+                                    text: _controller.selectedUnit.value,
+                                  ),
+                                  hintText: 'Unit',
+                                  enabled: false,
+                                  fillColor: kColorLightGrey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        tablet ? AppSpaces.v16 : AppSpaces.v12,
+                        Obx(
+                          () => AppDropdown(
+                            items: _controller.godownNames,
+                            hintText: 'Head',
+                            onChanged: _controller.onGodownSelected,
+                            selectedItem:
+                                _controller.selectedGodownName.value.isNotEmpty
+                                ? _controller.selectedGodownName.value
+                                : null,
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        tablet ? AppSpaces.v16 : AppSpaces.v12,
+                        AppTextFormField(
+                          controller: _controller.remarkController,
+                          hintText: 'Remark (Optional)',
+                          maxLines: 2,
+                        ),
+                        tablet ? AppSpaces.v24 : AppSpaces.v20,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  _controller.clearItemForm();
+                                  Navigator.of(dialogContext).pop();
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  side: BorderSide(
+                                    color: kColorLightGrey,
+                                    width: 1.5,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      tablet ? 12 : 10,
+                                    ),
+                                  ),
+                                  padding: AppPaddings.combined(
+                                    vertical: tablet ? 16 : 14,
+                                    horizontal: 0,
+                                  ),
+                                ),
+                                child: Text(
+                                  'Cancel',
+                                  style: TextStyles.kMediumOutfit(
+                                    color: kColorDarkGrey,
+                                    fontSize: tablet
+                                        ? FontSizes.k16FontSize
+                                        : FontSizes.k14FontSize,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            tablet ? AppSpaces.h16 : AppSpaces.h12,
+                            Expanded(
+                              child: Obx(
+                                () => AppButton(
+                                  title: _controller.isEditingItem.value
+                                      ? 'Update'
+                                      : 'Add',
+                                  buttonColor: kColorPrimary,
+                                  titleColor: kColorWhite,
+                                  titleSize: tablet
+                                      ? FontSizes.k16FontSize
+                                      : FontSizes.k14FontSize,
+                                  buttonHeight: tablet ? 54 : 48,
+                                  onPressed: () {
+                                    if (_controller
+                                        .indentItemFormKey
+                                        .currentState!
+                                        .validate()) {
+                                      _controller.addOrUpdateItem();
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

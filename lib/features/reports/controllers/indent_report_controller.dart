@@ -31,11 +31,16 @@ class IndentReportController extends GetxController {
   var selectedSiteName = ''.obs;
   var selectedSiteCode = ''.obs;
 
+
+
   var items = <ItemMasterDm>[].obs;
   var filteredItems = <ItemMasterDm>[].obs;
   var selectedItems = <String>[].obs;
   var selectedItemNames = <String>[].obs;
   var searchItemController = TextEditingController();
+
+  var reportTypeOptions = ['ItemWise', 'SiteWise'].obs;
+  var selectedReportType = 'ItemWise'.obs;
 
   @override
   void onInit() async {
@@ -65,10 +70,12 @@ class IndentReportController extends GetxController {
     }
   }
 
-  Future<void> getGodowns() async {
+  Future<void> getGodowns([String siteCode = '']) async {
     try {
       isLoading.value = true;
-      final fetchedGodowns = await GodownMasterRepo.getGodowns();
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(
+        siteCode: siteCode,
+      );
       godowns.assignAll(fetchedGodowns);
       godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
     } catch (e) {
@@ -86,12 +93,22 @@ class IndentReportController extends GetxController {
     selectedGodownCode.value = selectedGodownObj?.gdCode ?? '';
   }
 
-  void onSiteSelected(String? siteName) {
+  void onSiteSelected(String? siteName) async {
     selectedSiteName.value = siteName ?? '';
     var selectedSiteObj = sites.firstWhereOrNull(
       (site) => site.siteName == siteName,
     );
     selectedSiteCode.value = selectedSiteObj?.siteCode ?? '';
+
+    selectedGodownName.value = '';
+    selectedGodownCode.value = '';
+
+    if (selectedSiteCode.value.isNotEmpty) {
+      await getGodowns(selectedSiteCode.value);
+    } else {
+      godowns.clear();
+      godownNames.clear();
+    }
   }
 
   Future<void> getItems() async {
@@ -128,9 +145,16 @@ class IndentReportController extends GetxController {
         fromDate: fromDate,
         toDate: toDate,
         status: selectedStatus.value,
-        siteCode: selectedSiteCode.value,
-        gdCode: selectedGodownCode.value,
-        iCodes: selectedItems.join(','),
+        type: selectedReportType.value,
+        siteCode: selectedReportType.value == 'SiteWise'
+            ? selectedSiteCode.value
+            : '',
+        gdCode: selectedReportType.value == 'SiteWise'
+            ? selectedGodownCode.value
+            : '',
+        iCodes: selectedReportType.value == 'ItemWise'
+            ? selectedItems.join(',')
+            : '',
       );
 
       if (response.isEmpty) {
@@ -146,6 +170,7 @@ class IndentReportController extends GetxController {
         fromDate: fromDateController.text,
         toDate: toDateController.text,
         status: selectedStatus.value,
+        reportType: selectedReportType.value,
       );
     } catch (e) {
       if (e is Map<String, dynamic>) {
@@ -167,6 +192,7 @@ class IndentReportController extends GetxController {
     toDateController.text = formatter.format(now);
 
     selectedStatus.value = 'All';
+    selectedReportType.value = 'ItemWise';
     selectedGodownName.value = '';
     selectedGodownCode.value = '';
     selectedSiteName.value = '';

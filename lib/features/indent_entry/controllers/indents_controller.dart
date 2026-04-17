@@ -27,6 +27,7 @@ class IndentsController extends GetxController {
     'ALL': 'ALL',
     'PENDING': 'Pending',
     'AUTHORISED': 'Complete',
+    'CLOSED': 'Close',
   };
   var selectedFilter = 'ALL'.obs;
 
@@ -130,6 +131,27 @@ class IndentsController extends GetxController {
       if (response != null && response.containsKey('message')) {
         String message = response['message'];
         Get.back();
+        await getIndents();
+        showSuccessSnackbar('Success', message);
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> closeIndent({required String invNo}) async {
+    isLoading.value = true;
+    try {
+      var response = await IndentsRepo.closeIndent(invNo: invNo);
+
+      if (response != null && response.containsKey('message')) {
+        String message = response['message'];
         await getIndents();
         showSuccessSnackbar('Success', message);
       }

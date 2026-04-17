@@ -3,13 +3,17 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/site_transfer/controllers/site_transfer_controller.dart';
+import 'package:shivay_construction/features/site_transfer/models/site_transfer_detail_dm.dart';
+import 'package:shivay_construction/features/site_transfer/models/site_transfer_dm.dart';
 import 'package:shivay_construction/features/site_transfer/widgets/site_transfer_item_card.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 import 'package:shivay_construction/utils/extensions/app_size_extensions.dart';
+import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
@@ -21,7 +25,10 @@ import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
 class SiteTransferScreen extends StatefulWidget {
-  const SiteTransferScreen({super.key});
+  const SiteTransferScreen({super.key, this.transfer, this.transferDetails});
+
+  final SiteTransferDm? transfer;
+  final List<SiteTransferDetailDm>? transferDetails;
 
   @override
   State<SiteTransferScreen> createState() => _SiteTransferScreenState();
@@ -29,6 +36,61 @@ class SiteTransferScreen extends StatefulWidget {
 
 class _SiteTransferScreenState extends State<SiteTransferScreen> {
   final SiteTransferController _controller = Get.put(SiteTransferController());
+
+  @override
+  void initState() {
+    super.initState();
+    _initialize();
+  }
+
+  void _initialize() async {
+    _controller.dateController.text = DateFormat(
+      'dd-MM-yyyy',
+    ).format(DateTime.now());
+
+    await _controller.getSites();
+    await _controller.getGodowns();
+
+    if (widget.transfer != null && widget.transferDetails != null) {
+      await _loadEditData();
+    }
+  }
+
+  Future<void> _loadEditData() async {
+    final transfer = widget.transfer!;
+    final details = widget.transferDetails!;
+
+    _controller.isEditMode.value = true;
+    _controller.currentInvNo.value = transfer.invNo;
+    _controller.dateController.text = convertyyyyMMddToddMMyyyy(transfer.date);
+    _controller.remarksController.text = transfer.remarks;
+
+    _controller.selectedFromGodownCode.value = transfer.fromGDCode;
+    _controller.selectedFromGodownName.value = transfer.fromGodown;
+    _controller.selectedFromSiteCode.value = transfer.fromSiteCode;
+    _controller.fromSiteNameController.text = transfer.fromSiteName;
+
+    _controller.selectedToGodownCode.value = transfer.toGDCode;
+    _controller.selectedToGodownName.value = transfer.toGodown;
+    _controller.selectedToSiteCode.value = transfer.toSiteCode;
+    _controller.toSiteNameController.text = transfer.toSiteName;
+
+    _controller.canAddItem.value = true;
+    await _controller.getStockItems();
+
+    _controller.itemsToSend.clear();
+    int srNo = 1;
+    for (var item in details) {
+      _controller.itemsToSend.add({
+        'SrNo': srNo++,
+        'ICode': item.iCode,
+        'iname': item.iName,
+        'unit': 'Nos',
+        'Qty': item.qty,
+        'availableQty': item.qty,
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +104,10 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
           },
           child: Scaffold(
             appBar: AppAppbar(
-              title: 'Site Transfer',
+              title: widget.transfer != null
+                  ? 'Edit Site Transfer'
+                  : 'New Site Transfer',
+
               leading: IconButton(
                 onPressed: () => Get.back(),
                 icon: Icon(
@@ -91,7 +156,8 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                               () => AppDropdown(
                                 items: _controller.godownNames,
                                 hintText: 'From Godown *',
-                                onChanged: _controller.onFromGodownSelected,
+                                onChanged:
+                                    _controller.onFromGodownSelectedWithClear,
                                 selectedItem:
                                     _controller
                                         .selectedFromGodownName

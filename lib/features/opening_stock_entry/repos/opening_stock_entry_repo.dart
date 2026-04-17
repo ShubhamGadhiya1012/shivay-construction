@@ -6,7 +6,7 @@ class OpeningStockEntryRepo {
     required String invNo,
     required String date,
     required String siteCode,
-    required String gdCode,
+
     required List<Map<String, dynamic>> itemData,
   }) async {
     String? token = await SecureStorageHelper.read('token');
@@ -15,7 +15,7 @@ class OpeningStockEntryRepo {
       "Invno": invNo,
       "Date": date,
       "SiteCode": siteCode,
-      "GDCode": gdCode,
+
       "ItemData": itemData,
     };
 

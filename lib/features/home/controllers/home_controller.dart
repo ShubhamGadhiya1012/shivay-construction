@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
+import 'package:shivay_construction/constants/image_constants.dart';
 import 'package:shivay_construction/features/auth/screens/login_screen.dart';
 import 'package:shivay_construction/features/home/repos/home_repo.dart';
 import 'package:shivay_construction/features/user_settings/models/user_access_dm.dart';
@@ -22,15 +23,25 @@ class HomeController extends GetxController {
   var company = ''.obs;
   var menuAccess = <MenuAccessDm>[].obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    _initializeData();
+  var currentBannerIndex = 0.obs;
+  final List<String> bannerImages = [
+    kImagebanner1,
+    kImagebanner2,
+    kImagebanner3,
+    kImagebanner4,
+  ];
+
+  void updateBannerIndex(int index) {
+    currentBannerIndex.value = index;
   }
 
-  Future<void> _initializeData() async {
+  @override
+  Future<void> onInit() async {
+    super.onInit();
+
     await loadCompany();
     await loadMenuFromAPI();
+    await checkAppVersion();
   }
 
   Future<void> loadCompany() async {
@@ -42,7 +53,199 @@ class HomeController extends GetxController {
     }
   }
 
+  List<Map<String, dynamic>> getQuickActions() {
+    List<Map<String, dynamic>> actions = [];
+    // Item Help menu
+    if (hasAccessToMenu('Item Help')) {
+      actions.add({
+        'title': 'Item Help',
+        'icon': Icons.help_outline_rounded,
+        'submenu': 'item help',
+      });
+    }
+    // Entry submenu items
+    if (hasAccessToMenu('Entry')) {
+      if (menuAccess.any(
+        (menu) =>
+            menu.menuName.toLowerCase() == 'entry' &&
+            menu.subMenu.any(
+              (sub) =>
+                  sub.subMenuName.toLowerCase() == 'indent entry' &&
+                  sub.subMenuAccess,
+            ),
+      )) {
+        actions.add({
+          'title': 'Indent Entry',
+          'icon': Icons.description_rounded,
+          'submenu': 'indent entry',
+        });
+      }
+      if (menuAccess.any(
+        (menu) =>
+            menu.menuName.toLowerCase() == 'entry' &&
+            menu.subMenu.any(
+              (sub) =>
+                  sub.subMenuName.toLowerCase() == 'purchase order entry' &&
+                  sub.subMenuAccess,
+            ),
+      )) {
+        actions.add({
+          'title': 'Purchase Order Entry',
+          'icon': Icons.shopping_cart_rounded,
+          'submenu': 'purchase order entry',
+        });
+      }
+
+      if (menuAccess.any(
+        (menu) =>
+            menu.menuName.toLowerCase() == 'entry' &&
+            menu.subMenu.any(
+              (sub) =>
+                  sub.subMenuName.toLowerCase() == 'grn entry' &&
+                  sub.subMenuAccess,
+            ),
+      )) {
+        actions.add({
+          'title': 'GRN Entry',
+          'icon': Icons.receipt_long_rounded,
+          'submenu': 'grn entry',
+        });
+      }
+    }
+
+    // Reports submenu items
+    if (hasAccessToMenu('Reports')) {
+      if (menuAccess.any(
+        (menu) =>
+            menu.menuName.toLowerCase() == 'reports' &&
+            menu.subMenu.any(
+              (sub) =>
+                  sub.subMenuName.toLowerCase() == 'opening stock report' &&
+                  sub.subMenuAccess,
+            ),
+      )) {
+        actions.add({
+          'title': 'Opening Stock Report',
+          'icon': Icons.inventory_rounded,
+          'submenu': 'opening stock report',
+        });
+      }
+      if (menuAccess.any(
+        (menu) =>
+            menu.menuName.toLowerCase() == 'reports' &&
+            menu.subMenu.any(
+              (sub) =>
+                  sub.subMenuName.toLowerCase() == 'indent report' &&
+                  sub.subMenuAccess,
+            ),
+      )) {
+        actions.add({
+          'title': 'Indent Report',
+          'icon': Icons.bar_chart_rounded,
+          'submenu': 'indent report',
+        });
+      }
+      if (menuAccess.any(
+        (menu) =>
+            menu.menuName.toLowerCase() == 'reports' &&
+            menu.subMenu.any(
+              (sub) =>
+                  sub.subMenuName.toLowerCase() == 'purchase order report' &&
+                  sub.subMenuAccess,
+            ),
+      )) {
+        actions.add({
+          'title': 'Purchase Report',
+          'icon': Icons.assessment_rounded,
+          'submenu': 'purchase order report',
+        });
+      }
+      if (menuAccess.any(
+        (menu) =>
+            menu.menuName.toLowerCase() == 'reports' &&
+            menu.subMenu.any(
+              (sub) =>
+                  sub.subMenuName.toLowerCase() == 'grn report' &&
+                  sub.subMenuAccess,
+            ),
+      )) {
+        actions.add({
+          'title': 'GRN Report',
+          'icon': Icons.analytics_rounded,
+          'submenu': 'grn report',
+        });
+      }
+    }
+
+    // Stock Reports submenu items
+    if (hasAccessToMenu('Stock Reports')) {
+      if (menuAccess.any(
+        (menu) =>
+            menu.menuName.toLowerCase() == 'stock reports' &&
+            menu.subMenu.any(
+              (sub) =>
+                  sub.subMenuName.toLowerCase() == 'stock statement report' &&
+                  sub.subMenuAccess,
+            ),
+      )) {
+        actions.add({
+          'title': 'Stock Statement',
+          'icon': Icons.summarize_rounded,
+          'submenu': 'stock statement report',
+        });
+      }
+      if (menuAccess.any(
+        (menu) =>
+            menu.menuName.toLowerCase() == 'stock reports' &&
+            menu.subMenu.any(
+              (sub) =>
+                  sub.subMenuName.toLowerCase() == 'stock ledger' &&
+                  sub.subMenuAccess,
+            ),
+      )) {
+        actions.add({
+          'title': 'Stock Ledger',
+          'icon': Icons.book_rounded,
+          'submenu': 'stock ledger',
+        });
+      }
+      if (menuAccess.any(
+        (menu) =>
+            menu.menuName.toLowerCase() == 'stock reports' &&
+            menu.subMenu.any(
+              (sub) =>
+                  sub.subMenuName.toLowerCase() == 'group stock report' &&
+                  sub.subMenuAccess,
+            ),
+      )) {
+        actions.add({
+          'title': 'Group Stock',
+          'icon': Icons.view_module_rounded,
+          'submenu': 'group stock report',
+        });
+      }
+      if (menuAccess.any(
+        (menu) =>
+            menu.menuName.toLowerCase() == 'stock reports' &&
+            menu.subMenu.any(
+              (sub) =>
+                  sub.subMenuName.toLowerCase() == 'site stock report' &&
+                  sub.subMenuAccess,
+            ),
+      )) {
+        actions.add({
+          'title': 'Site Stock',
+          'icon': Icons.location_on_rounded,
+          'submenu': 'site stock report',
+        });
+      }
+    }
+
+    return actions;
+  }
+
   Future<void> loadMenuFromAPI() async {
+    await checkAppVersion();
     isLoading.value = true;
     try {
       String? userId = await SecureStorageHelper.read('userId');

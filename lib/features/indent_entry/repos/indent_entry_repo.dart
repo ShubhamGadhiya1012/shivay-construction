@@ -7,8 +7,6 @@ class IndentEntryRepo {
   static Future<dynamic> saveIndentEntry({
     required String invNo,
     required String date,
-    required String gdCode,
-
     required String siteCode,
     required List<Map<String, dynamic>> itemData,
     required List<PlatformFile> newFiles,
@@ -20,7 +18,6 @@ class IndentEntryRepo {
       final Map<String, String> fields = {
         'Invno': invNo,
         'Date': date,
-        'GDCode': gdCode,
         'SiteCode': siteCode,
       };
 
@@ -30,6 +27,8 @@ class IndentEntryRepo {
         fields['ItemData[$i].Unit'] = itemData[i]['Unit'];
         fields['ItemData[$i].Qty'] = itemData[i]['Qty'].toString();
         fields['ItemData[$i].ReqDate'] = itemData[i]['ReqDate'];
+        fields['ItemData[$i].Remark'] = itemData[i]['Remark']?.toString() ?? '';
+        fields['ItemData[$i].GDCode'] = itemData[i]['GDCode']?.toString() ?? '';
       }
 
       if (existingAttachments.isNotEmpty) {
@@ -60,19 +59,19 @@ class IndentEntryRepo {
         }
       }
 
-      // print('---- INDENT ENTRY PAYLOAD (FIELDS) ----');
-      // fields.forEach((key, value) {
-      //   print('$key : $value');
-      // });
+      print('---- INDENT ENTRY PAYLOAD (FIELDS) ----');
+      fields.forEach((key, value) {
+        print('$key : $value');
+      });
 
-      // print('---- INDENT ENTRY PAYLOAD (FILES) ----');
-      // for (var file in multipartFiles) {
-      //   print('File field: ${file.field}');
-      //   print('File name : ${file.filename}');
-      //   print('File size : ${file.length}');
-      // }
+      print('---- INDENT ENTRY PAYLOAD (FILES) ----');
+      for (var file in multipartFiles) {
+        print('File field: ${file.field}');
+        print('File name : ${file.filename}');
+        print('File size : ${file.length}');
+      }
 
-      // print('--------------------------------------');
+      print('--------------------------------------');
 
       final response = await ApiService.postFormData(
         endpoint: '/Indent/indentEntry',

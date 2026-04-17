@@ -1,3 +1,4 @@
+import 'package:shivay_construction/features/item_master/models/filtered_item_dm.dart';
 import 'package:shivay_construction/features/item_master/models/item_master_dm.dart';
 import 'package:shivay_construction/services/api_service.dart';
 import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
@@ -21,6 +22,32 @@ class ItemMasterListRepo {
       }
 
       return [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<List<FilteredItemDm>> getFilteredItems({
+    String cCode = '',
+    String igCode = '',
+    String icCode = '',
+  }) async {
+    String? token = await SecureStorageHelper.read('token');
+
+    try {
+      final response = await ApiService.getRequest(
+        endpoint:
+            '/Master/getFilterItems?CCode=$cCode&IGCode=$igCode&ICCode=$icCode',
+        token: token,
+      );
+
+      if (response == null || response['data'] == null) {
+        return [];
+      }
+
+      return (response['data'] as List<dynamic>)
+          .map((item) => FilteredItemDm.fromJson(item))
+          .toList();
     } catch (e) {
       rethrow;
     }

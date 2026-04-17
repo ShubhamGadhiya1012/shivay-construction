@@ -2,20 +2,18 @@ import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:shivay_construction/features/purchase_order_entry/models/auth_indent_item_dm.dart';
 import 'package:shivay_construction/services/api_service.dart';
+import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
 class PurchaseOrderRepo {
-  static Future<List<AuthIndentItemDm>> getAuthIndentItems({
-    required String siteCode,
-    required String gdCode,
-  }) async {
+  static Future<List<AuthIndentItemDm>> getAuthIndentItems() async {
     String? token = await SecureStorageHelper.read('token');
     // print(siteCode);
     // print(gdCode);
     try {
       final response = await ApiService.getRequest(
         endpoint: '/Order/getAuthIndentItems',
-        queryParams: {'SiteCode': siteCode, 'GDCode': gdCode},
+
         token: token,
       );
 
@@ -36,7 +34,7 @@ class PurchaseOrderRepo {
   static Future<dynamic> savePurchaseOrder({
     required String invNo,
     required String date,
-    required String gdCode,
+
     required String pCode,
     required String remarks,
     required String siteCode,
@@ -50,7 +48,7 @@ class PurchaseOrderRepo {
       final Map<String, String> fields = {
         'Invno': invNo,
         'Date': date,
-        'GDCode': gdCode,
+
         'PCode': pCode,
         'Remark': remarks,
         'SiteCode': siteCode,
@@ -65,6 +63,13 @@ class PurchaseOrderRepo {
         fields['ItemData[$i].IndentNo'] = itemData[i]['IndentNo'];
         fields['ItemData[$i].IndentSrNo'] = itemData[i]['IndentSrNo']
             .toString();
+        fields['ItemData[$i].ReqDate'] = convertToApiDateFormat(
+          itemData[i]['ReqDate'] ?? '',
+        );
+        // In the fields loop, ADD after ReqDate line:
+        fields['ItemData[$i].GDCode'] = itemData[i]['GDCode']?.toString() ?? '';
+        fields['ItemData[$i].IndentRemark'] =
+            itemData[i]['IndentRemark']?.toString() ?? '';
       }
 
       if (existingAttachments.isNotEmpty) {
@@ -116,7 +121,7 @@ class PurchaseOrderRepo {
         token: token,
       );
 
-      //  print(response);
+      print(response);
 
       return response;
     } catch (e) {

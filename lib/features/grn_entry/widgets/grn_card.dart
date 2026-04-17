@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/grn_entry/controllers/grns_controller.dart';
 import 'package:shivay_construction/features/grn_entry/models/grn_dm.dart';
-import 'package:shivay_construction/features/grn_entry/screens/grn_entry_screen.dart';
 import 'package:shivay_construction/features/grn_entry/screens/grn_pdf_screen.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
@@ -16,18 +15,24 @@ import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
 import 'package:shivay_construction/widgets/app_button.dart';
 
 class GrnCard extends StatefulWidget {
-  const GrnCard({super.key, required this.grn, required this.controller});
+  const GrnCard({
+    super.key,
+    required this.grn,
+    required this.controller,
+    required this.isExpanded,
+    required this.onTap,
+  });
 
   final GrnDm grn;
   final GrnsController controller;
+  final bool isExpanded;
+  final VoidCallback onTap;
 
   @override
   State<GrnCard> createState() => _GrnCardState();
 }
 
 class _GrnCardState extends State<GrnCard> {
-  bool isExpanded = false;
-
   @override
   Widget build(BuildContext context) {
     final bool tablet = AppScreenUtils.isTablet(context);
@@ -52,12 +57,10 @@ class _GrnCardState extends State<GrnCard> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            if (!isExpanded) {
+            if (!widget.isExpanded) {
               await widget.controller.getGrnDetails(invNo: widget.grn.invNo);
             }
-            setState(() {
-              isExpanded = !isExpanded;
-            });
+            widget.onTap();
           },
           borderRadius: BorderRadius.circular(tablet ? 14 : 12),
           child: Padding(
@@ -129,45 +132,46 @@ class _GrnCardState extends State<GrnCard> {
                       ),
                     ),
                     AppSpaces.h8,
-                    Material(
-                      color: kColorPrimary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(tablet ? 10 : 8),
-                      child: InkWell(
-                        onTap: () async {
-                          await widget.controller.getGrnDetails(
-                            invNo: widget.grn.invNo,
-                          );
-                          Get.to(
-                            () => GrnEntryScreen(
-                              isEdit: true,
-                              grn: widget.grn,
-                              grnDetails: widget.controller.grnDetails.toList(),
-                            ),
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(tablet ? 10 : 8),
-                        child: Container(
-                          padding: tablet
-                              ? AppPaddings.combined(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                )
-                              : AppPaddings.combined(
-                                  horizontal: 10,
-                                  vertical: 6,
-                                ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.edit_rounded,
-                                size: tablet ? 18 : 16,
-                                color: kColorPrimary,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                    // Material(
+                    //   color: kColorPrimary.withOpacity(0.1),
+                    //   borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                    //   child: InkWell(
+                    //     onTap: () async {
+                    //       await widget.controller.getGrnDetails(
+                    //         invNo: widget.grn.invNo,
+                    //       );
+                    //       Get.to(
+                    //         () => GrnEntryScreen(
+                    //           isEdit: true,
+                    //           grn: widget.grn,
+                    //           grnDetails: widget.controller.grnDetails.toList(),
+                    //           isDirect: widget.grn.type == 'Direct',
+                    //         ),
+                    //       );
+                    //     },
+                    //     borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                    //     child: Container(
+                    //       padding: tablet
+                    //           ? AppPaddings.combined(
+                    //               horizontal: 12,
+                    //               vertical: 8,
+                    //             )
+                    //           : AppPaddings.combined(
+                    //               horizontal: 10,
+                    //               vertical: 6,
+                    //             ),
+                    //       child: Row(
+                    //         children: [
+                    //           Icon(
+                    //             Icons.edit_rounded,
+                    //             size: tablet ? 18 : 16,
+                    //             color: kColorPrimary,
+                    //           ),
+                    //         ],
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                     if (widget.controller.isAdmin.value) ...[
                       AppSpaces.h8,
                       Material(
@@ -210,14 +214,6 @@ class _GrnCardState extends State<GrnCard> {
                   children: [
                     Expanded(
                       child: _buildInfoRow(
-                        label: 'Godown',
-                        value: widget.grn.gdName,
-                        tablet: tablet,
-                      ),
-                    ),
-                    tablet ? AppSpaces.h12 : AppSpaces.h10,
-                    Expanded(
-                      child: _buildInfoRow(
                         label: 'Site',
                         value: widget.grn.siteName,
                         tablet: tablet,
@@ -225,7 +221,7 @@ class _GrnCardState extends State<GrnCard> {
                     ),
                     tablet ? AppSpaces.h12 : AppSpaces.h8,
                     AnimatedRotation(
-                      turns: isExpanded ? 0.5 : 0,
+                      turns: widget.isExpanded ? 0.5 : 0,
                       duration: const Duration(milliseconds: 300),
                       child: Icon(
                         Icons.keyboard_arrow_down_rounded,
@@ -235,12 +231,37 @@ class _GrnCardState extends State<GrnCard> {
                     ),
                   ],
                 ),
+
                 if (widget.grn.remarks.isNotEmpty) ...[
                   tablet ? AppSpaces.v12 : AppSpaces.v10,
                   _buildInfoRow(
                     label: 'Remarks',
                     value: widget.grn.remarks,
                     tablet: tablet,
+                  ),
+                ],
+                if (widget.grn.type == 'Direct') ...[
+                  tablet ? AppSpaces.v12 : AppSpaces.v10,
+                  Container(
+                    padding: tablet
+                        ? AppPaddings.combined(horizontal: 12, vertical: 6)
+                        : AppPaddings.combined(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: kColorSecondary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: kColorSecondary.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Text(
+                      'Direct GRN',
+                      style: TextStyles.kMediumOutfit(
+                        fontSize: tablet
+                            ? FontSizes.k14FontSize
+                            : FontSizes.k12FontSize,
+                        color: kColorSecondary,
+                      ),
+                    ),
                   ),
                 ],
                 AnimatedCrossFade(
@@ -312,16 +333,42 @@ class _GrnCardState extends State<GrnCard> {
                                       color: kColorPrimary,
                                     ),
                                   ),
-                                  AppSpaces.v4,
-                                  Text(
-                                    'PO: ${detail.poInvNo}',
-                                    style: TextStyles.kRegularOutfit(
-                                      fontSize: tablet
-                                          ? FontSizes.k12FontSize
-                                          : FontSizes.k10FontSize,
-                                      color: kColorDarkGrey,
+                                  if (detail.poInvNo.isNotEmpty) AppSpaces.v4,
+                                  if (detail.poInvNo.isNotEmpty)
+                                    Text(
+                                      'PO: ${detail.poInvNo}',
+                                      style: TextStyles.kRegularOutfit(
+                                        fontSize: tablet
+                                            ? FontSizes.k12FontSize
+                                            : FontSizes.k10FontSize,
+                                        color: kColorDarkGrey,
+                                      ),
                                     ),
-                                  ),
+
+                                  if (detail.gdName.isNotEmpty) ...[
+                                    AppSpaces.v4,
+                                    Text(
+                                      'Head: ${detail.gdName}',
+                                      style: TextStyles.kRegularOutfit(
+                                        fontSize: tablet
+                                            ? FontSizes.k12FontSize
+                                            : FontSizes.k10FontSize,
+                                        color: kColorDarkGrey,
+                                      ),
+                                    ),
+                                  ],
+                                  if (detail.poRemark.isNotEmpty) ...[
+                                    AppSpaces.v4,
+                                    Text(
+                                      'Remark: ${detail.poRemark}',
+                                      style: TextStyles.kRegularOutfit(
+                                        fontSize: tablet
+                                            ? FontSizes.k12FontSize
+                                            : FontSizes.k10FontSize,
+                                        color: kColorDarkGrey,
+                                      ),
+                                    ),
+                                  ],
                                   AppSpaces.v8,
                                   Row(
                                     children: [
@@ -343,7 +390,7 @@ class _GrnCardState extends State<GrnCard> {
                       }),
                     ],
                   ),
-                  crossFadeState: isExpanded
+                  crossFadeState: widget.isExpanded
                       ? CrossFadeState.showSecond
                       : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 300),

@@ -3,10 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
+import 'package:shivay_construction/features/indent_entry/screens/site_wise_stock_screen.dart';
 import 'package:shivay_construction/features/purchase_order_entry/controllers/purchase_order_list_controller.dart';
 import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_list_dm.dart';
 import 'package:shivay_construction/features/purchase_order_entry/screens/purchase_order_pdf_screen.dart';
-import 'package:shivay_construction/features/purchase_order_entry/screens/purchase_order_screen.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
@@ -20,11 +20,15 @@ class PurchaseOrderCard extends StatefulWidget {
     super.key,
     required this.order,
     required this.controller,
+    required this.isExpanded,
+    required this.onTap,
     required this.onDelete,
   });
 
   final PurchaseOrderListDm order;
   final PurchaseOrderListController controller;
+  final bool isExpanded;
+  final VoidCallback onTap;
   final VoidCallback onDelete;
 
   @override
@@ -32,8 +36,6 @@ class PurchaseOrderCard extends StatefulWidget {
 }
 
 class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
-  bool isExpanded = false;
-
   @override
   Widget build(BuildContext context) {
     final bool tablet = AppScreenUtils.isTablet(context);
@@ -58,14 +60,12 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            if (!isExpanded) {
+            if (!widget.isExpanded) {
               await widget.controller.getOrderDetailsForCard(
                 widget.order.invNo,
               );
             }
-            setState(() {
-              isExpanded = !isExpanded;
-            });
+            widget.onTap();
           },
           borderRadius: BorderRadius.circular(tablet ? 14 : 12),
           child: Padding(
@@ -138,48 +138,48 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                       ),
                     ),
 
-                    if (!widget.order.authorize) ...[
-                      tablet ? AppSpaces.h8 : AppSpaces.h6, // Add this spacing
-                      Material(
-                        color: kColorPrimary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(tablet ? 10 : 8),
-                        child: InkWell(
-                          onTap: () async {
-                            await widget.controller.getOrderDetailsForCard(
-                              widget.order.invNo,
-                            );
-                            Get.to(
-                              () => PurchaseOrderScreen(
-                                order: widget.order,
-                                orderDetails: widget.controller.orderDetails
-                                    .toList(),
-                              ),
-                            );
-                          },
-                          borderRadius: BorderRadius.circular(tablet ? 10 : 8),
-                          child: Container(
-                            padding: tablet
-                                ? AppPaddings.combined(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  )
-                                : AppPaddings.combined(
-                                    horizontal: 10,
-                                    vertical: 6,
-                                  ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.edit_rounded,
-                                  size: tablet ? 18 : 16,
-                                  color: kColorPrimary,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    // if (!widget.order.authorize) ...[
+                    //   tablet ? AppSpaces.h8 : AppSpaces.h6,
+                    //   Material(
+                    //     color: kColorPrimary.withOpacity(0.1),
+                    //     borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                    //     child: InkWell(
+                    //       onTap: () async {
+                    //         await widget.controller.getOrderDetailsForCard(
+                    //           widget.order.invNo,
+                    //         );
+                    //         Get.to(
+                    //           () => PurchaseOrderScreen(
+                    //             order: widget.order,
+                    //             orderDetails: widget.controller.orderDetails
+                    //                 .toList(),
+                    //           ),
+                    //         );
+                    //       },
+                    //       borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                    //       child: Container(
+                    //         padding: tablet
+                    //             ? AppPaddings.combined(
+                    //                 horizontal: 12,
+                    //                 vertical: 8,
+                    //               )
+                    //             : AppPaddings.combined(
+                    //                 horizontal: 10,
+                    //                 vertical: 6,
+                    //               ),
+                    //         child: Row(
+                    //           children: [
+                    //             Icon(
+                    //               Icons.edit_rounded,
+                    //               size: tablet ? 18 : 16,
+                    //               color: kColorPrimary,
+                    //             ),
+                    //           ],
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ],
                     AppSpaces.h8,
                     if (widget.controller.isAdmin.value) ...[
                       Material(
@@ -212,18 +212,13 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
                 Divider(height: 1, color: kColorLightGrey.withOpacity(0.5)),
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
-                _buildInfoRow(
-                  label: 'Party',
-                  value: widget.order.pName,
-                  tablet: tablet,
-                ),
-                tablet ? AppSpaces.v12 : AppSpaces.v10,
+
                 Row(
                   children: [
                     Expanded(
                       child: _buildInfoRow(
-                        label: 'Godown',
-                        value: widget.order.gdName,
+                        label: 'Party',
+                        value: widget.order.pName,
                         tablet: tablet,
                       ),
                     ),
@@ -233,16 +228,6 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                         label: 'Site',
                         value: widget.order.siteName,
                         tablet: tablet,
-                      ),
-                    ),
-                    tablet ? AppSpaces.h12 : AppSpaces.h8,
-                    AnimatedRotation(
-                      turns: isExpanded ? 0.5 : 0,
-                      duration: const Duration(milliseconds: 300),
-                      child: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        size: tablet ? 28 : 24,
-                        color: kColorPrimary,
                       ),
                     ),
                   ],
@@ -257,31 +242,50 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                 ],
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildInfoRow(
+                      label: 'Total Amount',
+                      value: '₹ ${widget.order.amount.toStringAsFixed(2)}',
+                      tablet: tablet,
+                    ),
+                    tablet ? AppSpaces.h12 : AppSpaces.h8,
+                    AnimatedRotation(
+                      turns: widget.isExpanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 300),
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: tablet ? 28 : 24,
+                        color: kColorPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                tablet ? AppSpaces.v12 : AppSpaces.v10,
+                Row(
                   children: [
                     Container(
                       padding: tablet
                           ? AppPaddings.combined(horizontal: 12, vertical: 6)
                           : AppPaddings.combined(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: widget.order.authorize
-                            ? kColorGreen.withOpacity(0.1)
-                            : kColorSecondary.withOpacity(0.1),
+                        color: _getStatusColor(
+                          widget.order.poStatus,
+                        ).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                          color: widget.order.authorize
-                              ? kColorGreen.withOpacity(0.3)
-                              : kColorSecondary.withOpacity(0.3),
+                          color: _getStatusColor(
+                            widget.order.poStatus,
+                          ).withOpacity(0.3),
                         ),
                       ),
                       child: Text(
-                        widget.order.authorize ? 'Authorized' : 'Pending',
+                        widget.order.poStatus,
                         style: TextStyles.kMediumOutfit(
                           fontSize: tablet
                               ? FontSizes.k14FontSize
                               : FontSizes.k12FontSize,
-                          color: widget.order.authorize
-                              ? kColorGreen
-                              : kColorSecondary,
+                          color: _getStatusColor(widget.order.poStatus),
                         ),
                       ),
                     ),
@@ -461,88 +465,292 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                                               ),
                                             ),
                                           ),
-                                          child: Row(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              Container(
-                                                width: tablet ? 4 : 3,
-                                                height: tablet ? 24 : 20,
-                                                decoration: BoxDecoration(
-                                                  color: kColorPrimary,
-                                                  borderRadius:
-                                                      BorderRadius.circular(2),
-                                                ),
-                                              ),
-                                              tablet
-                                                  ? AppSpaces.h10
-                                                  : AppSpaces.h8,
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      indent.indentInvNo,
-                                                      style: TextStyles.kMediumOutfit(
-                                                        fontSize: tablet
-                                                            ? FontSizes
-                                                                  .k12FontSize
-                                                            : FontSizes
-                                                                  .k12FontSize,
-                                                        color:
-                                                            kColorTextPrimary,
-                                                      ),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
+                                              Row(
+                                                children: [
+                                                  Container(
+                                                    width: tablet ? 4 : 3,
+                                                    height: tablet ? 24 : 20,
+                                                    decoration: BoxDecoration(
+                                                      color: kColorPrimary,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            2,
+                                                          ),
                                                     ),
-                                                    AppSpaces.v2,
-                                                    Row(
+                                                  ),
+                                                  tablet
+                                                      ? AppSpaces.h10
+                                                      : AppSpaces.h8,
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: [
                                                         Text(
-                                                          indent.unit,
-                                                          style: TextStyles.kRegularOutfit(
+                                                          indent.indentInvNo,
+                                                          style: TextStyles.kMediumOutfit(
                                                             fontSize: tablet
                                                                 ? FontSizes
-                                                                      .k10FontSize
+                                                                      .k12FontSize
                                                                 : FontSizes
-                                                                      .k10FontSize,
+                                                                      .k12FontSize,
                                                             color:
-                                                                kColorDarkGrey,
+                                                                kColorTextPrimary,
                                                           ),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                         ),
-                                                        Padding(
-                                                          padding:
-                                                              AppPaddings.combined(
-                                                                horizontal: 6,
-                                                                vertical: 0,
+                                                        AppSpaces.v2,
+                                                        Row(
+                                                          children: [
+                                                            Text(
+                                                              indent.unit,
+                                                              style: TextStyles.kRegularOutfit(
+                                                                fontSize: tablet
+                                                                    ? FontSizes
+                                                                          .k10FontSize
+                                                                    : FontSizes
+                                                                          .k10FontSize,
+                                                                color:
+                                                                    kColorDarkGrey,
                                                               ),
-                                                          child: Container(
-                                                            width: 3,
-                                                            height: 3,
-                                                            decoration:
-                                                                BoxDecoration(
+                                                            ),
+                                                            Padding(
+                                                              padding:
+                                                                  AppPaddings.combined(
+                                                                    horizontal:
+                                                                        6,
+                                                                    vertical: 0,
+                                                                  ),
+                                                              child: Container(
+                                                                width: 3,
+                                                                height: 3,
+                                                                decoration: BoxDecoration(
                                                                   color:
                                                                       kColorDarkGrey,
                                                                   shape: BoxShape
                                                                       .circle,
                                                                 ),
-                                                          ),
+                                                              ),
+                                                            ),
+                                                            Text(
+                                                              'Qty: ${indent.orderQty.toStringAsFixed(2)}',
+                                                              style: TextStyles.kMediumOutfit(
+                                                                fontSize: tablet
+                                                                    ? FontSizes
+                                                                          .k10FontSize
+                                                                    : FontSizes
+                                                                          .k10FontSize,
+                                                                color:
+                                                                    kColorPrimary,
+                                                              ),
+                                                            ),
+                                                            if (indent.price !=
+                                                                null) ...[
+                                                              Padding(
+                                                                padding:
+                                                                    AppPaddings.combined(
+                                                                      horizontal:
+                                                                          6,
+                                                                      vertical:
+                                                                          0,
+                                                                    ),
+                                                                child: Container(
+                                                                  width: 3,
+                                                                  height: 3,
+                                                                  decoration: BoxDecoration(
+                                                                    color:
+                                                                        kColorDarkGrey,
+                                                                    shape: BoxShape
+                                                                        .circle,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              Text(
+                                                                'Rate: ₹${indent.price!.toStringAsFixed(2)}',
+                                                                style: TextStyles.kRegularOutfit(
+                                                                  fontSize:
+                                                                      tablet
+                                                                      ? FontSizes
+                                                                            .k10FontSize
+                                                                      : FontSizes
+                                                                            .k10FontSize,
+                                                                  color:
+                                                                      kColorDarkGrey,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ],
                                                         ),
+
+                                                        if (indent
+                                                            .reqDate
+                                                            .isNotEmpty) ...[
+                                                          AppSpaces.v2,
+                                                          Row(
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .calendar_today_rounded,
+                                                                size: tablet
+                                                                    ? 10
+                                                                    : 9,
+                                                                color:
+                                                                    kColorDarkGrey,
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 4,
+                                                              ),
+                                                              Text(
+                                                                'Req Date: ${convertyyyyMMddToddMMyyyy(indent.reqDate)}',
+                                                                style: TextStyles.kRegularOutfit(
+                                                                  fontSize:
+                                                                      tablet
+                                                                      ? FontSizes
+                                                                            .k10FontSize
+                                                                      : FontSizes
+                                                                            .k10FontSize,
+                                                                  color:
+                                                                      kColorDarkGrey,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+
+                                                        if (indent
+                                                            .gdName
+                                                            .isNotEmpty) ...[
+                                                          AppSpaces.v2,
+                                                          Row(
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .warehouse_outlined,
+                                                                size: tablet
+                                                                    ? 10
+                                                                    : 9,
+                                                                color:
+                                                                    kColorDarkGrey,
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 4,
+                                                              ),
+                                                              Text(
+                                                                'Head: ${indent.gdName}',
+                                                                style: TextStyles.kRegularOutfit(
+                                                                  fontSize:
+                                                                      tablet
+                                                                      ? FontSizes
+                                                                            .k10FontSize
+                                                                      : FontSizes
+                                                                            .k10FontSize,
+                                                                  color:
+                                                                      kColorDarkGrey,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                        if (indent
+                                                            .indentRemark
+                                                            .isNotEmpty) ...[
+                                                          AppSpaces.v2,
+                                                          Row(
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .notes_rounded,
+                                                                size: tablet
+                                                                    ? 10
+                                                                    : 9,
+                                                                color:
+                                                                    kColorDarkGrey,
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 4,
+                                                              ),
+                                                              Expanded(
+                                                                child: Text(
+                                                                  'Remark: ${indent.indentRemark}',
+                                                                  style: TextStyles.kRegularOutfit(
+                                                                    fontSize:
+                                                                        tablet
+                                                                        ? FontSizes
+                                                                              .k10FontSize
+                                                                        : FontSizes
+                                                                              .k10FontSize,
+                                                                    color:
+                                                                        kColorDarkGrey,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
                                                         Text(
-                                                          'Qty: ${indent.orderQty.toStringAsFixed(2)}',
+                                                          'Amt: ₹${indent.amount!.toStringAsFixed(2)}',
                                                           style: TextStyles.kMediumOutfit(
                                                             fontSize: tablet
                                                                 ? FontSizes
                                                                       .k10FontSize
                                                                 : FontSizes
                                                                       .k10FontSize,
-                                                            color:
-                                                                kColorPrimary,
+                                                            color: kColorGreen,
                                                           ),
                                                         ),
                                                       ],
                                                     ),
-                                                  ],
-                                                ),
+                                                  ),
+
+                                                  Material(
+                                                    color: kColorGreen
+                                                        .withOpacity(0.1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          tablet ? 6 : 5,
+                                                        ),
+                                                    child: InkWell(
+                                                      onTap: () {
+                                                        Get.to(
+                                                          () =>
+                                                              SiteWiseStockScreen(
+                                                                iCode:
+                                                                    item.iCode,
+                                                              ),
+                                                        );
+                                                      },
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            tablet ? 6 : 5,
+                                                          ),
+                                                      child: Container(
+                                                        padding: tablet
+                                                            ? AppPaddings.combined(
+                                                                horizontal: 8,
+                                                                vertical: 8,
+                                                              )
+                                                            : AppPaddings.combined(
+                                                                horizontal: 6,
+                                                                vertical: 6,
+                                                              ),
+                                                        child: Icon(
+                                                          Icons
+                                                              .visibility_rounded,
+                                                          size: tablet
+                                                              ? 16
+                                                              : 14,
+                                                          color: kColorGreen,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ],
                                           ),
@@ -558,7 +766,7 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                       }),
                     ],
                   ),
-                  crossFadeState: isExpanded
+                  crossFadeState: widget.isExpanded
                       ? CrossFadeState.showSecond
                       : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 300),
@@ -902,5 +1110,18 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
         ),
       ),
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'complete':
+        return kColorGreen;
+      case 'partial':
+        return kColorSecondary;
+      case 'pending':
+        return kColorSecondary;
+      default:
+        return kColorDarkGrey;
+    }
   }
 }

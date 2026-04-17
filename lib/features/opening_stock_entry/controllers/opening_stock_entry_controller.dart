@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:shivay_construction/features/godown_master/models/godown_master_dm.dart';
-import 'package:shivay_construction/features/godown_master/repos/godown_master_repo.dart';
 import 'package:shivay_construction/features/item_master/models/item_master_dm.dart';
 import 'package:shivay_construction/features/item_master/repos/item_master_list_repo.dart';
 import 'package:shivay_construction/features/opening_stock_entry/controllers/opening_stocks_controller.dart';
@@ -17,15 +15,11 @@ class OpeningStockEntryController extends GetxController {
   final openingStockItemFormKey = GlobalKey<FormState>();
 
   var dateController = TextEditingController();
-  var siteNameController = TextEditingController();
-
-  var godowns = <GodownMasterDm>[].obs;
-  var godownNames = <String>[].obs;
-  var selectedGodownName = ''.obs;
-  var selectedGodownCode = ''.obs;
-  var selectedSiteCode = ''.obs;
 
   var sites = <SiteMasterDm>[].obs;
+  var siteNames = <String>[].obs;
+  var selectedSiteName = ''.obs;
+  var selectedSiteCode = ''.obs;
 
   var items = <ItemMasterDm>[].obs;
   var itemNames = <String>[].obs;
@@ -50,6 +44,7 @@ class OpeningStockEntryController extends GetxController {
       isLoading.value = true;
       final fetchedSites = await SiteMasterListRepo.getSites();
       sites.assignAll(fetchedSites);
+      siteNames.assignAll(fetchedSites.map((s) => s.siteName).toList());
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
@@ -57,34 +52,10 @@ class OpeningStockEntryController extends GetxController {
     }
   }
 
-  Future<void> getGodowns() async {
-    try {
-      isLoading.value = true;
-      await getSites();
-      final fetchedGodowns = await GodownMasterRepo.getGodowns();
-      godowns.assignAll(fetchedGodowns);
-      godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
-    } catch (e) {
-      showErrorSnackbar('Error', e.toString());
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  void onGodownSelected(String? godownName) {
-    selectedGodownName.value = godownName!;
-    var selectedGodownObj = godowns.firstWhere((gd) => gd.gdName == godownName);
-    selectedGodownCode.value = selectedGodownObj.gdCode;
-    selectedSiteCode.value = selectedGodownObj.siteCode;
-
-    if (selectedGodownObj.siteCode.isNotEmpty) {
-      final site = sites.firstWhereOrNull(
-        (s) => s.siteCode == selectedGodownObj.siteCode,
-      );
-      siteNameController.text = site?.siteName ?? '';
-    } else {
-      siteNameController.clear();
-    }
+  void onSiteSelected(String? siteName) {
+    selectedSiteName.value = siteName!;
+    var selectedSiteObj = sites.firstWhere((s) => s.siteName == siteName);
+    selectedSiteCode.value = selectedSiteObj.siteCode;
   }
 
   Future<void> getItems() async {
@@ -186,7 +157,7 @@ class OpeningStockEntryController extends GetxController {
         invNo: invNo,
         date: formattedDate,
         siteCode: selectedSiteCode.value,
-        gdCode: selectedGodownCode.value,
+
         itemData: itemsToSend
             .map(
               (item) => {

@@ -19,18 +19,24 @@ import 'package:shivay_construction/widgets/app_button.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
 class IndentCard extends StatefulWidget {
-  const IndentCard({super.key, required this.indent, required this.controller});
+  const IndentCard({
+    super.key,
+    required this.indent,
+    required this.controller,
+    required this.isExpanded,
+    required this.onTap,
+  });
 
   final IndentDm indent;
   final IndentsController controller;
+  final bool isExpanded;
+  final VoidCallback onTap;
 
   @override
   State<IndentCard> createState() => _IndentCardState();
 }
 
 class _IndentCardState extends State<IndentCard> {
-  bool isExpanded = false;
-
   @override
   Widget build(BuildContext context) {
     final bool tablet = AppScreenUtils.isTablet(context);
@@ -55,14 +61,12 @@ class _IndentCardState extends State<IndentCard> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            if (!isExpanded) {
+            if (!widget.isExpanded) {
               await widget.controller.getIndentDetails(
                 invNo: widget.indent.invNo,
               );
             }
-            setState(() {
-              isExpanded = !isExpanded;
-            });
+            widget.onTap();
           },
           borderRadius: BorderRadius.circular(tablet ? 14 : 12),
           child: Padding(
@@ -139,7 +143,7 @@ class _IndentCardState extends State<IndentCard> {
                       ),
                     ),
                     AppSpaces.h8,
-                    if (!widget.indent.authorize)
+                    if (!widget.indent.authorize && !widget.indent.closeIndent)
                       Material(
                         color: kColorPrimary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(tablet ? 10 : 8),
@@ -180,9 +184,10 @@ class _IndentCardState extends State<IndentCard> {
                           ),
                         ),
                       ),
-                    if (!widget.indent.authorize) AppSpaces.h8,
+                    if (!widget.indent.authorize && !widget.indent.closeIndent)
+                      AppSpaces.h8,
                     AnimatedRotation(
-                      turns: isExpanded ? 0.5 : 0,
+                      turns: widget.isExpanded ? 0.5 : 0, // Changed here
                       duration: const Duration(milliseconds: 300),
                       child: Icon(
                         Icons.keyboard_arrow_down_rounded,
@@ -193,14 +198,16 @@ class _IndentCardState extends State<IndentCard> {
                   ],
                 ),
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
-                Divider(height: 1, color: kColorLightGrey.withOpacity(0.5)),
-                tablet ? AppSpaces.v16 : AppSpaces.v12,
-                _buildInfoRow(
-                  label: 'Godown',
-                  value: widget.indent.gdName,
-                  tablet: tablet,
+                Divider(
+                  height: 1,
+                  color: const Color.fromARGB(
+                    255,
+                    218,
+                    180,
+                    180,
+                  ).withOpacity(0.5),
                 ),
-                tablet ? AppSpaces.v12 : AppSpaces.v10,
+                tablet ? AppSpaces.v16 : AppSpaces.v12,
                 _buildInfoRow(
                   label: 'Site',
                   value: widget.indent.siteName,
@@ -216,27 +223,38 @@ class _IndentCardState extends State<IndentCard> {
                       decoration: BoxDecoration(
                         color: widget.indent.authorize
                             ? kColorGreen.withOpacity(0.1)
+                            : widget.indent.closeIndent
+                            ? kColorRed.withOpacity(0.1)
                             : kColorSecondary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
                           color: widget.indent.authorize
                               ? kColorGreen.withOpacity(0.3)
+                              : widget.indent.closeIndent
+                              ? kColorRed.withOpacity(0.3)
                               : kColorSecondary.withOpacity(0.3),
                         ),
                       ),
                       child: Text(
-                        widget.indent.authorize ? 'Authorized' : 'Pending',
+                        widget.indent.authorize
+                            ? 'Authorized'
+                            : widget.indent.closeIndent
+                            ? 'Closed'
+                            : 'Pending',
                         style: TextStyles.kMediumOutfit(
                           fontSize: tablet
                               ? FontSizes.k14FontSize
                               : FontSizes.k12FontSize,
                           color: widget.indent.authorize
                               ? kColorGreen
+                              : widget.indent.closeIndent
+                              ? kColorRed
                               : kColorSecondary,
                         ),
                       ),
                     ),
                     if (!widget.indent.authorize &&
+                        !widget.indent.closeIndent &&
                         widget.controller.canAuthorizeIndent.value) ...[
                       const Spacer(),
                       SizedBox(
@@ -252,6 +270,49 @@ class _IndentCardState extends State<IndentCard> {
                     ],
                   ],
                 ),
+                // Add Close Indent info text for pending indents only
+                if (!widget.indent.authorize && !widget.indent.closeIndent) ...[
+                  tablet ? AppSpaces.v12 : AppSpaces.v10,
+                  GestureDetector(
+                    onTap: () => _showCloseIndentDialog(context),
+                    child: Container(
+                      padding: tablet
+                          ? AppPaddings.combined(horizontal: 12, vertical: 8)
+                          : AppPaddings.combined(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: kColorRed.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: kColorRed.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: tablet ? 18 : 16,
+                            color: kColorRed,
+                          ),
+                          tablet ? AppSpaces.h8 : AppSpaces.h6,
+                          Expanded(
+                            child: Text(
+                              'Tap here to close this indent without authorization',
+                              style: TextStyles.kMediumOutfit(
+                                fontSize: tablet
+                                    ? FontSizes.k12FontSize
+                                    : FontSizes.k10FontSize,
+                                color: kColorRed,
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: tablet ? 14 : 12,
+                            color: kColorRed,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
                 AnimatedCrossFade(
                   firstChild: const SizedBox.shrink(),
                   secondChild: Column(
@@ -405,6 +466,15 @@ class _IndentCardState extends State<IndentCard> {
                                       ),
                                     ],
                                   ),
+                                  // ADD THIS AFTER THE ABOVE ROW:
+                                  if (detail.gdName.isNotEmpty) ...[
+                                    AppSpaces.v8,
+                                    _buildDetailRow(
+                                      label: 'Head',
+                                      value: detail.gdName,
+                                      tablet: tablet,
+                                    ),
+                                  ],
                                   AppSpaces.v8,
                                   Row(
                                     children: [
@@ -431,6 +501,14 @@ class _IndentCardState extends State<IndentCard> {
                                       ],
                                     ],
                                   ),
+                                  if (detail.remark.isNotEmpty) ...[
+                                    AppSpaces.v8,
+                                    _buildDetailRow(
+                                      label: 'Remark',
+                                      value: detail.remark,
+                                      tablet: tablet,
+                                    ),
+                                  ],
                                 ],
                               ),
                             );
@@ -439,7 +517,7 @@ class _IndentCardState extends State<IndentCard> {
                       }),
                     ],
                   ),
-                  crossFadeState: isExpanded
+                  crossFadeState: widget.isExpanded
                       ? CrossFadeState.showSecond
                       : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 300),
@@ -728,6 +806,156 @@ class _IndentCardState extends State<IndentCard> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showCloseIndentDialog(BuildContext context) {
+    final bool tablet = AppScreenUtils.isTablet(context);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(tablet ? 20 : 16),
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            width: tablet ? 400 : double.infinity,
+            constraints: BoxConstraints(
+              maxWidth: tablet ? 400 : MediaQuery.of(context).size.width * 0.9,
+            ),
+            decoration: BoxDecoration(
+              color: kColorWhite,
+              borderRadius: BorderRadius.circular(tablet ? 20 : 16),
+              boxShadow: [
+                BoxShadow(
+                  color: kColorRed.withOpacity(0.15),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: tablet
+                      ? AppPaddings.combined(horizontal: 24, vertical: 20)
+                      : AppPaddings.combined(horizontal: 20, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: kColorRed.withOpacity(0.08),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(tablet ? 20 : 16),
+                      topRight: Radius.circular(tablet ? 20 : 16),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: AppPaddings.p10,
+                        decoration: BoxDecoration(
+                          color: kColorRed.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(tablet ? 12 : 10),
+                        ),
+                        child: Icon(
+                          Icons.close_rounded,
+                          color: kColorRed,
+                          size: tablet ? 26 : 22,
+                        ),
+                      ),
+                      tablet ? AppSpaces.h12 : AppSpaces.h10,
+                      Expanded(
+                        child: Text(
+                          'Close Indent',
+                          style: TextStyles.kSemiBoldOutfit(
+                            fontSize: tablet
+                                ? FontSizes.k22FontSize
+                                : FontSizes.k18FontSize,
+                            color: kColorTextPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: tablet ? AppPaddings.p24 : AppPaddings.p20,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Are you sure you want to close this indent without authorization?',
+                        style: TextStyles.kRegularOutfit(
+                          fontSize: tablet
+                              ? FontSizes.k16FontSize
+                              : FontSizes.k14FontSize,
+                          color: kColorDarkGrey,
+                        ),
+                      ),
+                      tablet ? AppSpaces.v24 : AppSpaces.v20,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(
+                                  color: kColorLightGrey,
+                                  width: 1.5,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    tablet ? 12 : 10,
+                                  ),
+                                ),
+                                padding: AppPaddings.combined(
+                                  vertical: tablet ? 16 : 14,
+                                  horizontal: 0,
+                                ),
+                              ),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyles.kMediumOutfit(
+                                  color: kColorDarkGrey,
+                                  fontSize: tablet
+                                      ? FontSizes.k16FontSize
+                                      : FontSizes.k14FontSize,
+                                ),
+                              ),
+                            ),
+                          ),
+                          tablet ? AppSpaces.h16 : AppSpaces.h12,
+                          Expanded(
+                            child: AppButton(
+                              title: 'Close',
+                              buttonColor: kColorRed,
+                              titleColor: kColorWhite,
+                              titleSize: tablet
+                                  ? FontSizes.k16FontSize
+                                  : FontSizes.k14FontSize,
+                              buttonHeight: tablet ? 54 : 48,
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop();
+                                widget.controller.closeIndent(
+                                  invNo: widget.indent.invNo,
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -4,18 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:shivay_construction/features/godown_master/models/godown_master_dm.dart';
-import 'package:shivay_construction/features/godown_master/repos/godown_master_repo.dart';
 import 'package:shivay_construction/features/party_masters/models/party_master_dm.dart';
 import 'package:shivay_construction/features/party_masters/repos/party_master_list_repo.dart';
 import 'package:shivay_construction/features/purchase_order_entry/controllers/purchase_order_list_controller.dart';
 import 'package:shivay_construction/features/purchase_order_entry/models/auth_indent_item_dm.dart';
 import 'package:shivay_construction/features/purchase_order_entry/repos/purchase_order_repo.dart';
-import 'package:shivay_construction/features/site_master/models/site_master_dm.dart';
-import 'package:shivay_construction/features/site_master/repos/site_master_list_repo.dart';
 import 'package:shivay_construction/services/api_service.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
+import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../godown_master/repos/godown_master_repo.dart';
 
 class PurchaseOrderController extends GetxController {
   var isLoading = false.obs;
@@ -24,19 +23,13 @@ class PurchaseOrderController extends GetxController {
   var dateController = TextEditingController();
   var remarksController = TextEditingController();
 
-  var godowns = <GodownMasterDm>[].obs;
-  var godownNames = <String>[].obs;
-  var selectedGodownName = ''.obs;
-  var selectedGodownCode = ''.obs;
+  var selectedSiteName = ''.obs;
   var selectedSiteCode = ''.obs;
-  var siteNameController = TextEditingController();
 
   var parties = <PartyMasterDm>[].obs;
   var partyNames = <String>[].obs;
   var selectedPartyName = ''.obs;
   var selectedPartyCode = ''.obs;
-
-  var sites = <SiteMasterDm>[].obs;
 
   var attachmentFiles = <PlatformFile>[].obs;
   var existingAttachmentUrls = <String>[].obs;
@@ -53,58 +46,23 @@ class PurchaseOrderController extends GetxController {
 
   var qtyControllers = <String, TextEditingController>{}.obs;
   var priceControllers = <String, TextEditingController>{}.obs;
+  var dateControllers = <String, TextEditingController>{}.obs;
 
-  Future<void> getSites() async {
-    try {
-      isLoading.value = true;
-      final fetchedSites = await SiteMasterListRepo.getSites();
-      sites.assignAll(fetchedSites);
-    } catch (e) {
-      showErrorSnackbar('Error', e.toString());
-    } finally {
-      isLoading.value = false;
-    }
-  }
+  var godowns = <dynamic>[].obs;
+  var godownNames = <String>[].obs;
+  var selectedGodownName = <String, String>{}.obs;
+  var selectedGodownCode = <String, String>{}.obs;
+  var remarkControllers = <String, TextEditingController>{}.obs;
 
-  Future<void> getGodowns() async {
-    try {
-      isLoading.value = true;
-      await getSites();
-      final fetchedGodowns = await GodownMasterRepo.getGodowns();
-      godowns.assignAll(fetchedGodowns);
-      godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
-    } catch (e) {
-      showErrorSnackbar('Error', e.toString());
-    } finally {
-      isLoading.value = false;
-    }
-  }
+  var lockedSiteCode = ''.obs;
+  var lockedSiteName = ''.obs;
 
-  void onGodownSelected(String? godownName) {
-    selectedGodownName.value = godownName!;
-    var selectedGodownObj = godowns.firstWhere((gd) => gd.gdName == godownName);
-
-    bool isGodownChanging =
-        selectedGodownCode.value.isNotEmpty &&
-        selectedGodownCode.value != selectedGodownObj.gdCode;
-
-    selectedGodownCode.value = selectedGodownObj.gdCode;
-    selectedSiteCode.value = selectedGodownObj.siteCode;
-
-    if (isGodownChanging && selectedPurchaseItems.isNotEmpty) {
-      selectedPurchaseItems.clear();
-      
-      authIndentItems.clear();
-    }
-
-    if (selectedGodownObj.siteCode.isNotEmpty) {
-      final site = sites.firstWhereOrNull(
-        (s) => s.siteCode == selectedGodownObj.siteCode,
-      );
-      siteNameController.text = site?.siteName ?? '';
-    } else {
-      siteNameController.clear();
-    }
+  void onPartySelected(String? partyName) {
+    selectedPartyName.value = partyName!;
+    var selectedPartyObj = parties.firstWhere(
+      (p) => p.accountName == partyName,
+    );
+    selectedPartyCode.value = selectedPartyObj.pCode;
   }
 
   Future<void> getParties() async {
@@ -120,12 +78,25 @@ class PurchaseOrderController extends GetxController {
     }
   }
 
-  void onPartySelected(String? partyName) {
-    selectedPartyName.value = partyName!;
-    var selectedPartyObj = parties.firstWhere(
-      (p) => p.accountName == partyName,
-    );
-    selectedPartyCode.value = selectedPartyObj.pCode;
+  Future<void> getGodowns() async {
+    isLoading.value = true;
+    try {
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(siteCode: '');
+      godowns.assignAll(fetchedGodowns);
+      godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void onGodownSelected(String key, String? godownName) {
+    selectedGodownName[key] = godownName ?? '';
+    final obj = godowns.firstWhereOrNull((gd) => gd.gdName == godownName);
+    selectedGodownCode[key] = obj?.gdCode ?? '';
+    selectedGodownName.refresh();
+    selectedGodownCode.refresh();
   }
 
   Future<void> pickFromCamera() async {
@@ -135,18 +106,15 @@ class PurchaseOrderController extends GetxController {
         source: ImageSource.camera,
         imageQuality: 85,
       );
-
       if (photo != null) {
         final File file = File(photo.path);
         final bytes = await file.readAsBytes();
-
         final platformFile = PlatformFile(
           name: photo.name,
           size: bytes.length,
           path: photo.path,
           bytes: bytes,
         );
-
         attachmentFiles.add(platformFile);
       }
     } catch (e) {
@@ -171,7 +139,6 @@ class PurchaseOrderController extends GetxController {
           'xlsx',
         ],
       );
-
       if (result != null) {
         attachmentFiles.addAll(result.files);
       }
@@ -180,18 +147,13 @@ class PurchaseOrderController extends GetxController {
     }
   }
 
-  void removeFile(int index) {
-    attachmentFiles.removeAt(index);
-  }
-
-  void removeExistingAttachment(int index) {
-    existingAttachmentUrls.removeAt(index);
-  }
+  void removeFile(int index) => attachmentFiles.removeAt(index);
+  void removeExistingAttachment(int index) =>
+      existingAttachmentUrls.removeAt(index);
 
   Future<void> openAttachment(String fileUrl) async {
     String url =
         '${ApiService.kBaseUrl.replaceAll('/api', '')}/${fileUrl.replaceAll('\\', '/')}';
-
     try {
       final Uri uri = Uri.parse(url);
       if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
@@ -210,112 +172,199 @@ class PurchaseOrderController extends GetxController {
     return '${parts[2]}-${parts[1]}-${parts[0]}';
   }
 
-  void openItemSelectionScreen() {
-    if (purchaseOrderFormKey.currentState!.validate()) {
-      currentStep.value = 1;
-      getAuthIndentItems();
+  void proceedToForm() {
+    if (selectedPurchaseItems.isEmpty) {
+      showErrorSnackbar('Error', 'Please select at least one indent');
+      return;
     }
+    currentStep.value = 1;
   }
 
-  void previousStep() {
-    if (currentStep.value == 1) {
-      currentStep.value = 0;
-    }
+  void goBackToSelection() {
+    currentStep.value = 0;
   }
 
-  void preselectExistingItems() {
-    for (var selectedItem in selectedPurchaseItems) {
-      for (var item in authIndentItems) {
-        if (item.iCode == selectedItem['ICode']) {
-          if (selectedItem['iName'] == null || selectedItem['iName'].isEmpty) {
-            selectedItem['iName'] = item.iName;
-          }
+  bool toggleIndentSelection(int itemIndex, int indentIndex) {
+    final indent = authIndentItems[itemIndex].items[indentIndex];
 
-          for (var indent in item.indents) {
-            if (indent.indentNo == selectedItem['IndentNo'] &&
-                indent.indentSrNo == selectedItem['IndentSrNo']) {
-              indent.isSelected = true;
+    if (lockedSiteCode.value.isEmpty) {
+      lockedSiteCode.value = indent.siteCode;
+      lockedSiteName.value = indent.siteName;
+    } else if (indent.siteCode != lockedSiteCode.value) {
+      showErrorSnackbar(
+        'Site Mismatch',
+        'You can only select indents from "${lockedSiteName.value}". Deselect all to change site.',
+      );
+      return false;
+    }
 
-              // Set controllers with existing values
-              final key = '${indent.indentNo}_${indent.indentSrNo}';
-              qtyControllers[key]?.text = selectedItem['Qty'].toStringAsFixed(
-                2,
-              );
-              priceControllers[key]?.text = (selectedItem['Price'] ?? 0.0)
-                  .toStringAsFixed(2);
-            }
-          }
+    indent.isSelected = !indent.isSelected;
+    authIndentItems.refresh();
+
+    _syncSelectedPurchaseItems();
+    _updateLockIfNoSelection();
+    _updateSelectionMode();
+    return true;
+  }
+
+  void enableSelectionMode(int itemIndex, int indentIndex) {
+    final indent = authIndentItems[itemIndex].items[indentIndex];
+    if (lockedSiteCode.value.isNotEmpty &&
+        indent.siteCode != lockedSiteCode.value) {
+      showErrorSnackbar(
+        'Site Mismatch',
+        'You can only select indents from "${lockedSiteName.value}".',
+      );
+      return;
+    }
+    if (lockedSiteCode.value.isEmpty) {
+      lockedSiteCode.value = indent.siteCode;
+      lockedSiteName.value = indent.siteName;
+    }
+    isSelectionMode.value = true;
+    indent.isSelected = true;
+    authIndentItems.refresh();
+    _syncSelectedPurchaseItems();
+    _updateSelectionMode();
+  }
+
+  void selectAllIndents() {
+    for (var item in authIndentItems) {
+      for (var indent in item.items) {
+        if (lockedSiteCode.value.isEmpty) {
+          lockedSiteCode.value = indent.siteCode;
+          lockedSiteName.value = indent.siteName;
+        }
+        if (indent.siteCode == lockedSiteCode.value) {
+          indent.isSelected = true;
         }
       }
     }
     authIndentItems.refresh();
-    selectedPurchaseItems.refresh();
+    _syncSelectedPurchaseItems();
+    _updateSelectionMode();
+  }
 
+  void deselectAllIndents() {
+    for (var item in authIndentItems) {
+      for (var indent in item.items) {
+        indent.isSelected = false;
+      }
+    }
+    authIndentItems.refresh();
+    lockedSiteCode.value = '';
+    lockedSiteName.value = '';
+    selectedPurchaseItems.clear();
+    isSelectionMode.value = false;
+  }
+
+  void _updateSelectionMode() {
     bool anySelected = authIndentItems.any(
-      (item) => item.indents.any((indent) => indent.isSelected),
+      (item) => item.items.any((indent) => indent.isSelected),
     );
     isSelectionMode.value = anySelected;
   }
 
-  void saveSelectedItems() {
-    final newSelectedItems = getSelectedIndentsData();
+  void _updateLockIfNoSelection() {
+    bool anySelected = authIndentItems.any(
+      (item) => item.items.any((indent) => indent.isSelected),
+    );
+    if (!anySelected) {
+      lockedSiteCode.value = '';
+      lockedSiteName.value = '';
+    }
+  }
 
-    for (var newItem in newSelectedItems) {
-      for (var authItem in authIndentItems) {
-        if (authItem.iCode == newItem['ICode']) {
-          newItem['iName'] = authItem.iName;
-          break;
-        }
-      }
-
-      bool exists = selectedPurchaseItems.any(
-        (item) =>
-            item['IndentNo'] == newItem['IndentNo'] &&
-            item['IndentSrNo'] == newItem['IndentSrNo'],
-      );
-
-      if (!exists) {
-        selectedPurchaseItems.add(newItem);
-      } else {
-        // Update existing item
-        int index = selectedPurchaseItems.indexWhere(
-          (item) =>
-              item['IndentNo'] == newItem['IndentNo'] &&
-              item['IndentSrNo'] == newItem['IndentSrNo'],
-        );
-        if (index != -1) {
-          selectedPurchaseItems[index]['Qty'] = newItem['Qty'];
-          selectedPurchaseItems[index]['Price'] = newItem['Price'];
+  void _syncSelectedPurchaseItems() {
+    selectedPurchaseItems.clear();
+    int srNo = 1;
+    for (var item in authIndentItems) {
+      for (var indent in item.items) {
+        if (indent.isSelected) {
+          final key = '${item.indentNo}_${indent.indentSrNo}';
+          _ensureControllers(key, indent);
+          selectedPurchaseItems.add({
+            'SrNo': srNo++,
+            'ICode': indent.iCode,
+            'iName': indent.iName,
+            'Unit': 'Nos',
+            'Qty':
+                double.tryParse(qtyControllers[key]?.text ?? '') ??
+                indent.authoriseQty,
+            'Price':
+                double.tryParse(priceControllers[key]?.text ?? '') ??
+                indent.rate,
+            'IndentNo': item.indentNo,
+            'IndentSrNo': indent.indentSrNo,
+            'ReqDate':
+                dateControllers[key]?.text ??
+                convertyyyyMMddToddMMyyyy(indent.reqDate),
+            'GDCode': selectedGodownCode[key] ?? indent.gCode,
+            'GDName': selectedGodownName[key] ?? indent.gdName,
+            'IndentRemark': remarkControllers[key]?.text ?? indent.indentRemark,
+            'SiteCode': indent.siteCode,
+            'SiteName': indent.siteName,
+          });
         }
       }
     }
-
-    for (int i = 0; i < selectedPurchaseItems.length; i++) {
-      selectedPurchaseItems[i]['SrNo'] = i + 1;
-    }
-
-    currentStep.value = 0;
-    deselectAllIndents();
     selectedPurchaseItems.refresh();
+
+    if (lockedSiteCode.value.isNotEmpty) {
+      selectedSiteCode.value = lockedSiteCode.value;
+      selectedSiteName.value = lockedSiteName.value;
+    }
+  }
+
+  void _ensureControllers(String key, IndentDm indent) {
+    if (!qtyControllers.containsKey(key)) {
+      qtyControllers[key] = TextEditingController(
+        text: indent.authoriseQty.toStringAsFixed(2),
+      );
+    }
+    if (!priceControllers.containsKey(key)) {
+      priceControllers[key] = TextEditingController(
+        text: indent.rate.toStringAsFixed(2),
+      );
+    }
+    if (!dateControllers.containsKey(key)) {
+      dateControllers[key] = TextEditingController(
+        text: convertyyyyMMddToddMMyyyy(indent.reqDate),
+      );
+    }
+    if (!selectedGodownCode.containsKey(key)) {
+      selectedGodownCode[key] = indent.gCode;
+      selectedGodownName[key] = indent.gdName;
+    }
+    if (!remarkControllers.containsKey(key)) {
+      remarkControllers[key] = TextEditingController(text: indent.indentRemark);
+    }
   }
 
   void removeSelectedItem(int index) {
+    final item = selectedPurchaseItems[index];
+    for (var authItem in authIndentItems) {
+      for (var indent in authItem.items) {
+        if (authItem.indentNo == item['IndentNo'] &&
+            indent.indentSrNo == item['IndentSrNo']) {
+          indent.isSelected = false;
+        }
+      }
+    }
+    authIndentItems.refresh();
     selectedPurchaseItems.removeAt(index);
-
     for (int i = 0; i < selectedPurchaseItems.length; i++) {
       selectedPurchaseItems[i]['SrNo'] = i + 1;
     }
-
     selectedPurchaseItems.refresh();
+    _updateLockIfNoSelection();
+    _updateSelectionMode();
   }
 
   Future<void> getAuthIndentItems() async {
     isLoading.value = true;
     try {
-      final fetchedItems = await PurchaseOrderRepo.getAuthIndentItems(
-        siteCode: selectedSiteCode.value,
-        gdCode: selectedGodownCode.value,
-      );
+      final fetchedItems = await PurchaseOrderRepo.getAuthIndentItems();
       authIndentItems.assignAll(fetchedItems);
 
       expandedItemIndices.clear();
@@ -323,29 +372,81 @@ class PurchaseOrderController extends GetxController {
         expandedItemIndices.add(i);
       }
 
-      // Initialize controllers for all indents
       for (var item in fetchedItems) {
-        for (var indent in item.indents) {
-          final key = '${indent.indentNo}_${indent.indentSrNo}';
-
+        for (var indent in item.items) {
+          final key = '${item.indentNo}_${indent.indentSrNo}';
           if (!qtyControllers.containsKey(key)) {
             qtyControllers[key] = TextEditingController(
               text: indent.authoriseQty.toStringAsFixed(2),
             );
           }
-
           if (!priceControllers.containsKey(key)) {
-            priceControllers[key] = TextEditingController(text: '0.00');
+            priceControllers[key] = TextEditingController(
+              text: indent.rate.toStringAsFixed(2),
+            );
+          }
+          if (!dateControllers.containsKey(key)) {
+            dateControllers[key] = TextEditingController(
+              text: convertyyyyMMddToddMMyyyy(indent.reqDate),
+            );
+          }
+          if (!selectedGodownCode.containsKey(key)) {
+            selectedGodownCode[key] = indent.gCode;
+            selectedGodownName[key] = indent.gdName;
+          }
+          if (!remarkControllers.containsKey(key)) {
+            remarkControllers[key] = TextEditingController(
+              text: indent.indentRemark,
+            );
           }
         }
       }
 
-      preselectExistingItems();
+      await getGodowns();
+
+      _reapplySelectionsFromItems();
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void _reapplySelectionsFromItems() {
+    for (var selectedItem in selectedPurchaseItems) {
+      for (var item in authIndentItems) {
+        for (var indent in item.items) {
+          if (item.indentNo == selectedItem['IndentNo'] &&
+              indent.indentSrNo == selectedItem['IndentSrNo']) {
+            indent.isSelected = true;
+            final key = '${item.indentNo}_${indent.indentSrNo}';
+            qtyControllers[key]?.text = selectedItem['Qty'].toStringAsFixed(2);
+            priceControllers[key]?.text = (selectedItem['Price'] ?? 0.0)
+                .toStringAsFixed(2);
+            if (selectedItem.containsKey('ReqDate')) {
+              dateControllers[key]?.text = selectedItem['ReqDate'];
+            }
+            if (selectedItem.containsKey('GDCode')) {
+              selectedGodownCode[key] = selectedItem['GDCode'] ?? '';
+              final obj = godowns.firstWhereOrNull(
+                (gd) => gd.gdCode == selectedItem['GDCode'],
+              );
+              selectedGodownName[key] =
+                  obj?.gdName ?? selectedItem['GDName'] ?? '';
+            }
+            if (selectedItem.containsKey('IndentRemark')) {
+              remarkControllers[key]?.text = selectedItem['IndentRemark'] ?? '';
+            }
+            if (lockedSiteCode.value.isEmpty) {
+              lockedSiteCode.value = indent.siteCode;
+              lockedSiteName.value = indent.siteName;
+            }
+          }
+        }
+      }
+    }
+    authIndentItems.refresh();
+    _updateSelectionMode();
   }
 
   void toggleItemExpansion(int index) {
@@ -354,43 +455,6 @@ class PurchaseOrderController extends GetxController {
     } else {
       expandedItemIndices.add(index);
     }
-  }
-
-  void toggleIndentSelection(int itemIndex, int indentIndex) {
-    authIndentItems[itemIndex].indents[indentIndex].isSelected =
-        !authIndentItems[itemIndex].indents[indentIndex].isSelected;
-    authIndentItems.refresh();
-
-    bool anySelected = authIndentItems.any(
-      (item) => item.indents.any((indent) => indent.isSelected),
-    );
-    isSelectionMode.value = anySelected;
-  }
-
-  void enableSelectionMode(int itemIndex, int indentIndex) {
-    isSelectionMode.value = true;
-    authIndentItems[itemIndex].indents[indentIndex].isSelected = true;
-    authIndentItems.refresh();
-  }
-
-  void selectAllIndents() {
-    for (var item in authIndentItems) {
-      for (var indent in item.indents) {
-        indent.isSelected = true;
-      }
-    }
-    authIndentItems.refresh();
-    isSelectionMode.value = true;
-  }
-
-  void deselectAllIndents() {
-    for (var item in authIndentItems) {
-      for (var indent in item.indents) {
-        indent.isSelected = false;
-      }
-    }
-    authIndentItems.refresh();
-    isSelectionMode.value = false;
   }
 
   void updateSelectedItemQty(int index, double qty) {
@@ -407,57 +471,50 @@ class PurchaseOrderController extends GetxController {
     }
   }
 
-  List<Map<String, dynamic>> getSelectedIndentsData() {
-    List<Map<String, dynamic>> selectedData = [];
-    int srNo = 1;
-
-    for (var item in authIndentItems) {
-      for (var indent in item.indents) {
-        if (indent.isSelected) {
-          final key = '${indent.indentNo}_${indent.indentSrNo}';
-          final qty =
-              double.tryParse(qtyControllers[key]?.text ?? '') ??
-              indent.authoriseQty;
-          final price =
-              double.tryParse(priceControllers[key]?.text ?? '') ?? 0.0;
-
-          selectedData.add({
-            'SrNo': srNo,
-            'ICode': item.iCode,
-            'Unit': 'Nos',
-            'Qty': qty,
-            'Price': price,
-            'IndentNo': indent.indentNo,
-            'IndentSrNo': indent.indentSrNo,
-          });
-          srNo++;
-        }
-      }
-    }
-
-    return selectedData;
-  }
-
   final PurchaseOrderListController purchaseOrderListController =
       Get.find<PurchaseOrderListController>();
 
   Future<void> savePurchaseOrder() async {
+    if (!purchaseOrderFormKey.currentState!.validate()) return;
     isLoading.value = true;
-
     try {
       if (selectedPurchaseItems.isEmpty) {
         showErrorSnackbar('Error', 'Please add at least one item');
         return;
       }
+      for (var item in selectedPurchaseItems) {
+        if (item['Price'] == null || item['Price'] <= 0) {
+          showErrorSnackbar(
+            'Error',
+            'Price must be greater than 0 for all items',
+          );
+          return;
+        }
+      }
+
+      final itemsToSave = selectedPurchaseItems.map((item) {
+        final key = '${item['IndentNo']}_${item['IndentSrNo']}';
+        return {
+          ...item,
+          'Qty':
+              double.tryParse(qtyControllers[key]?.text ?? '') ?? item['Qty'],
+          'Price':
+              double.tryParse(priceControllers[key]?.text ?? '') ??
+              item['Price'],
+          'ReqDate': dateControllers[key]?.text ?? item['ReqDate'],
+          'GDCode': selectedGodownCode[key] ?? item['GDCode'] ?? '',
+          'IndentRemark':
+              remarkControllers[key]?.text ?? item['IndentRemark'] ?? '',
+        };
+      }).toList();
 
       var response = await PurchaseOrderRepo.savePurchaseOrder(
         invNo: isEditMode.value ? currentInvNo.value : '',
         date: _convertToApiDateFormat(dateController.text),
-        gdCode: selectedGodownCode.value,
         pCode: selectedPartyCode.value,
         remarks: remarksController.text.trim(),
         siteCode: selectedSiteCode.value,
-        itemData: selectedPurchaseItems.toList(),
+        itemData: itemsToSave,
         newFiles: attachmentFiles.toList(),
         existingAttachments: existingAttachmentUrls.toList(),
       );
@@ -484,28 +541,41 @@ class PurchaseOrderController extends GetxController {
     currentInvNo.value = '';
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
     remarksController.clear();
-    siteNameController.clear();
 
-    selectedGodownName.value = '';
-    selectedGodownCode.value = '';
+    selectedSiteName.value = '';
     selectedSiteCode.value = '';
     selectedPartyName.value = '';
     selectedPartyCode.value = '';
+    lockedSiteCode.value = '';
+    lockedSiteName.value = '';
 
     attachmentFiles.clear();
     existingAttachmentUrls.clear();
     authIndentItems.clear();
     selectedPurchaseItems.clear();
 
-    // Dispose controllers
-    for (var controller in qtyControllers.values) {
-      controller.dispose();
+    for (var c in remarkControllers.values) {
+      c.dispose();
     }
-    for (var controller in priceControllers.values) {
-      controller.dispose();
+    for (var c in qtyControllers.values) {
+      c.dispose();
     }
+    for (var c in priceControllers.values) {
+      c.dispose();
+    }
+    for (var c in dateControllers.values) {
+      c.dispose();
+    }
+
+    remarkControllers.clear();
     qtyControllers.clear();
     priceControllers.clear();
+    dateControllers.clear();
+
+    selectedGodownName.clear();
+    selectedGodownCode.clear();
+    godowns.clear();
+    godownNames.clear();
 
     currentStep.value = 0;
     isEditMode.value = false;

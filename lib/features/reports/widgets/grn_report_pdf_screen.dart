@@ -106,7 +106,7 @@ class GrnReportPdfScreen {
       'GRN Date',
       'Party Name',
       'Site Name',
-      'Godown Name',
+      'Head',
       'Item Name',
       'Unit',
       'GRN Qty',

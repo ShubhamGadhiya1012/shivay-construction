@@ -31,6 +31,7 @@ class ItemMasterCard extends StatelessWidget {
     required String label,
     required String value,
     required bool tablet,
+    Color? valueColor,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,7 +48,7 @@ class ItemMasterCard extends StatelessWidget {
           value,
           style: TextStyles.kSemiBoldOutfit(
             fontSize: tablet ? FontSizes.k15FontSize : FontSizes.k14FontSize,
-            color: kColorTextPrimary,
+            color: valueColor ?? kColorTextPrimary,
           ),
         ),
       ],
@@ -86,6 +87,7 @@ class ItemMasterCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // ── Header Row ──
                 Row(
                   children: [
                     Expanded(
@@ -119,6 +121,7 @@ class ItemMasterCard extends StatelessWidget {
                       ),
                     ),
                     tablet ? AppSpaces.h12 : AppSpaces.h8,
+                    // Edit Button
                     Material(
                       color: kColorPrimary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(tablet ? 10 : 8),
@@ -135,24 +138,10 @@ class ItemMasterCard extends StatelessWidget {
                                   horizontal: 10,
                                   vertical: 6,
                                 ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.edit_rounded,
-                                size: tablet ? 18 : 16,
-                                color: kColorPrimary,
-                              ),
-                              AppSpaces.h6,
-                              Text(
-                                'Edit',
-                                style: TextStyles.kSemiBoldOutfit(
-                                  fontSize: tablet
-                                      ? FontSizes.k15FontSize
-                                      : FontSizes.k14FontSize,
-                                  color: kColorPrimary,
-                                ),
-                              ),
-                            ],
+                          child: Icon(
+                            Icons.edit_rounded,
+                            size: tablet ? 18 : 16,
+                            color: kColorPrimary,
                           ),
                         ),
                       ),
@@ -199,6 +188,7 @@ class ItemMasterCard extends StatelessWidget {
                 Divider(height: 1, color: kColorLightGrey.withOpacity(0.5)),
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
 
+                // ── Always Visible: Rate, Unit ──
                 Row(
                   children: [
                     Expanded(
@@ -219,6 +209,33 @@ class ItemMasterCard extends StatelessWidget {
                   ],
                 ),
 
+                // ── Rent Item Badge (always visible if rentItem true) ──
+                if (item.rentItem) ...[
+                  tablet ? AppSpaces.v12 : AppSpaces.v8,
+                  Container(
+                    padding: tablet
+                        ? AppPaddings.combined(horizontal: 12, vertical: 6)
+                        : AppPaddings.combined(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: kColorSecondary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: kColorSecondary.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Text(
+                      'Rent Item',
+                      style: TextStyles.kMediumOutfit(
+                        fontSize: tablet
+                            ? FontSizes.k14FontSize
+                            : FontSizes.k12FontSize,
+                        color: kColorSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+
+                // ── Expanded Section ──
                 AnimatedCrossFade(
                   firstChild: const SizedBox.shrink(),
                   secondChild: Column(
@@ -226,6 +243,17 @@ class ItemMasterCard extends StatelessWidget {
                     children: [
                       tablet ? AppSpaces.v12 : AppSpaces.v10,
 
+                      // HSN No
+                      if (item.hsnNo.isNotEmpty) ...[
+                        _buildInfoRow(
+                          label: 'HSN No',
+                          value: item.hsnNo,
+                          tablet: tablet,
+                        ),
+                        tablet ? AppSpaces.v12 : AppSpaces.v10,
+                      ],
+
+                      // Category
                       if (item.cName.isNotEmpty) ...[
                         _buildInfoRow(
                           label: 'Category',
@@ -235,6 +263,7 @@ class ItemMasterCard extends StatelessWidget {
                         tablet ? AppSpaces.v12 : AppSpaces.v10,
                       ],
 
+                      // Item Group & Sub Group
                       if (item.igName.isNotEmpty || item.icName.isNotEmpty) ...[
                         Row(
                           children: [
@@ -257,6 +286,49 @@ class ItemMasterCard extends StatelessWidget {
                                   tablet: tablet,
                                 ),
                               ),
+                          ],
+                        ),
+                        tablet ? AppSpaces.v12 : AppSpaces.v10,
+                      ],
+
+                      // Rent Details (only if rentItem is true)
+                      if (item.rentItem) ...[
+                        Divider(
+                          height: 1,
+                          color: kColorLightGrey.withOpacity(0.5),
+                        ),
+                        tablet ? AppSpaces.v12 : AppSpaces.v10,
+                        Text(
+                          'Rent Details',
+                          style: TextStyles.kSemiBoldOutfit(
+                            fontSize: tablet
+                                ? FontSizes.k16FontSize
+                                : FontSizes.k14FontSize,
+                            color: kColorTextPrimary,
+                          ),
+                        ),
+                        tablet ? AppSpaces.v12 : AppSpaces.v8,
+                        Row(
+                          children: [
+                            if (item.frequency.isNotEmpty)
+                              Expanded(
+                                child: _buildInfoRow(
+                                  label: 'Frequency',
+                                  value: item.frequency,
+                                  tablet: tablet,
+                                  valueColor: kColorPrimary,
+                                ),
+                              ),
+                            if (item.frequency.isNotEmpty)
+                              tablet ? AppSpaces.h16 : AppSpaces.h12,
+                            Expanded(
+                              child: _buildInfoRow(
+                                label: 'Rent Rate',
+                                value: '₹${item.rentRate.toStringAsFixed(2)}',
+                                tablet: tablet,
+                                valueColor: kColorPrimary,
+                              ),
+                            ),
                           ],
                         ),
                       ],
@@ -373,9 +445,7 @@ class ItemMasterCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: () {
-                              Get.back();
-                            },
+                            onPressed: () => Get.back(),
                             style: OutlinedButton.styleFrom(
                               side: BorderSide(
                                 color: kColorLightGrey,
