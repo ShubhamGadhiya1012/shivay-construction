@@ -257,6 +257,8 @@ class PoOrderCard extends StatelessWidget {
                         (controller.selectedPoGodownName[key] ?? '').isNotEmpty
                         ? controller.selectedPoGodownName[key]
                         : null,
+                    fillColor: kColorLightGrey,
+                    enabled: false,
                   );
                 }),
                 tablet ? AppSpaces.v12 : AppSpaces.v10,

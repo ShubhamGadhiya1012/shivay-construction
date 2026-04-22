@@ -388,8 +388,11 @@ class GrnEntryController extends GetxController {
       final fetchedGodowns = await GodownMasterRepo.getGodowns(
         siteCode: siteCode,
       );
-      godowns.assignAll(fetchedGodowns);
-      godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
+      final parentGodowns = fetchedGodowns
+          .where((gd) => !gd.isSubGodown)
+          .toList();
+      godowns.assignAll(parentGodowns);
+      godownNames.assignAll(parentGodowns.map((gd) => gd.gdName).toList());
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {

@@ -19,7 +19,7 @@ class GodownMasterController extends GetxController {
 
   var siteNames = <String>[].obs;
   var selectedSiteName = ''.obs;
-
+  var isSubGodown = false.obs;
   @override
   void onInit() async {
     super.onInit();
@@ -103,6 +103,7 @@ class GodownMasterController extends GetxController {
     required String gdCode,
     required String gdName,
     required String siteCode,
+    required bool isSubGodown,
   }) async {
     isLoading.value = true;
     try {
@@ -110,7 +111,9 @@ class GodownMasterController extends GetxController {
         gdCode: gdCode,
         gdName: gdName,
         siteCode: siteCode,
+        isSubGodown: isSubGodown,
       );
+      // ... rest unchanged
 
       if (response != null && response.containsKey('message')) {
         String message = response['message'];

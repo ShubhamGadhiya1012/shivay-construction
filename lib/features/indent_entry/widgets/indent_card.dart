@@ -480,7 +480,7 @@ class _IndentCardState extends State<IndentCard> {
                                     children: [
                                       Expanded(
                                         child: _buildDetailRow(
-                                          label: 'Req. Date',
+                                          label: 'Required Date',
                                           value: convertyyyyMMddToddMMyyyy(
                                             detail.reqDate,
                                           ),

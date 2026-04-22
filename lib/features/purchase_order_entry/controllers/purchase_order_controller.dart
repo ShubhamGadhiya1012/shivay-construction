@@ -78,12 +78,17 @@ class PurchaseOrderController extends GetxController {
     }
   }
 
-  Future<void> getGodowns() async {
-    isLoading.value = true;
+  Future<void> getGodowns([String siteCode = '']) async {
     try {
-      final fetchedGodowns = await GodownMasterRepo.getGodowns(siteCode: '');
-      godowns.assignAll(fetchedGodowns);
-      godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
+      isLoading.value = true;
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(
+        siteCode: siteCode,
+      );
+      final parentGodowns = fetchedGodowns
+          .where((gd) => !gd.isSubGodown)
+          .toList();
+      godowns.assignAll(parentGodowns);
+      godownNames.assignAll(parentGodowns.map((gd) => gd.gdName).toList());
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {

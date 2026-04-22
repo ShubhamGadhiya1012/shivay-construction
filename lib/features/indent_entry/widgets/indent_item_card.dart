@@ -67,7 +67,7 @@ class IndentItemCard extends StatelessWidget {
                         item['ReqDate'].toString().isNotEmpty) ...[
                       tablet ? AppSpaces.v10 : AppSpaces.v8,
                       _buildDetailRow(
-                        label: 'Request Date',
+                        label: 'Required Date',
                         value: convertyyyyMMddToddMMyyyy(item['ReqDate']),
                         tablet: tablet,
                       ),

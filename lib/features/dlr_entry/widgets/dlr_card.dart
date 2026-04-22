@@ -55,6 +55,33 @@ class DlrCard extends StatelessWidget {
     );
   }
 
+  Widget _buildDetailColumn({
+    required String label,
+    required String value,
+    required bool tablet,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyles.kRegularOutfit(
+            fontSize: tablet ? FontSizes.k12FontSize : FontSizes.k10FontSize,
+            color: kColorDarkGrey,
+          ),
+        ),
+        AppSpaces.v2,
+        Text(
+          value,
+          style: TextStyles.kMediumOutfit(
+            fontSize: tablet ? FontSizes.k14FontSize : FontSizes.k12FontSize,
+            color: kColorTextPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool tablet = AppScreenUtils.isTablet(context);
@@ -87,6 +114,7 @@ class DlrCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Header row
                 Row(
                   children: [
                     Expanded(
@@ -132,14 +160,10 @@ class DlrCard extends StatelessWidget {
                                   horizontal: 10,
                                   vertical: 6,
                                 ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.edit_rounded,
-                                size: tablet ? 18 : 16,
-                                color: kColorPrimary,
-                              ),
-                            ],
+                          child: Icon(
+                            Icons.edit_rounded,
+                            size: tablet ? 18 : 16,
+                            color: kColorPrimary,
                           ),
                         ),
                       ),
@@ -181,20 +205,14 @@ class DlrCard extends StatelessWidget {
                     ),
                   ],
                 ),
+
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
                 Divider(height: 1, color: kColorLightGrey.withOpacity(0.5)),
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
 
+                // Shift & Site
                 Row(
                   children: [
-                    Expanded(
-                      child: _buildInfoRow(
-                        label: 'Party',
-                        value: dlr.vendorName,
-                        tablet: tablet,
-                      ),
-                    ),
-                    tablet ? AppSpaces.h16 : AppSpaces.h12,
                     Expanded(
                       child: _buildInfoRow(
                         label: 'Shift',
@@ -202,91 +220,157 @@ class DlrCard extends StatelessWidget {
                         tablet: tablet,
                       ),
                     ),
+                    if (dlr.siteName.isNotEmpty) ...[
+                      tablet ? AppSpaces.h16 : AppSpaces.h12,
+                      Expanded(
+                        child: _buildInfoRow(
+                          label: 'Site',
+                          value: dlr.siteName,
+                          tablet: tablet,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
 
-                if (dlr.siteName.isNotEmpty) ...[
-                  tablet ? AppSpaces.v12 : AppSpaces.v10,
-                  _buildInfoRow(
-                    label: 'Site',
-                    value: dlr.siteName,
-                    tablet: tablet,
+                // Entries count badge
+                tablet ? AppSpaces.v12 : AppSpaces.v10,
+                Container(
+                  padding: tablet
+                      ? AppPaddings.combined(horizontal: 10, vertical: 5)
+                      : AppPaddings.combined(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: kColorPrimary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: kColorPrimary.withOpacity(0.3)),
                   ),
-                ],
+                  child: Text(
+                    '${dlr.dlrData.length} ${dlr.dlrData.length == 1 ? 'Party Entry' : 'Party Entries'}',
+                    style: TextStyles.kMediumOutfit(
+                      fontSize: tablet
+                          ? FontSizes.k14FontSize
+                          : FontSizes.k12FontSize,
+                      color: kColorPrimary,
+                    ),
+                  ),
+                ),
 
-                if (dlr.gdName.isNotEmpty || dlr.supervisorName.isNotEmpty) ...[
-                  tablet ? AppSpaces.v12 : AppSpaces.v10,
-                  Row(
-                    children: [
-                      if (dlr.gdName.isNotEmpty)
-                        Expanded(
-                          child: _buildInfoRow(
-                            label: 'Godown',
-                            value: dlr.gdName,
-                            tablet: tablet,
-                          ),
-                        ),
-                      if (dlr.gdName.isNotEmpty &&
-                          dlr.supervisorName.isNotEmpty)
-                        tablet ? AppSpaces.h16 : AppSpaces.h12,
-                      if (dlr.supervisorName.isNotEmpty)
-                        Expanded(
-                          child: _buildInfoRow(
-                            label: 'Supervisor',
-                            value: dlr.supervisorName,
-                            tablet: tablet,
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
+                // Expanded details
                 AnimatedCrossFade(
                   firstChild: const SizedBox.shrink(),
                   secondChild: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      tablet ? AppSpaces.v12 : AppSpaces.v10,
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildInfoRow(
-                              label: 'Skill',
-                              value: dlr.skill.toStringAsFixed(2),
-                              tablet: tablet,
-                            ),
-                          ),
-                          tablet ? AppSpaces.h16 : AppSpaces.h12,
-                          Expanded(
-                            child: _buildInfoRow(
-                              label: 'Skill Rate',
-                              value: dlr.skillRate.toStringAsFixed(2),
-                              tablet: tablet,
-                            ),
-                          ),
-                        ],
+                      tablet ? AppSpaces.v16 : AppSpaces.v12,
+                      Divider(
+                        height: 1,
+                        color: kColorLightGrey.withOpacity(0.5),
                       ),
-                      tablet ? AppSpaces.v12 : AppSpaces.v10,
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildInfoRow(
-                              label: 'Unskill',
-                              value: dlr.unSkill.toStringAsFixed(2),
-                              tablet: tablet,
-                            ),
-                          ),
-                          tablet ? AppSpaces.h16 : AppSpaces.h12,
-                          Expanded(
-                            child: _buildInfoRow(
-                              label: 'Unskill Rate',
-                              value: dlr.unSkillRate.toStringAsFixed(2),
-                              tablet: tablet,
-                            ),
-                          ),
-                        ],
+                      tablet ? AppSpaces.v16 : AppSpaces.v12,
+                      Text(
+                        'Party Entries',
+                        style: TextStyles.kSemiBoldOutfit(
+                          fontSize: tablet
+                              ? FontSizes.k18FontSize
+                              : FontSizes.k16FontSize,
+                          color: kColorTextPrimary,
+                        ),
                       ),
+                      tablet ? AppSpaces.v12 : AppSpaces.v8,
+                      ...dlr.dlrData.map((data) {
+                        return Container(
+                          margin: AppPaddings.custom(bottom: 8),
+                          padding: tablet ? AppPaddings.p12 : AppPaddings.p10,
+                          decoration: BoxDecoration(
+                            color: kColorPrimary.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: kColorPrimary.withOpacity(0.2),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                data.vendorName.isNotEmpty
+                                    ? data.vendorName
+                                    : data.pCode,
+                                style: TextStyles.kSemiBoldOutfit(
+                                  fontSize: tablet
+                                      ? FontSizes.k15FontSize
+                                      : FontSizes.k14FontSize,
+                                  color: kColorPrimary,
+                                ),
+                              ),
+                              tablet ? AppSpaces.v8 : AppSpaces.v6,
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildDetailColumn(
+                                      label: 'Skill',
+                                      value: data.skill.toStringAsFixed(2),
+                                      tablet: tablet,
+                                    ),
+                                  ),
+                                  AppSpaces.h8,
+                                  Expanded(
+                                    child: _buildDetailColumn(
+                                      label: 'Skill Rate',
+                                      value: data.skillRate.toStringAsFixed(2),
+                                      tablet: tablet,
+                                    ),
+                                  ),
+                                  AppSpaces.h8,
+                                  Expanded(
+                                    child: _buildDetailColumn(
+                                      label: 'Unskill',
+                                      value: data.unSkill.toStringAsFixed(2),
+                                      tablet: tablet,
+                                    ),
+                                  ),
+                                  AppSpaces.h8,
+                                  Expanded(
+                                    child: _buildDetailColumn(
+                                      label: 'Unskill Rate',
+                                      value: data.unSkillRate.toStringAsFixed(
+                                        2,
+                                      ),
+                                      tablet: tablet,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (data.activity.isNotEmpty ||
+                                  data.supervisorName.isNotEmpty) ...[
+                                tablet ? AppSpaces.v8 : AppSpaces.v6,
+                                Row(
+                                  children: [
+                                    if (data.activity.isNotEmpty)
+                                      Expanded(
+                                        child: _buildDetailColumn(
+                                          label: 'Activity',
+                                          value: data.activity,
+                                          tablet: tablet,
+                                        ),
+                                      ),
+                                    if (data.activity.isNotEmpty &&
+                                        data.supervisorName.isNotEmpty)
+                                      AppSpaces.h8,
+                                    if (data.supervisorName.isNotEmpty)
+                                      Expanded(
+                                        child: _buildDetailColumn(
+                                          label: 'Supervisor',
+                                          value: data.supervisorName,
+                                          tablet: tablet,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ],
+                          ),
+                        );
+                      }),
                     ],
                   ),
                   crossFadeState: isExpanded
@@ -400,9 +484,7 @@ class DlrCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: () {
-                              Get.back();
-                            },
+                            onPressed: () => Get.back(),
                             style: OutlinedButton.styleFrom(
                               side: BorderSide(
                                 color: kColorLightGrey,

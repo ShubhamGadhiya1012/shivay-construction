@@ -32,11 +32,7 @@ class _DlrListScreenState extends State<DlrListScreen> {
 
   void _handleCardTap(int index) {
     setState(() {
-      if (expandedIndex == index) {
-        expandedIndex = null;
-      } else {
-        expandedIndex = index;
-      }
+      expandedIndex = expandedIndex == index ? null : index;
     });
   }
 
@@ -132,9 +128,7 @@ class _DlrListScreenState extends State<DlrListScreen> {
                         color: kColorPrimary,
                         strokeWidth: 2.5,
                         onRefresh: () async {
-                          setState(() {
-                            expandedIndex = null;
-                          });
+                          setState(() => expandedIndex = null);
                           await _controller.getDlrList();
                         },
                         child: NotificationListener<ScrollNotification>(
@@ -244,7 +238,7 @@ class _DlrListScreenState extends State<DlrListScreen> {
         return Padding(
           padding: mediaQuery.viewInsets,
           child: SizedBox(
-            height: mediaQuery.size.height * 0.6,
+            height: mediaQuery.size.height * 0.4,
             child: Stack(
               children: [
                 Padding(
@@ -265,26 +259,6 @@ class _DlrListScreenState extends State<DlrListScreen> {
                           ),
                         ),
                         tablet ? AppSpaces.v16 : AppSpaces.v12,
-
-                        Obx(
-                          () => AppDropdown(
-                            items: _controller.partyNames,
-                            selectedItem:
-                                _controller.selectedPartyName.value.isNotEmpty
-                                ? _controller.selectedPartyName.value
-                                : null,
-                            hintText: 'Party',
-                            onChanged: _controller.onPartySelected,
-                            clearButtonProps: ClearButtonProps(
-                              isVisible: _controller
-                                  .selectedPartyName
-                                  .value
-                                  .isNotEmpty,
-                            ),
-                          ),
-                        ),
-                        tablet ? AppSpaces.v16 : AppSpaces.v12,
-
                         Obx(
                           () => AppDropdown(
                             items: _controller.siteNames,
@@ -297,25 +271,6 @@ class _DlrListScreenState extends State<DlrListScreen> {
                             clearButtonProps: ClearButtonProps(
                               isVisible:
                                   _controller.selectedSiteName.value.isNotEmpty,
-                            ),
-                          ),
-                        ),
-                        tablet ? AppSpaces.v12 : AppSpaces.v8,
-
-                        Obx(
-                          () => AppDropdown(
-                            items: _controller.godownNames,
-                            selectedItem:
-                                _controller.selectedGodownName.value.isNotEmpty
-                                ? _controller.selectedGodownName.value
-                                : null,
-                            hintText: 'Godown',
-                            onChanged: _controller.onGodownSelected,
-                            clearButtonProps: ClearButtonProps(
-                              isVisible: _controller
-                                  .selectedGodownName
-                                  .value
-                                  .isNotEmpty,
                             ),
                           ),
                         ),

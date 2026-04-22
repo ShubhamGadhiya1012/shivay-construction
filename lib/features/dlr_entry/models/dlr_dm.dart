@@ -1,75 +1,99 @@
-class DlrDm {
-  final String invno;
-  final String date;
-  final String pcode;
+class DlrDataDm {
+  final String pCode;
   final String vendorName;
-  final String shift;
   final double skill;
   final double skillRate;
   final double unSkill;
   final double unSkillRate;
-  final String siteCode;
-  final String siteName;
-  final String gdCode;
-  final String gdName;
+  final String activity;
   final int supervisor;
   final String supervisorName;
+  final String remark;
 
-  DlrDm({
-    required this.invno,
-    required this.date,
-    required this.pcode,
+  DlrDataDm({
+    required this.pCode,
     required this.vendorName,
-    required this.shift,
     required this.skill,
     required this.skillRate,
     required this.unSkill,
     required this.unSkillRate,
-    required this.siteCode,
-    required this.siteName,
-    required this.gdCode,
-    required this.gdName,
+    required this.activity,
     required this.supervisor,
     required this.supervisorName,
+    required this.remark,
   });
 
-  factory DlrDm.fromJson(Map<String, dynamic> json) {
-    return DlrDm(
-      invno: json['Invno'] ?? '',
-      date: json['Date'] ?? '',
-      pcode: json['Pcode'] ?? '',
-      vendorName: json['VendorName'] ?? '',
-      shift: json['Shift'] ?? '',
-      skill: (json['Skill'] as num?)?.toDouble() ?? 0.0,
-      skillRate: (json['SkillRate'] as num?)?.toDouble() ?? 0.0,
-      unSkill: (json['UnSkill'] as num?)?.toDouble() ?? 0.0,
-      unSkillRate: (json['UnSkillRate'] as num?)?.toDouble() ?? 0.0,
-      siteCode: json['SiteCode'] ?? '',
-      siteName: json['SiteName'] ?? '',
-      gdCode: json['GDCode'] ?? '',
-      gdName: json['GDName'] ?? '',
-      supervisor: json['Supervisor'] ?? 0,
-      supervisorName: json['SuperisorName'] ?? '',
+  factory DlrDataDm.fromJson(Map<String, dynamic> json) {
+    return DlrDataDm(
+      pCode: json['pCode'] ?? '',
+      vendorName: json['vendorName'] ?? '',
+      skill: (json['skill'] as num?)?.toDouble() ?? 0.0,
+      skillRate: (json['skillRate'] as num?)?.toDouble() ?? 0.0,
+      unSkill: (json['unSkill'] as num?)?.toDouble() ?? 0.0,
+      unSkillRate: (json['unSkillRate'] as num?)?.toDouble() ?? 0.0,
+      activity: json['activity'] ?? '',
+      supervisor: json['supervisor'] ?? 0,
+      supervisorName: json['supervisorName'] ?? '',
+      remark: json['remark'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'Invno': invno,
-      'Date': date,
-      'Pcode': pcode,
-      'VendorName': vendorName,
-      'Shift': shift,
-      'Skill': skill,
-      'SkillRate': skillRate,
-      'UnSkill': unSkill,
-      'UnSkillRate': unSkillRate,
-      'SiteCode': siteCode,
-      'SiteName': siteName,
-      'GDCode': gdCode,
-      'GDName': gdName,
-      'Supervisor': supervisor,
-      'SupervisorName': supervisorName,
+      'pCode': pCode,
+      'vendorName': vendorName,
+      'skill': skill,
+      'skillRate': skillRate,
+      'unSkill': unSkill,
+      'unSkillRate': unSkillRate,
+      'activity': activity,
+      'supervisor': supervisor,
+      'supervisorName': supervisorName,
+      'remark': remark,
+    };
+  }
+}
+
+class DlrDm {
+  final String invno;
+  final String date;
+  final String shift;
+  final String siteCode;
+  final String siteName;
+  final List<DlrDataDm> dlrData;
+
+  DlrDm({
+    required this.invno,
+    required this.date,
+    required this.shift,
+    required this.siteCode,
+    required this.siteName,
+    required this.dlrData,
+  });
+
+  factory DlrDm.fromJson(Map<String, dynamic> json) {
+    return DlrDm(
+      invno: json['invno'] ?? '',
+      date: json['date'] ?? '',
+      shift: json['shift'] ?? '',
+      siteCode: json['siteCode'] ?? '',
+      siteName: json['siteName'] ?? '',
+      dlrData:
+          (json['dlrData'] as List<dynamic>?)
+              ?.map((item) => DlrDataDm.fromJson(item))
+              .toList() ??
+          [],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'invno': invno,
+      'date': date,
+      'shift': shift,
+      'siteCode': siteCode,
+      'siteName': siteName,
+      'dlrData': dlrData.map((d) => d.toJson()).toList(),
     };
   }
 }

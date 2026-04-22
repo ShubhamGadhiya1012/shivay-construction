@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String kBaseUrl =
-      'http://192.168.0.145:5209/api'; // Dhruvilbhai Debugging
+  // static const String kBaseUrl =
+  // 'http://192.168.0.145:5209/api'; // Dhruvilbhai Debugging
   // static const String kBaseUrl =
   //     'http://192.168.0.145:5020/api'; // Dhruvilbhai Local
   // static const String kBaseUrl = 'http://160.187.80.215:8080/api'; // Live
@@ -13,7 +13,7 @@ class ApiService {
   // static const String kBaseUrl =
   //     'http://94.249.151.81:8081/api'; // New Client URL
 
-  // static const String kBaseUrl = 'http://shivayapp.jineecs.in/api'; // Plesk URL
+  static const String kBaseUrl = 'http://shivayapp.jineecs.in/api'; // Plesk URL
 
   static Future<dynamic> getRequest({
     String? endpoint,
