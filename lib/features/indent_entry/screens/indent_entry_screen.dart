@@ -776,9 +776,9 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
                       children: [
                         AppDatePickerTextFormField(
                           dateController: _controller.reqDateController,
-                          hintText: 'Request Date *',
+                          hintText: 'Required Date *',
                           validator: (value) => value == null || value.isEmpty
-                              ? 'Please select request date'
+                              ? 'Please select Required date'
                               : null,
                         ),
                         tablet ? AppSpaces.v16 : AppSpaces.v12,

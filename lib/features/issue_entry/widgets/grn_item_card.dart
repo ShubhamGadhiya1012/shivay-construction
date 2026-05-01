@@ -3,53 +3,49 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
-import 'package:shivay_construction/features/grn_entry/controllers/grn_entry_controller.dart';
-import 'package:shivay_construction/features/grn_entry/models/po_auth_item_dm.dart';
+import 'package:shivay_construction/features/issue_entry/controllers/issue_entry_controller.dart';
+import 'package:shivay_construction/features/issue_entry/models/grn_item_dm.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
-import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
 import 'package:shivay_construction/widgets/app_dropdown.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
-class PoOrderCard extends StatelessWidget {
-  const PoOrderCard({
+class GrnItemCardForIssue extends StatelessWidget {
+  const GrnItemCardForIssue({
     super.key,
+    required this.grn,
     required this.item,
-    required this.order,
     required this.controller,
   });
 
-  final PoAuthItemDm item;
-  final PoOrderDm order;
-  final GrnEntryController controller;
+  final GrnItemForIssueDm grn;
+  final GrnItemDetailDm item;
+  final IssueEntryController controller;
 
   @override
   Widget build(BuildContext context) {
     final bool tablet = AppScreenUtils.isTablet(context);
-    final key = '${order.poInvNo}_${order.poSrNo}';
+    final key = '${grn.grnInvNo}_${item.grnSrNo}';
 
     return Obx(() {
-      final isSelected = controller.isPoOrderSelected(
-        order.poInvNo,
-        order.poSrNo,
-      );
+      final isSelected = controller.isItemSelected(grn.grnInvNo, item.grnSrNo);
       final qtyController = controller.qtyControllers[key];
       if (qtyController == null) return const SizedBox.shrink();
 
       return GestureDetector(
         onTap: () {
           if (controller.isInSelectionMode.value) {
-            controller.togglePoOrderSelection(item, order);
+            controller.toggleItemSelection(grn, item);
           }
         },
         onLongPress: () {
           if (!controller.isInSelectionMode.value) {
             controller.isInSelectionMode.value = true;
           }
-          controller.togglePoOrderSelection(item, order);
+          controller.toggleItemSelection(grn, item);
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -84,7 +80,7 @@ class PoOrderCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          order.poInvNo,
+                          item.iName,
                           style: TextStyles.kSemiBoldOutfit(
                             fontSize: tablet
                                 ? FontSizes.k16FontSize
@@ -95,19 +91,9 @@ class PoOrderCard extends StatelessWidget {
                           ),
                         ),
                         AppSpaces.v4,
-                        Text(
-                          'Date: ${convertyyyyMMddToddMMyyyy(order.poDate)}',
-                          style: TextStyles.kRegularOutfit(
-                            fontSize: tablet
-                                ? FontSizes.k12FontSize
-                                : FontSizes.k10FontSize,
-                            color: kColorDarkGrey,
-                          ),
-                        ),
-                        if (!isSelected && order.gdName.isNotEmpty) ...[
-                          AppSpaces.v2,
+                        if (!isSelected && item.gdName.isNotEmpty) ...[
                           Text(
-                            'Head: ${order.gdName}',
+                            'Head: ${item.gdName}',
                             style: TextStyles.kRegularOutfit(
                               fontSize: tablet
                                   ? FontSizes.k12FontSize
@@ -115,61 +101,20 @@ class PoOrderCard extends StatelessWidget {
                               color: kColorDarkGrey,
                             ),
                           ),
-                        ],
-                        if (!isSelected && order.poRemark.isNotEmpty) ...[
                           AppSpaces.v2,
-                          Text(
-                            'Remark: ${order.poRemark}',
-                            style: TextStyles.kRegularOutfit(
-                              fontSize: tablet
-                                  ? FontSizes.k12FontSize
-                                  : FontSizes.k10FontSize,
-                              color: kColorDarkGrey,
-                            ),
-                          ),
                         ],
-
-                        AppSpaces.v2,
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'SiteName : ${order.siteName} ',
-                                style: TextStyles.kRegularOutfit(
-                                  fontSize: tablet
-                                      ? FontSizes.k12FontSize
-                                      : FontSizes.k10FontSize,
-                                  color: kColorDarkGrey,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                'PartyName: ${order.pName}',
-                                style: TextStyles.kRegularOutfit(
-                                  fontSize: tablet
-                                      ? FontSizes.k12FontSize
-                                      : FontSizes.k10FontSize,
-                                  color: kColorDarkGrey,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),
                 ],
               ),
-
               tablet ? AppSpaces.v10 : AppSpaces.v8,
-
               Row(
                 children: [
                   Expanded(
                     child: _buildInfoColumn(
-                      label: 'PO Qty',
-                      value: order.poQty.toStringAsFixed(2),
+                      label: 'GRN Qty',
+                      value: item.grnQty.toStringAsFixed(2),
                       tablet: tablet,
                     ),
                   ),
@@ -184,8 +129,8 @@ class PoOrderCard extends StatelessWidget {
                   AppSpaces.h8,
                   Expanded(
                     child: _buildInfoColumn(
-                      label: 'Received',
-                      value: order.receivedQty.toStringAsFixed(2),
+                      label: 'Issued',
+                      value: item.issuedQty.toStringAsFixed(2),
                       tablet: tablet,
                       valueColor: kColorGreen,
                     ),
@@ -194,22 +139,22 @@ class PoOrderCard extends StatelessWidget {
                   Expanded(
                     child: _buildInfoColumn(
                       label: 'Pending',
-                      value: order.pendingQty.toStringAsFixed(2),
+                      value: item.pendingQty.toStringAsFixed(2),
                       tablet: tablet,
                       valueColor: kColorSecondary,
                     ),
                   ),
                 ],
               ),
-
               if (isSelected) ...[
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
 
+                // Issue Quantity field
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'GRN Quantity *',
+                      'Issue Quantity *',
                       style: TextStyles.kMediumOutfit(
                         fontSize: tablet
                             ? FontSizes.k14FontSize
@@ -220,15 +165,15 @@ class PoOrderCard extends StatelessWidget {
                     tablet ? AppSpaces.v6 : AppSpaces.v4,
                     AppTextFormField(
                       controller: qtyController,
-                      hintText: 'Enter GRN Qty',
+                      hintText: 'Enter Issue Qty',
                       keyboardType: TextInputType.number,
                       floatingLabelRequired: false,
                       onChanged: (value) {
                         final qty = double.tryParse(value);
                         if (qty != null) {
-                          controller.updateGrnQty(
-                            order.poInvNo,
-                            order.poSrNo,
+                          controller.updateIssueQty(
+                            grn.grnInvNo,
+                            item.grnSrNo,
                             qty,
                           );
                         }
@@ -236,7 +181,7 @@ class PoOrderCard extends StatelessWidget {
                     ),
                     tablet ? AppSpaces.v4 : AppSpaces.v2,
                     Text(
-                      'Max: ${order.pendingQty.toStringAsFixed(2)} ${item.unit}',
+                      'Max: ${item.pendingQty.toStringAsFixed(2)} ${item.unit}',
                       style: TextStyles.kRegularOutfit(
                         fontSize: tablet
                             ? FontSizes.k12FontSize
@@ -246,62 +191,22 @@ class PoOrderCard extends StatelessWidget {
                     ),
                   ],
                 ),
+
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
 
+                // Head (Godown) dropdown
                 Obx(() {
+                  final selectedName =
+                      controller.selectedItemGodownName[key] ?? '';
                   return AppDropdown(
                     items: controller.godownNames,
                     hintText: 'Head',
-                    onChanged: (val) => controller.onPoGodownSelected(key, val),
-                    selectedItem:
-                        (controller.selectedPoGodownName[key] ?? '').isNotEmpty
-                        ? controller.selectedPoGodownName[key]
-                        : null,
-                    fillColor: kColorLightGrey,
-                    enabled: false,
+                    onChanged: (val) =>
+                        controller.onItemGodownSelected(key, val),
+                    selectedItem: selectedName.isNotEmpty ? selectedName : null,
                   );
                 }),
-                tablet ? AppSpaces.v12 : AppSpaces.v10,
-
-                Builder(
-                  builder: (context) {
-                    final remarkController =
-                        controller.poRemarkControllers[key];
-                    if (remarkController == null) {
-                      return const SizedBox.shrink();
-                    }
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Remark',
-                          style: TextStyles.kMediumOutfit(
-                            fontSize: tablet
-                                ? FontSizes.k14FontSize
-                                : FontSizes.k12FontSize,
-                            color: kColorTextPrimary,
-                          ),
-                        ),
-                        tablet ? AppSpaces.v6 : AppSpaces.v4,
-                        AppTextFormField(
-                          controller: remarkController,
-                          hintText: 'Enter Remark',
-                          maxLines: 2,
-                          floatingLabelRequired: false,
-                          onChanged: (value) {
-                            if (controller.selectedPoOrders.containsKey(key)) {
-                              controller.selectedPoOrders[key]!['PORemark'] =
-                                  value;
-                              controller.selectedPoOrders.refresh();
-                            }
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                ),
               ],
-
               if (!isSelected) ...[
                 tablet ? AppSpaces.v8 : AppSpaces.v6,
                 Obx(

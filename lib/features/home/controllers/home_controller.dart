@@ -112,7 +112,23 @@ class HomeController extends GetxController {
         });
       }
     }
-
+    // Add this after the GRN Entry block
+    if (menuAccess.any(
+      (menu) =>
+          menu.menuName.toLowerCase() == 'entry' &&
+          menu.subMenu.any(
+            (sub) =>
+                sub.subMenuName.toLowerCase() == 'issue entry' &&
+                sub.subMenuAccess,
+          ),
+    )) {
+      actions.add({
+        'title': 'Issue Entry',
+        'icon': Icons
+            .output_rounded, // or Icons.logout_rounded / Icons.move_to_inbox_rounded
+        'submenu': 'issue entry',
+      });
+    }
     // Reports submenu items
     if (hasAccessToMenu('Reports')) {
       if (menuAccess.any(

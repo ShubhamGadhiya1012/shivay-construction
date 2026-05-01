@@ -12,6 +12,7 @@ import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
 import 'package:shivay_construction/widgets/app_appbar.dart';
 import 'package:shivay_construction/widgets/app_button.dart';
+import 'package:shivay_construction/widgets/app_checkbox_row.dart';
 import 'package:shivay_construction/widgets/app_dropdown.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
@@ -114,6 +115,7 @@ class GodownMasterScreen extends StatelessWidget {
                                 gdCode: godown.gdCode,
                                 initialName: godown.gdName,
                                 initialSiteCode: godown.siteCode,
+                                initialIsSubGodown: godown.isSubGodown,
                               ),
                               onDelete: () async {
                                 await _controller.deleteGodown(godown.gdCode);
@@ -174,9 +176,11 @@ class GodownMasterScreen extends StatelessWidget {
     String? gdCode,
     String? initialName,
     String? initialSiteCode,
+    bool? initialIsSubGodown,
   }) {
     final bool tablet = AppScreenUtils.isTablet(Get.context!);
     _controller.gdNameController.text = initialName ?? '';
+    _controller.isSubGodown.value = initialIsSubGodown ?? false;
 
     if (initialSiteCode != null) {
       final site = _controller.sites.firstWhereOrNull(
@@ -217,6 +221,7 @@ class GodownMasterScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // ── Header ──────────────────────────────────────────────
               Container(
                 padding: tablet
                     ? AppPaddings.combined(horizontal: 24, vertical: 20)
@@ -259,6 +264,8 @@ class GodownMasterScreen extends StatelessWidget {
                   ],
                 ),
               ),
+
+              // ── Body ────────────────────────────────────────────────
               Padding(
                 padding: tablet ? AppPaddings.p24 : AppPaddings.p20,
                 child: Form(
@@ -266,6 +273,7 @@ class GodownMasterScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Godown Name
                       AppTextFormField(
                         controller: _controller.gdNameController,
                         hintText: 'Godown name*',
@@ -278,6 +286,7 @@ class GodownMasterScreen extends StatelessWidget {
                       ),
                       tablet ? AppSpaces.v16 : AppSpaces.v10,
 
+                      // Site Dropdown
                       Obx(
                         () => AppDropdown(
                           hintText: 'Select Site',
@@ -291,8 +300,21 @@ class GodownMasterScreen extends StatelessWidget {
                           },
                         ),
                       ),
+                      tablet ? AppSpaces.v16 : AppSpaces.v10,
+
+                      // Sub Godown Checkbox
+                      Obx(
+                        () => AppCheckboxRow(
+                          title: 'Sub Godown',
+                          value: _controller.isSubGodown.value,
+                          onChanged: () => _controller.isSubGodown.value =
+                              !_controller.isSubGodown.value,
+                        ),
+                      ),
 
                       tablet ? AppSpaces.v24 : AppSpaces.v20,
+
+                      // Action Buttons
                       Row(
                         children: [
                           Expanded(
@@ -300,6 +322,7 @@ class GodownMasterScreen extends StatelessWidget {
                               onPressed: () {
                                 _controller.gdNameController.clear();
                                 _controller.selectedSiteName.value = '';
+                                _controller.isSubGodown.value = false;
                                 Get.back();
                               },
                               style: OutlinedButton.styleFrom(
@@ -355,9 +378,11 @@ class GodownMasterScreen extends StatelessWidget {
                                             _controller.selectedSiteName.value,
                                           )
                                         : '',
+                                    isSubGodown: _controller.isSubGodown.value,
                                   );
                                   _controller.gdNameController.clear();
                                   _controller.selectedSiteName.value = '';
+                                  _controller.isSubGodown.value = false;
                                 }
                               },
                             ),

@@ -56,10 +56,12 @@ class GodownMasterCard extends StatelessWidget {
                 : AppPaddings.combined(horizontal: 14, vertical: 12),
             child: Row(
               children: [
+                // ── Left content ──────────────────────────────────────
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Godown name
                       Text(
                         godown.gdName,
                         style: TextStyles.kSemiBoldOutfit(
@@ -70,6 +72,8 @@ class GodownMasterCard extends StatelessWidget {
                         ),
                       ),
                       tablet ? AppSpaces.v4 : AppSpaces.v2,
+
+                      // Site name row
                       Row(
                         children: [
                           Icon(
@@ -91,10 +95,37 @@ class GodownMasterCard extends StatelessWidget {
                           ),
                         ],
                       ),
+
+                      // Sub Godown label — only shown when true
+                      if (godown.isSubGodown) ...[
+                        tablet ? AppSpaces.v4 : AppSpaces.v2,
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.account_tree_outlined,
+                              size: tablet ? 14 : 12,
+                              color: kColorPrimary,
+                            ),
+                            AppSpaces.h4,
+                            Text(
+                              'Sub Godown',
+                              style: TextStyles.kRegularOutfit(
+                                fontSize: tablet
+                                    ? FontSizes.k12FontSize
+                                    : FontSizes.k10FontSize,
+                                color: kColorPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
+
                 tablet ? AppSpaces.h12 : AppSpaces.h8,
+
+                // ── Edit button ───────────────────────────────────────
                 Material(
                   color: kColorPrimary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(tablet ? 8 : 6),
@@ -113,26 +144,29 @@ class GodownMasterCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                tablet ? AppSpaces.h8 : AppSpaces.h6,
-                // Delete Button
-                Material(
-                  color: Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(tablet ? 8 : 6),
-                  child: InkWell(
-                    onTap: () => _showDeleteDialog(context, tablet),
+
+                // ── Delete button — hidden for auto godowns ───────────
+                if (!godown.isAuto) ...[
+                  tablet ? AppSpaces.h8 : AppSpaces.h6,
+                  Material(
+                    color: Colors.red.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(tablet ? 8 : 6),
-                    child: Container(
-                      padding: tablet
-                          ? AppPaddings.combined(horizontal: 10, vertical: 10)
-                          : AppPaddings.combined(horizontal: 8, vertical: 8),
-                      child: Icon(
-                        Icons.delete_rounded,
-                        size: tablet ? 20 : 18,
-                        color: Colors.red,
+                    child: InkWell(
+                      onTap: () => _showDeleteDialog(context, tablet),
+                      borderRadius: BorderRadius.circular(tablet ? 8 : 6),
+                      child: Container(
+                        padding: tablet
+                            ? AppPaddings.combined(horizontal: 10, vertical: 10)
+                            : AppPaddings.combined(horizontal: 8, vertical: 8),
+                        child: Icon(
+                          Icons.delete_rounded,
+                          size: tablet ? 20 : 18,
+                          color: Colors.red,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
@@ -170,6 +204,7 @@ class GodownMasterCard extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // ── Header ──────────────────────────────────────────────
               Container(
                 padding: tablet
                     ? AppPaddings.combined(horizontal: 24, vertical: 20)
@@ -210,6 +245,8 @@ class GodownMasterCard extends StatelessWidget {
                   ],
                 ),
               ),
+
+              // ── Body ────────────────────────────────────────────────
               Padding(
                 padding: tablet ? AppPaddings.p24 : AppPaddings.p20,
                 child: Column(
@@ -239,9 +276,7 @@ class GodownMasterCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: () {
-                              Get.back();
-                            },
+                            onPressed: () => Get.back(),
                             style: OutlinedButton.styleFrom(
                               side: BorderSide(
                                 color: kColorLightGrey,

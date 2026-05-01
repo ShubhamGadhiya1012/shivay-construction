@@ -1,3 +1,4 @@
+import 'package:shivay_construction/features/dlr_entry/controllers/dlr_entry_controller.dart';
 import 'package:shivay_construction/features/dlr_entry/models/dlr_dm.dart';
 import 'package:shivay_construction/services/api_service.dart';
 import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
@@ -7,9 +8,7 @@ class DlrRepo {
     int pageNumber = 1,
     int pageSize = 10,
     String searchText = '',
-    String pCode = '',
     String siteCode = '',
-    String gdCode = '',
   }) async {
     String? token = await SecureStorageHelper.read('token');
 
@@ -18,9 +17,7 @@ class DlrRepo {
         'PageNumber': pageNumber.toString(),
         'PageSize': pageSize.toString(),
         'SearchText': searchText,
-        'PCode': pCode,
         'SiteCode': siteCode,
-        'GDCode': gdCode,
       };
 
       final response = await ApiService.getRequest(
@@ -41,35 +38,46 @@ class DlrRepo {
     }
   }
 
+  static Future<List<ActivityDm>> getActivities() async {
+    String? token = await SecureStorageHelper.read('token');
+
+    try {
+      final response = await ApiService.getRequest(
+        endpoint: '/Master/getActivity',
+        token: token,
+      );
+
+      if (response == null) return [];
+
+      if (response['data'] != null) {
+        return (response['data'] as List<dynamic>)
+            .map((item) => ActivityDm.fromJson(item))
+            .toList();
+      }
+
+      return [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   static Future<dynamic> saveDlrEntry({
     required String invno,
-    required String pCode,
     required String date,
     required String shift,
-    required double skill,
-    required double skillRate,
-    required double unSkill,
-    required double unSkillRate,
-    required int supervisor,
     required String deviceId,
     required String siteCode,
-    required String gdCode,
+    required List<Map<String, dynamic>> dlrData,
   }) async {
     String? token = await SecureStorageHelper.read('token');
 
     final Map<String, dynamic> requestBody = {
       'Invno': invno,
-      'PCode': pCode,
       'Date': date,
       'Shift': shift,
-      'Skill': skill,
-      'SkillRate': skillRate,
-      'UnSkill': unSkill,
-      'UnSkillRate': unSkillRate,
-      'Supervisor': supervisor,
       'DeviceId': deviceId,
       'SiteCode': siteCode,
-      'GDCode': gdCode,
+      'DLRData': dlrData,
     };
 
     try {
