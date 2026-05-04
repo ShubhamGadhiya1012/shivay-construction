@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:shivay_construction/features/hsn_master/controllers/hsn_master_list_controller.dart';
 import 'package:shivay_construction/features/hsn_master/models/hsn_master_dm.dart';
 import 'package:shivay_construction/features/hsn_master/repos/hsn_master_repo.dart';
+import 'package:shivay_construction/features/tax_master/models/tax_master_dm.dart';
+import 'package:shivay_construction/features/tax_master/repos/tax_master_list_repo.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 
 class HsnMasterController extends GetxController {
@@ -20,12 +22,42 @@ class HsnMasterController extends GetxController {
   var sgstController = TextEditingController();
   var cgstController = TextEditingController();
 
+  var taxList = <TaxMasterDm>[].obs;
+  var taxNames = <String>[].obs;
+  var selectedTaxName = ''.obs;
+  var selectedTCode = ''.obs;
+
   var sac = false.obs;
 
   var isEditMode = false.obs;
 
   void toggleSac() {
     sac.value = !sac.value;
+  }
+
+  @override
+  void onInit() async {
+    super.onInit();
+    await fetchTaxList();
+  }
+
+  Future<void> fetchTaxList() async {
+    try {
+      final data = await TaxMasterListRepo.getTaxList();
+      taxList.assignAll(data);
+      taxNames.assignAll(data.map((e) => e.taxName));
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    }
+  }
+
+  // FULL onTaxSelected - NEW METHOD
+  void onTaxSelected(String? taxName) {
+    if (taxName != null && taxName.isNotEmpty) {
+      selectedTaxName.value = taxName;
+      final selected = taxList.firstWhere((e) => e.taxName == taxName);
+      selectedTCode.value = selected.tCode;
+    }
   }
 
   void autoFillDataForEdit(HsnMasterDm hsn) {
@@ -45,11 +77,17 @@ class HsnMasterController extends GetxController {
     required double sgst,
     required double cgst,
     required String effectDate,
+    required String tCode,
+    required String tName, // ADD THIS
   }) {
     igstController.text = igst.toString();
     sgstController.text = sgst.toString();
     cgstController.text = cgst.toString();
     effectDateController.text = _convertyyyyMMddToddMMyyyy(effectDate);
+
+    selectedTCode.value = tCode;
+    selectedTaxName.value =
+        tName; // USE tName DIRECTLY — no need to search taxList
   }
 
   String _convertyyyyMMddToddMMyyyy(String dateStr) {
@@ -81,6 +119,7 @@ class HsnMasterController extends GetxController {
         sgst: double.tryParse(sgstController.text.trim()) ?? 0.0,
         cgst: double.tryParse(cgstController.text.trim()) ?? 0.0,
         sac: sac.value,
+        tCode: selectedTCode.value,
       );
 
       if (response != null && response.containsKey('message')) {
@@ -91,10 +130,8 @@ class HsnMasterController extends GetxController {
           final listController = Get.find<HsnMasterListController>();
           await listController.getHsnList();
           listController.filterHsnList(listController.searchController.text);
-          // Add this line:
           listController.resetExpandedIndex();
         }
-
         clearAll();
       }
     } catch (e) {
@@ -121,5 +158,7 @@ class HsnMasterController extends GetxController {
     cgstController.clear();
     sac.value = false;
     isEditMode.value = false;
+    selectedTaxName.value = '';
+    selectedTCode.value = '';
   }
 }

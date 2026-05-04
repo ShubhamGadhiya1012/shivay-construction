@@ -5,6 +5,7 @@ class HsnMasterDetailDm {
   final double cgst;
   final String effectDate;
   final String tCode;
+  final String tName; // ADD THIS
   final double lgst;
 
   HsnMasterDetailDm({
@@ -14,6 +15,7 @@ class HsnMasterDetailDm {
     required this.cgst,
     required this.effectDate,
     required this.tCode,
+    required this.tName, // ADD THIS
     required this.lgst,
   });
 
@@ -25,6 +27,7 @@ class HsnMasterDetailDm {
       cgst: (json['CGST'] as num?)?.toDouble() ?? 0.0,
       effectDate: json['EffectDate'] ?? '',
       tCode: json['TCode'] ?? '',
+      tName: json['TName'] ?? '', // ADD THIS
       lgst: (json['LGST'] as num?)?.toDouble() ?? 0.0,
     );
   }

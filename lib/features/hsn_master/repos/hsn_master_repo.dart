@@ -14,6 +14,7 @@ class HsnMasterRepo {
     required double sgst,
     required double cgst,
     required bool sac,
+    required String tCode,
   }) async {
     String? token = await SecureStorageHelper.read('token');
 
@@ -29,8 +30,9 @@ class HsnMasterRepo {
       "SGST": sgst,
       "CGST": cgst,
       "SAC": sac,
+      "tCode": tCode,
     };
- //   print(requestBody);
+
     try {
       final response = await ApiService.postRequest(
         endpoint: '/Master/AddUpdateHSNMaster',
