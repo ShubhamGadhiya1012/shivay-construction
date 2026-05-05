@@ -322,6 +322,14 @@ class HsnMasterCard extends StatelessWidget {
                                       ),
                                     ],
                                   ),
+                                  if (detail.tName.isNotEmpty) ...[
+                                    tablet ? AppSpaces.v12 : AppSpaces.v8,
+                                    _buildInfoRow(
+                                      label: 'Tax Type',
+                                      value: detail.tName,
+                                      tablet: tablet,
+                                    ),
+                                  ],
                                   tablet ? AppSpaces.v12 : AppSpaces.v8,
                                   Row(
                                     children: [

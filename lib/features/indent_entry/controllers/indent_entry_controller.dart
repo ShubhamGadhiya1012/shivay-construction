@@ -1,19 +1,28 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/godown_master/models/godown_master_dm.dart';
 import 'package:shivay_construction/features/godown_master/repos/godown_master_repo.dart';
 import 'package:shivay_construction/features/indent_entry/controllers/indents_controller.dart';
 import 'package:shivay_construction/features/indent_entry/repos/indent_entry_repo.dart';
 import 'package:shivay_construction/features/item_master/models/item_master_dm.dart';
 import 'package:shivay_construction/features/item_master/repos/item_master_list_repo.dart';
+import 'package:shivay_construction/features/purchase_order_entry/repos/purchase_order_repo.dart';
 import 'package:shivay_construction/features/site_master/models/site_master_dm.dart';
 import 'package:shivay_construction/features/site_master/repos/site_master_list_repo.dart';
 import 'package:shivay_construction/services/api_service.dart';
+import 'package:shivay_construction/styles/font_sizes.dart';
+import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
+import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
+import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
+import 'package:shivay_construction/widgets/app_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class IndentEntryController extends GetxController {
@@ -29,7 +38,6 @@ class IndentEntryController extends GetxController {
   var selectedSiteName = ''.obs;
   var selectedSiteCode = ''.obs;
 
-  // Add after site variables:
   var godowns = <GodownMasterDm>[].obs;
   var godownNames = <String>[].obs;
   var selectedGodownName = ''.obs;
@@ -72,8 +80,6 @@ class IndentEntryController extends GetxController {
     var selectedSiteObj = sites.firstWhere((s) => s.siteName == siteName);
     selectedSiteCode.value = selectedSiteObj.siteCode;
 
-    // Remove godown loading - no longer needed here
-    // Just reset selection
     selectedGodownName.value = '';
     selectedGodownCode.value = '';
   }
@@ -117,12 +123,128 @@ class IndentEntryController extends GetxController {
     }
   }
 
-  void onItemSelected(String? itemName) {
+  void onItemSelected(String? itemName) async {
     selectedItemName.value = itemName!;
     var selectedItemObj = items.firstWhere((item) => item.iName == itemName);
     selectedItemCode.value = selectedItemObj.iCode;
     selectedUnit.value = selectedItemObj.unit;
     qtyController.clear();
+
+    try {
+      final taxList = await PurchaseOrderRepo.getItemTax(
+        tCode: '',
+        iCode: selectedItemObj.iCode,
+      );
+
+      if (taxList.isEmpty ||
+          (taxList.first.hsnNo == null ||
+              taxList.first.hsnNo!.trim().isEmpty)) {
+        selectedItemName.value = '';
+        selectedItemCode.value = '';
+        selectedUnit.value = '';
+
+        Get.dialog(
+          Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            child: Container(
+              decoration: BoxDecoration(
+                color: kColorWhite,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: kColorRed.withOpacity(0.15),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: AppPaddings.combined(horizontal: 20, vertical: 16),
+                    decoration: BoxDecoration(
+                      color: kColorRed.withOpacity(0.08),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: AppPaddings.p10,
+                          decoration: BoxDecoration(
+                            color: kColorRed.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.warning_amber_rounded,
+                            color: kColorRed,
+                            size: 22,
+                          ),
+                        ),
+                        AppSpaces.h10,
+                        Expanded(
+                          child: Text(
+                            'Item Not Allowed',
+                            style: TextStyles.kSemiBoldOutfit(
+                              fontSize: FontSizes.k18FontSize,
+                              color: kColorTextPrimary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: AppPaddings.p20,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '"${selectedItemObj.iName}"',
+                          style: TextStyles.kSemiBoldOutfit(
+                            fontSize: FontSizes.k14FontSize,
+                            color: kColorTextPrimary,
+                          ),
+                        ),
+                        AppSpaces.v8,
+                        Text(
+                          'This item does not have an HSN No. assigned. You cannot create an indent for this item.',
+                          style: TextStyles.kRegularOutfit(
+                            fontSize: FontSizes.k14FontSize,
+                            color: kColorDarkGrey,
+                          ),
+                        ),
+                        AppSpaces.v20,
+                        AppButton(
+                          title: 'OK',
+                          buttonColor: kColorRed,
+                          titleColor: kColorWhite,
+                          buttonHeight: 48,
+                          onPressed: () => Get.back(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          barrierDismissible: false,
+        );
+      }
+    } catch (e) {
+      showErrorSnackbar('Error', 'Failed to validate item: ${e.toString()}');
+      selectedItemName.value = '';
+      selectedItemCode.value = '';
+      selectedUnit.value = '';
+    }
   }
 
   void prepareAddItem() {
@@ -130,7 +252,6 @@ class IndentEntryController extends GetxController {
     isEditingItem.value = false;
     editingItemIndex.value = -1;
 
-    // Reset godown selection
     selectedGodownName.value = '';
     selectedGodownCode.value = '';
   }
@@ -145,7 +266,6 @@ class IndentEntryController extends GetxController {
       qtyController.text = (item['qty'] ?? item['Qty'] ?? 0).toString();
       remarkController.text = item['Remark']?.toString() ?? '';
 
-      // Load godown selection
       selectedGodownCode.value = item['GDCode']?.toString() ?? '';
       selectedGodownName.value = item['GDName']?.toString() ?? '';
 
@@ -169,8 +289,8 @@ class IndentEntryController extends GetxController {
     qtyController.clear();
     reqDateController.clear();
     remarkController.clear();
-    selectedGodownName.value = ''; // ADD
-    selectedGodownCode.value = ''; // ADD
+    selectedGodownName.value = '';
+    selectedGodownCode.value = '';
   }
 
   void addOrUpdateItem() {
@@ -200,8 +320,8 @@ class IndentEntryController extends GetxController {
       "Qty": qty,
       "ReqDate": _convertToApiDateFormat(reqDateController.text),
       "Remark": remarkController.text.trim(),
-      "GDCode": selectedGodownCode.value, // ADD
-      "GDName": selectedGodownName.value, // ADD
+      "GDCode": selectedGodownCode.value,
+      "GDName": selectedGodownName.value,
     };
 
     if (isEditingItem.value) {
@@ -362,8 +482,8 @@ class IndentEntryController extends GetxController {
     existingAttachmentUrls.clear();
     selectedGodownName.value = '';
     selectedGodownCode.value = '';
-    godowns.clear(); // ADD
-    godownNames.clear(); // ADD
+    godowns.clear();
+    godownNames.clear();
     isEditMode.value = false;
   }
 }

@@ -33,6 +33,8 @@ import 'package:shivay_construction/features/reports/screens/site_transfer_repor
 import 'package:shivay_construction/features/site_master/screens/site_master_list_screen.dart';
 import 'package:shivay_construction/features/site_transfer/screens/site_transfer_list_screen.dart';
 import 'package:shivay_construction/features/stock_reports/screens/stock_report_screen.dart';
+import 'package:shivay_construction/features/tax_master/screens/tax_master_list_screen.dart';
+import 'package:shivay_construction/features/term_master/screens/term_master_list_screen.dart';
 import 'package:shivay_construction/features/user_settings/models/user_access_dm.dart';
 import 'package:shivay_construction/features/user_settings/screens/unauthorised_users_screen.dart';
 import 'package:shivay_construction/features/user_settings/screens/users_screen.dart';
@@ -475,6 +477,12 @@ class AppDrawer extends StatelessWidget {
         break;
       case 'hsn master':
         Get.to(() => HsnMasterListScreen());
+        break;
+      case 'tax master':
+        Get.to(() => TaxMasterListScreen());
+        break;
+      case 'terms master':
+        Get.to(() => TermMasterListScreen());
         break;
       case 'opening stock entry':
         Get.to(() => OpeningStocksScreen());

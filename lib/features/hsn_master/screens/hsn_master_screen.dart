@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -14,6 +12,7 @@ import 'package:shivay_construction/widgets/app_appbar.dart';
 import 'package:shivay_construction/widgets/app_button.dart';
 import 'package:shivay_construction/widgets/app_checkbox_row.dart';
 import 'package:shivay_construction/widgets/app_date_picker_text_form_field.dart';
+import 'package:shivay_construction/widgets/app_dropdown.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
@@ -39,6 +38,8 @@ class HsnMasterScreen extends StatelessWidget {
             sgst: detail.sgst,
             cgst: detail.cgst,
             effectDate: detail.effectDate,
+            tCode: detail.tCode,
+            tName: detail.tName, // ADD THIS
           );
         }
       });
@@ -78,7 +79,6 @@ class HsnMasterScreen extends StatelessWidget {
                           children: [
                             tablet ? AppSpaces.v6 : AppSpaces.v4,
 
-                            // HSN No
                             AppTextFormField(
                               controller: _controller.hsnNoController,
                               hintText: 'HSN No *',
@@ -90,7 +90,6 @@ class HsnMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Org HSN No
                             AppTextFormField(
                               controller: _controller.orgHsnNoController,
                               hintText: 'Org HSN No *',
@@ -101,7 +100,6 @@ class HsnMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Chapter No
                             AppTextFormField(
                               controller: _controller.chapterNoController,
                               hintText: 'Chapter No *',
@@ -112,7 +110,6 @@ class HsnMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Unit & EWB Unit
                             Row(
                               children: [
                                 Expanded(
@@ -140,7 +137,6 @@ class HsnMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Description
                             AppTextFormField(
                               controller: _controller.descriptionController,
                               hintText: 'Description',
@@ -148,7 +144,6 @@ class HsnMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Effect Date
                             AppDatePickerTextFormField(
                               dateController: _controller.effectDateController,
                               hintText: 'Effect Date *',
@@ -159,7 +154,19 @@ class HsnMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // IGST, SGST, CGST
+                            Obx(
+                              () => AppDropdown(
+                                hintText: 'Tax Type',
+                                items: _controller.taxNames,
+                                selectedItem:
+                                    _controller.selectedTaxName.value.isNotEmpty
+                                    ? _controller.selectedTaxName.value
+                                    : null,
+                                onChanged: _controller.onTaxSelected,
+                              ),
+                            ),
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
+
                             Row(
                               children: [
                                 Expanded(
@@ -246,7 +253,6 @@ class HsnMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // SAC Checkbox
                             Obx(
                               () => AppCheckboxRow(
                                 title: 'SAC (Service Accounting Code)',
@@ -261,7 +267,6 @@ class HsnMasterScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Submit Button
                   Obx(
                     () => AppButton(
                       title: _controller.isEditMode.value ? 'Update' : 'Submit',
