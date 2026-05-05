@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   static const String kBaseUrl =
-  'http://192.168.0.145:5209/api'; // Dhruvilbhai Debugging
+      'http://192.168.0.145:5209/api'; // Dhruvilbhai Debugging
   // static const String kBaseUrl =
   //     'http://192.168.0.145:5020/api'; // Dhruvilbhai Local
   // static const String kBaseUrl = 'http://160.187.80.215:8080/api'; // Live
@@ -43,7 +43,7 @@ class ApiService {
       if (response.statusCode == 204) {
         return null;
       }
-      print(response.body);
+      // print(response.body);
       final contentType = response.headers['content-type'];
       if (contentType != null && contentType.contains('application/pdf')) {
         return response.bodyBytes;
@@ -72,7 +72,7 @@ class ApiService {
   }) async {
     try {
       Uri url = Uri.parse('$kBaseUrl$endpoint');
-      print(requestBody);
+      // print(requestBody);
       if (queryParams != null && queryParams.isNotEmpty) {
         url = url.replace(queryParameters: queryParams);
       }
@@ -88,7 +88,7 @@ class ApiService {
         headers: headers,
         body: json.encode(requestBody),
       );
-      print(response.body);
+      // print(response.body);
       if (response.statusCode == 204) {
         return null;
       }
@@ -117,7 +117,7 @@ class ApiService {
 
         return json.decode(response.body);
       }
-      print(response.body);
+      // print(response.body);
       var errorResponse = response.body.isNotEmpty
           ? json.decode(response.body)
           : {'error': 'Unknown error occurred'};
@@ -169,7 +169,7 @@ class ApiService {
       final response = await request.send();
 
       final responseBody = await response.stream.bytesToString();
-      print(responseBody);
+      // print(responseBody);
       if (response.statusCode == 200 || response.statusCode == 201) {
         return json.decode(responseBody);
       } else {

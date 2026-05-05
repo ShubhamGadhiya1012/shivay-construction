@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
@@ -512,6 +510,97 @@ class AuthIndentItemCard extends StatelessWidget {
                                         ),
                                       ],
                                     ),
+
+                                    tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                                    Obx(() {
+                                      final percCtrl = controller
+                                          .discountPercControllers[key];
+                                      final amtCtrl = controller
+                                          .discountAmountControllers[key];
+                                      if (percCtrl == null || amtCtrl == null)
+                                        return const SizedBox.shrink();
+                                      return Row(
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Discount %',
+                                                  style:
+                                                      TextStyles.kMediumOutfit(
+                                                        fontSize: tablet
+                                                            ? FontSizes
+                                                                  .k14FontSize
+                                                            : FontSizes
+                                                                  .k12FontSize,
+                                                        color:
+                                                            kColorTextPrimary,
+                                                      ),
+                                                ),
+                                                tablet
+                                                    ? AppSpaces.v6
+                                                    : AppSpaces.v4,
+                                                AppTextFormField(
+                                                  controller: percCtrl,
+                                                  hintText: 'Disc %',
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  floatingLabelRequired: false,
+                                                  onChanged: (val) => controller
+                                                      .onDiscountPercChanged(
+                                                        key,
+                                                        val,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          tablet
+                                              ? AppSpaces.h12
+                                              : AppSpaces.h10,
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Discount Amt',
+                                                  style:
+                                                      TextStyles.kMediumOutfit(
+                                                        fontSize: tablet
+                                                            ? FontSizes
+                                                                  .k14FontSize
+                                                            : FontSizes
+                                                                  .k12FontSize,
+                                                        color:
+                                                            kColorTextPrimary,
+                                                      ),
+                                                ),
+                                                tablet
+                                                    ? AppSpaces.v6
+                                                    : AppSpaces.v4,
+                                                AppTextFormField(
+                                                  controller: amtCtrl,
+                                                  hintText: 'Disc Amt',
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  floatingLabelRequired: false,
+                                                  onChanged: (val) => controller
+                                                      .onDiscountAmountChanged(
+                                                        key,
+                                                        val,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }),
+
                                     tablet ? AppSpaces.v12 : AppSpaces.v10,
 
                                     if (remarkController != null) ...[
