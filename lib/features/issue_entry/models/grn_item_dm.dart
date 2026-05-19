@@ -45,6 +45,8 @@ class GrnItemDetailDm {
   final double pendingQty;
   final String gdCode;
   final String gdName;
+  final String cpCode;
+  final String cpName;
 
   GrnItemDetailDm({
     required this.grnSrNo,
@@ -57,20 +59,26 @@ class GrnItemDetailDm {
     required this.pendingQty,
     required this.gdCode,
     required this.gdName,
+    required this.cpCode,
+    required this.cpName,
   });
 
   factory GrnItemDetailDm.fromJson(Map<String, dynamic> json) {
     return GrnItemDetailDm(
-      grnSrNo: json['grnSrNo'] ?? 0,
-      iCode: json['iCode'] ?? '',
-      iName: json['iName'] ?? '',
-      unit: json['unit'] ?? '',
-      rate: (json['rate'] as num?)?.toDouble() ?? 0.0,
-      grnQty: (json['grnQty'] as num?)?.toDouble() ?? 0.0,
-      issuedQty: (json['issuedQty'] as num?)?.toDouble() ?? 0.0,
-      pendingQty: (json['pendingQty'] as num?)?.toDouble() ?? 0.0,
-      gdCode: json['gdCode'] ?? '',
-      gdName: json['gdName'] ?? '',
+      grnSrNo: json['grnSrNo'] ?? json['SrNo'] ?? 0,
+      iCode: json['iCode'] ?? json['ICode'] ?? '',
+      iName: json['iName'] ?? json['IName'] ?? '',
+      unit: json['unit'] ?? json['Unit'] ?? '',
+      rate: (json['rate'] ?? json['Rate'] as num?)?.toDouble() ?? 0.0,
+      grnQty: (json['grnQty'] ?? json['GrnQty'] as num?)?.toDouble() ?? 0.0,
+      issuedQty:
+          (json['issuedQty'] ?? json['IssuedQty'] as num?)?.toDouble() ?? 0.0,
+      pendingQty:
+          (json['pendingQty'] ?? json['PendingQty'] as num?)?.toDouble() ?? 0.0,
+      gdCode: json['gdCode'] ?? json['GDCode'] ?? '',
+      gdName: json['gdName'] ?? json['GDName'] ?? '',
+      cpCode: json['cpCode'] ?? json['CPCode'] ?? '',
+      cpName: json['cpName'] ?? json['CPName'] ?? '',
     );
   }
 }

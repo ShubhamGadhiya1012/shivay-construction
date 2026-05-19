@@ -92,6 +92,31 @@ class IssueSelectedItemCard extends StatelessWidget {
                         ],
                       ),
                     ],
+                    if ((itemData['cpName'] ?? '').toString().isNotEmpty) ...[
+                      AppSpaces.v4,
+                      Row(
+                        children: [
+                          Text(
+                            'Contractor: ',
+                            style: TextStyles.kRegularOutfit(
+                              fontSize: tablet
+                                  ? FontSizes.k12FontSize
+                                  : FontSizes.k10FontSize,
+                              color: kColorDarkGrey,
+                            ),
+                          ),
+                          Text(
+                            itemData['cpName'].toString(),
+                            style: TextStyles.kMediumOutfit(
+                              fontSize: tablet
+                                  ? FontSizes.k12FontSize
+                                  : FontSizes.k10FontSize,
+                              color: kColorTextPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),

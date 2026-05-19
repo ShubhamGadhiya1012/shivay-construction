@@ -43,6 +43,7 @@ class _IssueEntryScreenState extends State<IssueEntryScreen> {
     ).format(DateTime.now());
     await _controller.getGrnItems();
     await _controller.getGodowns();
+    await _controller.getContractors();
   }
 
   void _handleBackPress() {

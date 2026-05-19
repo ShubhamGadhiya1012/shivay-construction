@@ -4,12 +4,16 @@ import 'package:shivay_construction/features/party_masters/models/party_master_d
 import 'package:shivay_construction/features/party_masters/repos/party_master_list_repo.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 
+enum PartyFilterType { all, vendor, contractor }
+
 class PartyMasterListController extends GetxController {
   var isLoading = false.obs;
 
   var parties = <PartyMasterDm>[].obs;
   var filteredParties = <PartyMasterDm>[].obs;
   var searchController = TextEditingController();
+
+  var selectedFilter = PartyFilterType.all.obs;
 
   @override
   void onInit() async {
@@ -20,7 +24,16 @@ class PartyMasterListController extends GetxController {
   Future<void> getParties() async {
     isLoading.value = true;
     try {
-      final fetchedParties = await PartyMasterListRepo.getParties();
+      bool? isContSubCont;
+      if (selectedFilter.value == PartyFilterType.vendor) {
+        isContSubCont = false;
+      } else if (selectedFilter.value == PartyFilterType.contractor) {
+        isContSubCont = true;
+      }
+
+      final fetchedParties = await PartyMasterListRepo.getParties(
+        isContSubCont: isContSubCont,
+      );
       parties.assignAll(fetchedParties);
       filteredParties.assignAll(fetchedParties);
     } catch (e) {
@@ -28,6 +41,12 @@ class PartyMasterListController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> onFilterChanged(PartyFilterType filter) async {
+    selectedFilter.value = filter;
+    searchController.clear();
+    await getParties();
   }
 
   void filterParties(String query) {

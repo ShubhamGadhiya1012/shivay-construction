@@ -37,6 +37,8 @@ class PartyMasterController extends GetxController {
   var stateNames = <String>[].obs;
   var selectedState = ''.obs;
 
+  var isContSubCont = false.obs;
+
   var isEditMode = false.obs;
   var currentPCode = ''.obs;
 
@@ -48,6 +50,10 @@ class PartyMasterController extends GetxController {
     accountNameController.addListener(() {
       printNameController.text = accountNameController.text;
     });
+  }
+
+  void toggleIsContSubCont() {
+    isContSubCont.value = !isContSubCont.value;
   }
 
   Future<void> fetchDropdownData() async {
@@ -137,18 +143,11 @@ class PartyMasterController extends GetxController {
     mobileController.text = party.mobile;
     gstNumberController.text = party.gstNumber;
     panNumberController.text = party.pan;
+    isContSubCont.value = party.isContSubCont;
 
-    if (party.location.isNotEmpty) {
-      selectedLocation.value = party.location;
-    }
-
-    if (party.city.isNotEmpty) {
-      selectedCity.value = party.city;
-    }
-
-    if (party.state.isNotEmpty) {
-      selectedState.value = party.state;
-    }
+    if (party.location.isNotEmpty) selectedLocation.value = party.location;
+    if (party.city.isNotEmpty) selectedCity.value = party.city;
+    if (party.state.isNotEmpty) selectedState.value = party.state;
   }
 
   Future<void> addUpdatePartyMaster() async {
@@ -171,6 +170,7 @@ class PartyMasterController extends GetxController {
         mobile: mobileController.text.trim(),
         gstNumber: gstNumberController.text.trim(),
         panNumber: panNumberController.text.trim(),
+        isContSubCont: isContSubCont.value,
       );
 
       if (response != null && response.containsKey('message')) {
@@ -214,6 +214,7 @@ class PartyMasterController extends GetxController {
     selectedLocation.value = '';
     selectedCity.value = '';
     selectedState.value = '';
+    isContSubCont.value = false;
 
     isEditMode.value = false;
     currentPCode.value = '';

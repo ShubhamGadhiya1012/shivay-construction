@@ -38,13 +38,11 @@ class PartyMasterRepo {
       );
 
       if (response == null) return [];
-
       if (response['data'] != null) {
         return (response['data'] as List<dynamic>)
             .map((item) => LocationDm.fromJson(item))
             .toList();
       }
-
       return [];
     } catch (e) {
       rethrow;
@@ -61,13 +59,11 @@ class PartyMasterRepo {
       );
 
       if (response == null) return [];
-
       if (response['data'] != null) {
         return (response['data'] as List<dynamic>)
             .map((item) => CityDm.fromJson(item))
             .toList();
       }
-
       return [];
     } catch (e) {
       rethrow;
@@ -84,13 +80,11 @@ class PartyMasterRepo {
       );
 
       if (response == null) return [];
-
       if (response['data'] != null) {
         return (response['data'] as List<dynamic>)
             .map((item) => StateDm.fromJson(item))
             .toList();
       }
-
       return [];
     } catch (e) {
       rethrow;
@@ -114,6 +108,7 @@ class PartyMasterRepo {
     required String mobile,
     required String gstNumber,
     required String panNumber,
+    required bool isContSubCont,
   }) async {
     String? token = await SecureStorageHelper.read('token');
 
@@ -134,6 +129,7 @@ class PartyMasterRepo {
       "Mobile": mobile,
       "GSTNumber": gstNumber,
       "PANNumber": panNumber,
+      "IsContSubCont": isContSubCont,
     };
 
     try {
