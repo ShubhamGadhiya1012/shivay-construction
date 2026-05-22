@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/constants/image_constants.dart';
+import 'package:shivay_construction/features/company_master/screens/company_master_list_screen.dart';
 import 'package:shivay_construction/features/dlr_entry/screens/dlr_list_screen.dart';
 import 'package:shivay_construction/features/grn_entry/screens/grns_screen.dart';
 import 'package:shivay_construction/features/home/controllers/home_controller.dart';
@@ -468,6 +469,9 @@ class AppDrawer extends StatelessWidget {
         break;
       case 'item group master':
         Get.to(() => ItemGroupMasterScreen());
+        break;
+      case 'company master':
+        Get.to(() => CompanyMasterListScreen());
         break;
       case 'item sub group master':
         Get.to(() => ItemSubGroupMasterScreen());

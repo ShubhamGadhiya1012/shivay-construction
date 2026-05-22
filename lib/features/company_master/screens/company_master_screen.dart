@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
-import 'package:shivay_construction/features/site_master/controllers/site_master_controller.dart';
-import 'package:shivay_construction/features/site_master/models/site_master_dm.dart';
+import 'package:shivay_construction/features/company_master/controllers/company_master_controller.dart';
+import 'package:shivay_construction/features/company_master/models/company_master_dm.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
@@ -17,20 +17,22 @@ import 'package:shivay_construction/widgets/app_dropdown.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
-class SiteMasterScreen extends StatelessWidget {
-  final SiteMasterDm? site;
+class CompanyMasterScreen extends StatelessWidget {
+  final CompanyMasterDm? company;
 
-  SiteMasterScreen({super.key, this.site});
+  CompanyMasterScreen({super.key, this.company});
 
-  final SiteMasterController _controller = Get.put(SiteMasterController());
+  final CompanyMasterController _controller = Get.put(
+    CompanyMasterController(),
+  );
 
   @override
   Widget build(BuildContext context) {
     final bool tablet = AppScreenUtils.isTablet(context);
 
-    if (site != null && !_controller.isEditMode.value) {
+    if (company != null && !_controller.isEditMode.value) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _controller.autoFillDataForEdit(site!);
+        _controller.autoFillDataForEdit(company!);
       });
     }
 
@@ -40,7 +42,7 @@ class SiteMasterScreen extends StatelessWidget {
           onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
           child: Scaffold(
             appBar: AppAppbar(
-              title: site != null ? 'Update Site' : 'Add Site',
+              title: company != null ? 'Update Company' : 'Add Company',
               leading: IconButton(
                 icon: Icon(
                   Icons.arrow_back_ios,
@@ -62,25 +64,28 @@ class SiteMasterScreen extends StatelessWidget {
                   Expanded(
                     child: SingleChildScrollView(
                       child: Form(
-                        key: _controller.siteFormKey,
+                        key: _controller.companyFormKey,
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             tablet ? AppSpaces.v6 : AppSpaces.v4,
 
-                            // Site Name
+                            // ── Section: Basic Information ──────────────────
+                            _buildSectionHeader('Basic Information', tablet),
+                            tablet ? AppSpaces.v10 : AppSpaces.v8,
+
                             AppTextFormField(
-                              controller: _controller.siteNameController,
-                              hintText: 'Site Name *',
+                              controller: _controller.nameController,
+                              hintText: 'Company Name *',
                               validator: (value) =>
                                   (value == null || value.trim().isEmpty)
-                                  ? 'Please enter site name'
+                                  ? 'Please enter company name'
                                   : value.trim().length < 2
                                   ? 'Name must be at least 2 characters'
                                   : null,
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Address 1
                             AppTextFormField(
                               controller: _controller.address1Controller,
                               hintText: 'Address Line 1 *',
@@ -91,14 +96,13 @@ class SiteMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Address 2
                             AppTextFormField(
                               controller: _controller.address2Controller,
                               hintText: 'Address Line 2',
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // City & State
+                            // City & State dropdowns
                             Row(
                               children: [
                                 Expanded(
@@ -175,21 +179,34 @@ class SiteMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Pin Code
-                            AppTextFormField(
-                              controller: _controller.pinCodeController,
-                              hintText: 'Pin Code *',
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                                LengthLimitingTextInputFormatter(6),
+                            // ZIP & Country
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: AppTextFormField(
+                                    controller: _controller.zipController,
+                                    hintText: 'ZIP Code *',
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                      LengthLimitingTextInputFormatter(6),
+                                    ],
+                                    validator: (value) =>
+                                        (value == null || value.trim().isEmpty)
+                                        ? 'Please enter ZIP code'
+                                        : value.trim().length != 6
+                                        ? 'ZIP code must be 6 digits'
+                                        : null,
+                                  ),
+                                ),
+                                tablet ? AppSpaces.h16 : AppSpaces.h12,
+                                Expanded(
+                                  child: AppTextFormField(
+                                    controller: _controller.countryController,
+                                    hintText: 'Country',
+                                  ),
+                                ),
                               ],
-                              validator: (value) =>
-                                  (value == null || value.trim().isEmpty)
-                                  ? 'Please enter pin code'
-                                  : value.trim().length != 6
-                                  ? 'Pin code must be 6 digits'
-                                  : null,
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
@@ -221,7 +238,6 @@ class SiteMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Email
                             AppTextFormField(
                               controller: _controller.emailController,
                               hintText: 'Email',
@@ -240,7 +256,35 @@ class SiteMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // PAN & GST Number
+                            AppTextFormField(
+                              controller: _controller.mgmtEmailController,
+                              hintText: 'Management Email',
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (value) {
+                                if (value != null && value.trim().isNotEmpty) {
+                                  final emailRegex = RegExp(
+                                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                  );
+                                  if (!emailRegex.hasMatch(value.trim())) {
+                                    return 'Please enter a valid email';
+                                  }
+                                }
+                                return null;
+                              },
+                            ),
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
+
+                            AppTextFormField(
+                              controller: _controller.urlController,
+                              hintText: 'Website URL',
+                              keyboardType: TextInputType.url,
+                            ),
+                            tablet ? AppSpaces.v24 : AppSpaces.v20,
+
+                            // ── Section: Tax & Registration ─────────────────
+                            _buildSectionHeader('Tax & Registration', tablet),
+                            tablet ? AppSpaces.v10 : AppSpaces.v8,
+
                             Row(
                               children: [
                                 Expanded(
@@ -272,23 +316,170 @@ class SiteMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
-                            // Company dropdown — mandatory
-                            Obx(
-                              () => AppDropdown(
-                                hintText: 'Company *',
-                                items: _controller.companyNames,
-                                selectedItem:
-                                    _controller
-                                        .selectedCompanyName
-                                        .value
-                                        .isNotEmpty
-                                    ? _controller.selectedCompanyName.value
-                                    : null,
-                                onChanged: (selectedValue) {
-                                  _controller.onCompanySelected(selectedValue);
-                                },
-                                validatorText: 'Please select a company',
-                              ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: AppTextFormField(
+                                    controller: _controller.cinNoController,
+                                    hintText: 'CIN No',
+                                    inputFormatters: [
+                                      LengthLimitingTextInputFormatter(21),
+                                      FilteringTextInputFormatter.allow(
+                                        RegExp(r'[A-Z0-9/]'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                tablet ? AppSpaces.h16 : AppSpaces.h12,
+                                Expanded(
+                                  child: AppTextFormField(
+                                    controller: _controller.msmeNoController,
+                                    hintText: 'MSME No',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            tablet ? AppSpaces.v24 : AppSpaces.v20,
+
+                            // ── Section: Statutory Codes ────────────────────
+                            _buildSectionHeader('Statutory Codes', tablet),
+                            tablet ? AppSpaces.v10 : AppSpaces.v8,
+
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: AppTextFormField(
+                                    controller: _controller.uanController,
+                                    hintText: 'UAN',
+                                  ),
+                                ),
+                                tablet ? AppSpaces.h16 : AppSpaces.h12,
+                                Expanded(
+                                  child: AppTextFormField(
+                                    controller: _controller.ptCodeController,
+                                    hintText: 'PT Code',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
+
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: AppTextFormField(
+                                    controller: _controller.estCodeController,
+                                    hintText: 'EST Code',
+                                  ),
+                                ),
+                                tablet ? AppSpaces.h16 : AppSpaces.h12,
+                                Expanded(
+                                  child: AppTextFormField(
+                                    controller: _controller.pfCodeController,
+                                    hintText: 'PF Code',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
+
+                            AppTextFormField(
+                              controller: _controller.esiCodeController,
+                              hintText: 'ESI Code',
+                            ),
+                            tablet ? AppSpaces.v24 : AppSpaces.v20,
+
+                            // ── Section: Bank Details 1 ─────────────────────
+                            _buildSectionHeader('Bank Details 1', tablet),
+                            tablet ? AppSpaces.v10 : AppSpaces.v8,
+
+                            AppTextFormField(
+                              controller: _controller.coBankName1Controller,
+                              hintText: 'Bank Name',
+                            ),
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
+
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: AppTextFormField(
+                                    controller:
+                                        _controller.coBankBranch1Controller,
+                                    hintText: 'Branch',
+                                  ),
+                                ),
+                                tablet ? AppSpaces.h16 : AppSpaces.h12,
+                                Expanded(
+                                  child: AppTextFormField(
+                                    controller:
+                                        _controller.coBankAcNo1Controller,
+                                    hintText: 'Account No',
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
+
+                            AppTextFormField(
+                              controller: _controller.coBankIfsc1Controller,
+                              hintText: 'IFSC Code',
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(11),
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'[A-Z0-9]'),
+                                ),
+                              ],
+                            ),
+                            tablet ? AppSpaces.v24 : AppSpaces.v20,
+
+                            // ── Section: Bank Details 2 ─────────────────────
+                            _buildSectionHeader('Bank Details 2', tablet),
+                            tablet ? AppSpaces.v10 : AppSpaces.v8,
+
+                            AppTextFormField(
+                              controller: _controller.coBankName2Controller,
+                              hintText: 'Bank Name',
+                            ),
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
+
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: AppTextFormField(
+                                    controller:
+                                        _controller.coBankBranch2Controller,
+                                    hintText: 'Branch',
+                                  ),
+                                ),
+                                tablet ? AppSpaces.h16 : AppSpaces.h12,
+                                Expanded(
+                                  child: AppTextFormField(
+                                    controller:
+                                        _controller.coBankAcNo2Controller,
+                                    hintText: 'Account No',
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
+
+                            AppTextFormField(
+                              controller: _controller.coBankIfsc2Controller,
+                              hintText: 'IFSC Code',
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(11),
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'[A-Z0-9]'),
+                                ),
+                              ],
                             ),
                             tablet ? AppSpaces.v20 : AppSpaces.v16,
                           ],
@@ -296,15 +487,14 @@ class SiteMasterScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  // Submit / Update button
                   Obx(
                     () => AppButton(
                       title: _controller.isEditMode.value ? 'Update' : 'Submit',
                       buttonHeight: tablet ? 54 : 48,
                       onPressed: () {
-                        if (_controller.siteFormKey.currentState!.validate()) {
-                          _controller.addUpdateSiteMaster();
+                        if (_controller.companyFormKey.currentState!
+                            .validate()) {
+                          _controller.addUpdateCompanyMaster();
                         }
                       },
                     ),
@@ -316,6 +506,29 @@ class SiteMasterScreen extends StatelessWidget {
           ),
         ),
         Obx(() => AppLoadingOverlay(isLoading: _controller.isLoading.value)),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(String title, bool tablet) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: tablet ? 22 : 18,
+          decoration: BoxDecoration(
+            color: kColorPrimary,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        AppSpaces.h8,
+        Text(
+          title,
+          style: TextStyles.kSemiBoldOutfit(
+            fontSize: tablet ? FontSizes.k18FontSize : FontSizes.k16FontSize,
+            color: kColorTextPrimary,
+          ),
+        ),
       ],
     );
   }

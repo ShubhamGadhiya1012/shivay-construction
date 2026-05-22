@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shivay_construction/features/site_master/controllers/site_master_list_controller.dart';
+import 'package:shivay_construction/features/company_master/models/company_master_dm.dart';
 import 'package:shivay_construction/features/party_masters/models/city_dm.dart';
-import 'package:shivay_construction/features/site_master/models/site_master_dm.dart';
 import 'package:shivay_construction/features/party_masters/models/state_dm.dart';
+import 'package:shivay_construction/features/site_master/controllers/site_master_list_controller.dart';
+import 'package:shivay_construction/features/site_master/models/site_master_dm.dart';
 import 'package:shivay_construction/features/site_master/repos/site_master_repo.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 
@@ -21,14 +22,23 @@ class SiteMasterController extends GetxController {
   var panController = TextEditingController();
   var gstNumberController = TextEditingController();
 
+  // City dropdown
   var cityList = <CityDm>[].obs;
   var cityNames = <String>[].obs;
   var selectedCity = ''.obs;
 
+  // State dropdown
   var stateList = <StateDm>[].obs;
   var stateNames = <String>[].obs;
   var selectedState = ''.obs;
 
+  // Company dropdown — populated from /Master/getCompany
+  var companyList = <CompanyMasterDm>[].obs;
+  var companyNames = <String>[].obs;
+  var selectedCompanyName = ''.obs;
+  var selectedCompanyCode = ''.obs;
+
+  // Edit mode
   var isEditMode = false.obs;
   var currentSiteCode = ''.obs;
 
@@ -42,8 +52,11 @@ class SiteMasterController extends GetxController {
     isLoading.value = true;
     await getCities();
     await getStates();
+    await getCompanies();
     isLoading.value = false;
   }
+
+  // ── City ──────────────────────────────────────────────────────────────────
 
   Future<void> getCities() async {
     try {
@@ -66,6 +79,8 @@ class SiteMasterController extends GetxController {
     selectedCity.value = value;
   }
 
+  // ── State ─────────────────────────────────────────────────────────────────
+
   Future<void> getStates() async {
     try {
       final data = await SiteMasterRepo.getStates();
@@ -87,6 +102,34 @@ class SiteMasterController extends GetxController {
     selectedState.value = value;
   }
 
+  // ── Company ───────────────────────────────────────────────────────────────
+
+  Future<void> getCompanies() async {
+    try {
+      final data = await SiteMasterRepo.getCompanies();
+      companyList.assignAll(data);
+      // Display names shown in dropdown
+      companyNames.assignAll(data.map((e) => e.name));
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    }
+  }
+
+  /// Called when user picks a company from the dropdown.
+  /// Stores both the display name and the CoCode string for the API.
+  void onCompanySelected(String? name) {
+    if (name == null || name.isEmpty) {
+      selectedCompanyName.value = '';
+      selectedCompanyCode.value = '';
+      return;
+    }
+    selectedCompanyName.value = name;
+    final match = companyList.firstWhereOrNull((c) => c.name == name);
+    selectedCompanyCode.value = match != null ? match.coCode.toString() : '';
+  }
+
+  // ── Edit mode ─────────────────────────────────────────────────────────────
+
   void autoFillDataForEdit(SiteMasterDm site) {
     isEditMode.value = true;
     currentSiteCode.value = site.siteCode;
@@ -101,14 +144,26 @@ class SiteMasterController extends GetxController {
     panController.text = site.pan;
     gstNumberController.text = site.gstNumber;
 
-    if (site.city.isNotEmpty) {
-      selectedCity.value = site.city;
-    }
+    if (site.city.isNotEmpty) selectedCity.value = site.city;
+    if (site.state.isNotEmpty) selectedState.value = site.state;
 
-    if (site.state.isNotEmpty) {
-      selectedState.value = site.state;
+    // Restore company selection from the stored company code
+    if (site.company.isNotEmpty) {
+      final match = companyList.firstWhereOrNull(
+        (c) => c.coCode.toString() == site.company,
+      );
+      if (match != null) {
+        selectedCompanyName.value = match.name;
+        selectedCompanyCode.value = match.coCode.toString();
+      } else {
+        // Fallback: use CompanyName text if code lookup fails
+        selectedCompanyName.value = site.companyName;
+        selectedCompanyCode.value = site.company;
+      }
     }
   }
+
+  // ── Save ──────────────────────────────────────────────────────────────────
 
   Future<void> addUpdateSiteMaster() async {
     isLoading.value = true;
@@ -126,6 +181,7 @@ class SiteMasterController extends GetxController {
         email: emailController.text.trim(),
         pan: panController.text.trim(),
         gstNumber: gstNumberController.text.trim(),
+        company: selectedCompanyCode.value,
       );
 
       if (response != null && response.containsKey('message')) {
@@ -152,6 +208,8 @@ class SiteMasterController extends GetxController {
     }
   }
 
+  // ── Clear ─────────────────────────────────────────────────────────────────
+
   void clearAll() {
     siteNameController.clear();
     address1Controller.clear();
@@ -165,6 +223,8 @@ class SiteMasterController extends GetxController {
 
     selectedCity.value = '';
     selectedState.value = '';
+    selectedCompanyName.value = '';
+    selectedCompanyCode.value = '';
 
     isEditMode.value = false;
     currentSiteCode.value = '';

@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
-import 'package:shivay_construction/features/site_master/models/site_master_dm.dart';
+import 'package:shivay_construction/features/company_master/models/company_master_dm.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
@@ -11,17 +11,17 @@ import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
 import 'package:shivay_construction/widgets/app_button.dart';
 
-class SiteMasterCard extends StatelessWidget {
-  const SiteMasterCard({
+class CompanyMasterCard extends StatelessWidget {
+  const CompanyMasterCard({
     super.key,
-    required this.site,
+    required this.company,
     required this.onEdit,
     required this.onDelete,
     required this.isExpanded,
     required this.onTap,
   });
 
-  final SiteMasterDm site;
+  final CompanyMasterDm company;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final bool isExpanded;
@@ -51,6 +51,19 @@ class SiteMasterCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSectionHeader(String title, bool tablet) {
+    return Padding(
+      padding: AppPaddings.custom(bottom: tablet ? 10 : 8),
+      child: Text(
+        title,
+        style: TextStyles.kSemiBoldOutfit(
+          fontSize: tablet ? FontSizes.k14FontSize : FontSizes.k12FontSize,
+          color: kColorPrimary,
+        ),
+      ),
     );
   }
 
@@ -86,11 +99,12 @@ class SiteMasterCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Header row
                 Row(
                   children: [
                     Expanded(
                       child: Text(
-                        site.siteName,
+                        company.name,
                         style: TextStyles.kBoldOutfit(
                           fontSize: tablet
                               ? FontSizes.k20FontSize
@@ -139,7 +153,6 @@ class SiteMasterCard extends StatelessWidget {
                       ),
                     ),
                     tablet ? AppSpaces.h12 : AppSpaces.h8,
-                    // Delete Button
                     Material(
                       color: Colors.red.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(tablet ? 10 : 8),
@@ -164,7 +177,6 @@ class SiteMasterCard extends StatelessWidget {
                         ),
                       ),
                     ),
-
                     AppSpaces.h8,
                     AnimatedRotation(
                       turns: isExpanded ? 0.5 : 0,
@@ -182,37 +194,38 @@ class SiteMasterCard extends StatelessWidget {
                 Divider(height: 1, color: kColorLightGrey.withOpacity(0.5)),
                 tablet ? AppSpaces.v16 : AppSpaces.v12,
 
-                if (site.address1.isNotEmpty) ...[
+                // Always visible: address, city/state
+                if (company.address1.isNotEmpty) ...[
                   _buildInfoRow(
                     label: 'Address',
                     value: [
-                      if (site.address1.isNotEmpty) site.address1,
-                      if (site.address2.isNotEmpty) site.address2,
+                      if (company.address1.isNotEmpty) company.address1,
+                      if (company.address2.isNotEmpty) company.address2,
                     ].join(', '),
                     tablet: tablet,
                   ),
                   tablet ? AppSpaces.v12 : AppSpaces.v10,
                 ],
 
-                if (site.city.isNotEmpty || site.state.isNotEmpty) ...[
+                if (company.city.isNotEmpty || company.state.isNotEmpty) ...[
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (site.city.isNotEmpty)
+                      if (company.city.isNotEmpty)
                         Expanded(
                           child: _buildInfoRow(
                             label: 'City',
-                            value: site.city,
+                            value: company.city,
                             tablet: tablet,
                           ),
                         ),
-                      if (site.city.isNotEmpty && site.state.isNotEmpty)
+                      if (company.city.isNotEmpty && company.state.isNotEmpty)
                         tablet ? AppSpaces.h16 : AppSpaces.h12,
-                      if (site.state.isNotEmpty)
+                      if (company.state.isNotEmpty)
                         Expanded(
                           child: _buildInfoRow(
                             label: 'State',
-                            value: site.state,
+                            value: company.state,
                             tablet: tablet,
                           ),
                         ),
@@ -220,6 +233,7 @@ class SiteMasterCard extends StatelessWidget {
                   ),
                 ],
 
+                // Expandable section
                 AnimatedCrossFade(
                   firstChild: const SizedBox.shrink(),
                   secondChild: Column(
@@ -227,34 +241,56 @@ class SiteMasterCard extends StatelessWidget {
                     children: [
                       tablet ? AppSpaces.v12 : AppSpaces.v10,
 
-                      if (site.pinCode.isNotEmpty) ...[
-                        _buildInfoRow(
-                          label: 'Pin Code',
-                          value: site.pinCode,
-                          tablet: tablet,
+                      if (company.zip.isNotEmpty ||
+                          company.country.isNotEmpty) ...[
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (company.zip.isNotEmpty)
+                              Expanded(
+                                child: _buildInfoRow(
+                                  label: 'ZIP Code',
+                                  value: company.zip,
+                                  tablet: tablet,
+                                ),
+                              ),
+                            if (company.zip.isNotEmpty &&
+                                company.country.isNotEmpty)
+                              tablet ? AppSpaces.h16 : AppSpaces.h12,
+                            if (company.country.isNotEmpty)
+                              Expanded(
+                                child: _buildInfoRow(
+                                  label: 'Country',
+                                  value: company.country,
+                                  tablet: tablet,
+                                ),
+                              ),
+                          ],
                         ),
                         tablet ? AppSpaces.v12 : AppSpaces.v10,
                       ],
 
-                      if (site.phone.isNotEmpty || site.fax.isNotEmpty) ...[
+                      if (company.phone.isNotEmpty ||
+                          company.fax.isNotEmpty) ...[
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (site.phone.isNotEmpty)
+                            if (company.phone.isNotEmpty)
                               Expanded(
                                 child: _buildInfoRow(
                                   label: 'Phone',
-                                  value: site.phone,
+                                  value: company.phone,
                                   tablet: tablet,
                                 ),
                               ),
-                            if (site.phone.isNotEmpty && site.fax.isNotEmpty)
+                            if (company.phone.isNotEmpty &&
+                                company.fax.isNotEmpty)
                               tablet ? AppSpaces.h16 : AppSpaces.h12,
-                            if (site.fax.isNotEmpty)
+                            if (company.fax.isNotEmpty)
                               Expanded(
                                 child: _buildInfoRow(
                                   label: 'Fax',
-                                  value: site.fax,
+                                  value: company.fax,
                                   tablet: tablet,
                                 ),
                               ),
@@ -263,48 +299,266 @@ class SiteMasterCard extends StatelessWidget {
                         tablet ? AppSpaces.v12 : AppSpaces.v10,
                       ],
 
-                      if (site.email.isNotEmpty) ...[
+                      if (company.email.isNotEmpty) ...[
                         _buildInfoRow(
                           label: 'Email',
-                          value: site.email,
-                          tablet: tablet,
-                        ),
-                        tablet ? AppSpaces.v12 : AppSpaces.v10,
-                      ],
-                      if (site.companyName.isNotEmpty) ...[
-                        _buildInfoRow(
-                          label: 'Company',
-                          value: site.companyName,
+                          value: company.email,
                           tablet: tablet,
                         ),
                         tablet ? AppSpaces.v12 : AppSpaces.v10,
                       ],
 
-                      if (site.pan.isNotEmpty || site.gstNumber.isNotEmpty) ...[
+                      if (company.mgmtEmail.isNotEmpty) ...[
+                        _buildInfoRow(
+                          label: 'Management Email',
+                          value: company.mgmtEmail,
+                          tablet: tablet,
+                        ),
+                        tablet ? AppSpaces.v12 : AppSpaces.v10,
+                      ],
+
+                      if (company.url.isNotEmpty) ...[
+                        _buildInfoRow(
+                          label: 'Website URL',
+                          value: company.url,
+                          tablet: tablet,
+                        ),
+                        tablet ? AppSpaces.v12 : AppSpaces.v10,
+                      ],
+
+                      if (company.pan.isNotEmpty ||
+                          company.gstNumber.isNotEmpty) ...[
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (site.pan.isNotEmpty)
+                            if (company.pan.isNotEmpty)
                               Expanded(
                                 child: _buildInfoRow(
                                   label: 'PAN Number',
-                                  value: site.pan,
+                                  value: company.pan,
                                   tablet: tablet,
                                 ),
                               ),
-                            if (site.pan.isNotEmpty &&
-                                site.gstNumber.isNotEmpty)
+                            if (company.pan.isNotEmpty &&
+                                company.gstNumber.isNotEmpty)
                               tablet ? AppSpaces.h16 : AppSpaces.h12,
-                            if (site.gstNumber.isNotEmpty)
+                            if (company.gstNumber.isNotEmpty)
                               Expanded(
                                 child: _buildInfoRow(
                                   label: 'GST Number',
-                                  value: site.gstNumber,
+                                  value: company.gstNumber,
                                   tablet: tablet,
                                 ),
                               ),
                           ],
                         ),
+                        tablet ? AppSpaces.v12 : AppSpaces.v10,
+                      ],
+
+                      if (company.cinNo.isNotEmpty ||
+                          company.msmeNo.isNotEmpty) ...[
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (company.cinNo.isNotEmpty)
+                              Expanded(
+                                child: _buildInfoRow(
+                                  label: 'CIN No',
+                                  value: company.cinNo,
+                                  tablet: tablet,
+                                ),
+                              ),
+                            if (company.cinNo.isNotEmpty &&
+                                company.msmeNo.isNotEmpty)
+                              tablet ? AppSpaces.h16 : AppSpaces.h12,
+                            if (company.msmeNo.isNotEmpty)
+                              Expanded(
+                                child: _buildInfoRow(
+                                  label: 'MSME No',
+                                  value: company.msmeNo,
+                                  tablet: tablet,
+                                ),
+                              ),
+                          ],
+                        ),
+                        tablet ? AppSpaces.v12 : AppSpaces.v10,
+                      ],
+
+                      // Statutory Codes
+                      if (company.uan.isNotEmpty ||
+                          company.ptCode.isNotEmpty ||
+                          company.estCode.isNotEmpty ||
+                          company.pfCode.isNotEmpty ||
+                          company.esiCode.isNotEmpty) ...[
+                        Divider(
+                          height: 1,
+                          color: kColorLightGrey.withOpacity(0.5),
+                        ),
+                        tablet ? AppSpaces.v12 : AppSpaces.v10,
+                        _buildSectionHeader('Statutory Codes', tablet),
+                        if (company.uan.isNotEmpty || company.ptCode.isNotEmpty)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (company.uan.isNotEmpty)
+                                Expanded(
+                                  child: _buildInfoRow(
+                                    label: 'UAN',
+                                    value: company.uan,
+                                    tablet: tablet,
+                                  ),
+                                ),
+                              if (company.uan.isNotEmpty &&
+                                  company.ptCode.isNotEmpty)
+                                tablet ? AppSpaces.h16 : AppSpaces.h12,
+                              if (company.ptCode.isNotEmpty)
+                                Expanded(
+                                  child: _buildInfoRow(
+                                    label: 'PT Code',
+                                    value: company.ptCode,
+                                    tablet: tablet,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        if ((company.uan.isNotEmpty ||
+                                company.ptCode.isNotEmpty) &&
+                            (company.estCode.isNotEmpty ||
+                                company.pfCode.isNotEmpty))
+                          tablet ? AppSpaces.v12 : AppSpaces.v10,
+                        if (company.estCode.isNotEmpty ||
+                            company.pfCode.isNotEmpty)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (company.estCode.isNotEmpty)
+                                Expanded(
+                                  child: _buildInfoRow(
+                                    label: 'EST Code',
+                                    value: company.estCode,
+                                    tablet: tablet,
+                                  ),
+                                ),
+                              if (company.estCode.isNotEmpty &&
+                                  company.pfCode.isNotEmpty)
+                                tablet ? AppSpaces.h16 : AppSpaces.h12,
+                              if (company.pfCode.isNotEmpty)
+                                Expanded(
+                                  child: _buildInfoRow(
+                                    label: 'PF Code',
+                                    value: company.pfCode,
+                                    tablet: tablet,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        if (company.esiCode.isNotEmpty) ...[
+                          tablet ? AppSpaces.v12 : AppSpaces.v10,
+                          _buildInfoRow(
+                            label: 'ESI Code',
+                            value: company.esiCode,
+                            tablet: tablet,
+                          ),
+                        ],
+                        tablet ? AppSpaces.v12 : AppSpaces.v10,
+                      ],
+
+                      // Bank Details
+                      if (company.coBankName1.isNotEmpty ||
+                          company.coBankName2.isNotEmpty) ...[
+                        Divider(
+                          height: 1,
+                          color: kColorLightGrey.withOpacity(0.5),
+                        ),
+                        tablet ? AppSpaces.v12 : AppSpaces.v10,
+                        _buildSectionHeader('Bank Details', tablet),
+
+                        if (company.coBankName1.isNotEmpty) ...[
+                          _buildInfoRow(
+                            label: 'Bank 1 - Name',
+                            value: company.coBankName1,
+                            tablet: tablet,
+                          ),
+                          tablet ? AppSpaces.v8 : AppSpaces.v6,
+                          if (company.coBankBranch1.isNotEmpty ||
+                              company.coBankAcNo1.isNotEmpty)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (company.coBankBranch1.isNotEmpty)
+                                  Expanded(
+                                    child: _buildInfoRow(
+                                      label: 'Branch',
+                                      value: company.coBankBranch1,
+                                      tablet: tablet,
+                                    ),
+                                  ),
+                                if (company.coBankBranch1.isNotEmpty &&
+                                    company.coBankAcNo1.isNotEmpty)
+                                  tablet ? AppSpaces.h16 : AppSpaces.h12,
+                                if (company.coBankAcNo1.isNotEmpty)
+                                  Expanded(
+                                    child: _buildInfoRow(
+                                      label: 'Account No',
+                                      value: company.coBankAcNo1,
+                                      tablet: tablet,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          if (company.coBankIfsc1.isNotEmpty) ...[
+                            tablet ? AppSpaces.v8 : AppSpaces.v6,
+                            _buildInfoRow(
+                              label: 'IFSC Code',
+                              value: company.coBankIfsc1,
+                              tablet: tablet,
+                            ),
+                          ],
+                          tablet ? AppSpaces.v12 : AppSpaces.v10,
+                        ],
+
+                        if (company.coBankName2.isNotEmpty) ...[
+                          _buildInfoRow(
+                            label: 'Bank 2 - Name',
+                            value: company.coBankName2,
+                            tablet: tablet,
+                          ),
+                          tablet ? AppSpaces.v8 : AppSpaces.v6,
+                          if (company.coBankBranch2.isNotEmpty ||
+                              company.coBankAcNo2.isNotEmpty)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (company.coBankBranch2.isNotEmpty)
+                                  Expanded(
+                                    child: _buildInfoRow(
+                                      label: 'Branch',
+                                      value: company.coBankBranch2,
+                                      tablet: tablet,
+                                    ),
+                                  ),
+                                if (company.coBankBranch2.isNotEmpty &&
+                                    company.coBankAcNo2.isNotEmpty)
+                                  tablet ? AppSpaces.h16 : AppSpaces.h12,
+                                if (company.coBankAcNo2.isNotEmpty)
+                                  Expanded(
+                                    child: _buildInfoRow(
+                                      label: 'Account No',
+                                      value: company.coBankAcNo2,
+                                      tablet: tablet,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          if (company.coBankIfsc2.isNotEmpty) ...[
+                            tablet ? AppSpaces.v8 : AppSpaces.v6,
+                            _buildInfoRow(
+                              label: 'IFSC Code',
+                              value: company.coBankIfsc2,
+                              tablet: tablet,
+                            ),
+                          ],
+                        ],
                       ],
                     ],
                   ),
@@ -378,7 +632,7 @@ class SiteMasterCard extends StatelessWidget {
                     tablet ? AppSpaces.h12 : AppSpaces.h10,
                     Expanded(
                       child: Text(
-                        'Delete Site',
+                        'Delete Company',
                         style: TextStyles.kSemiBoldOutfit(
                           fontSize: tablet
                               ? FontSizes.k22FontSize
@@ -396,7 +650,7 @@ class SiteMasterCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Are you sure you want to delete "${site.siteName}"?',
+                      'Are you sure you want to delete "${company.name}"?',
                       style: TextStyles.kRegularOutfit(
                         fontSize: tablet
                             ? FontSizes.k16FontSize
@@ -419,9 +673,7 @@ class SiteMasterCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: () {
-                              Get.back();
-                            },
+                            onPressed: () => Get.back(),
                             style: OutlinedButton.styleFrom(
                               side: BorderSide(
                                 color: kColorLightGrey,

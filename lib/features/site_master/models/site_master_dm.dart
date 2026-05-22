@@ -11,6 +11,8 @@ class SiteMasterDm {
   final String email;
   final String pan;
   final String gstNumber;
+  final String company;
+  final String companyName;
 
   SiteMasterDm({
     required this.siteCode,
@@ -25,6 +27,8 @@ class SiteMasterDm {
     required this.email,
     required this.pan,
     required this.gstNumber,
+    required this.company,
+    required this.companyName,
   });
 
   factory SiteMasterDm.fromJson(Map<String, dynamic> json) {
@@ -41,6 +45,8 @@ class SiteMasterDm {
       email: json['Email'] ?? '',
       pan: json['Pan'] ?? '',
       gstNumber: json['GSTNumber'] ?? '',
+      company: json['Company'] ?? '',
+      companyName: json['CompanyName'] ?? '',
     );
   }
 
@@ -58,6 +64,8 @@ class SiteMasterDm {
       'Email': email,
       'Pan': pan,
       'GSTNumber': gstNumber,
+      'Company': company,
+      'CompanyName': companyName,
     };
   }
 }

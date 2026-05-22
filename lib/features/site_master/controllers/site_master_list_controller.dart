@@ -17,7 +17,7 @@ class SiteMasterListController extends GetxController {
     await getSites();
   }
 
-  Future<void> getSites() async {
+  Future<void> getSites({String company = ''}) async {
     isLoading.value = true;
     try {
       final fetchedSites = await SiteMasterListRepo.getSites();
@@ -39,7 +39,8 @@ class SiteMasterListController extends GetxController {
           return site.siteName.toLowerCase().contains(query.toLowerCase()) ||
               site.siteCode.toLowerCase().contains(query.toLowerCase()) ||
               site.city.toLowerCase().contains(query.toLowerCase()) ||
-              site.state.toLowerCase().contains(query.toLowerCase());
+              site.state.toLowerCase().contains(query.toLowerCase()) ||
+              site.companyName.toLowerCase().contains(query.toLowerCase());
         }).toList(),
       );
     }
