@@ -109,15 +109,20 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                       borderRadius: BorderRadius.circular(tablet ? 10 : 8),
                       child: InkWell(
                         onTap: () async {
-                          await widget.controller.getOrderDetailsForCard(
+                          await widget.controller.printPurchaseOrder(
                             widget.order.invNo,
                           );
-                          PurchaseOrderPdfScreen.generatePurchaseOrderPdf(
-                            order: widget.order,
-                            orderDetails: widget.controller.orderDetails
-                                .toList(),
-                          );
                         },
+                        // onTap: () async {
+                        //   await widget.controller.getOrderDetailsForCard(
+                        //     widget.order.invNo,
+                        //   );
+                        //   PurchaseOrderPdfScreen.generatePurchaseOrderPdf(
+                        //     order: widget.order,
+                        //     orderDetails: widget.controller.orderDetails
+                        //         .toList(),
+                        //   );
+                        // },
                         borderRadius: BorderRadius.circular(tablet ? 10 : 8),
                         child: Container(
                           padding: tablet
