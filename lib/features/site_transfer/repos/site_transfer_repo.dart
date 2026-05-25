@@ -8,7 +8,8 @@ class SiteTransferRepo {
     required String gdCode,
   }) async {
     String? token = await SecureStorageHelper.read('token');
-
+    print(siteCode);
+    print(gdCode);
     try {
       final response = await ApiService.getRequest(
         endpoint: '/Transfer/getSiteStock?SiteCode=$siteCode&GDCode=$gdCode',
@@ -88,7 +89,7 @@ class SiteTransferRepo {
         "ItemData": itemData,
         "Remarks": remarks,
       };
-    //  print(requestBody);
+      //  print(requestBody);
       final response = await ApiService.postRequest(
         endpoint: '/Transfer/siteTransferReceive',
         requestBody: requestBody,

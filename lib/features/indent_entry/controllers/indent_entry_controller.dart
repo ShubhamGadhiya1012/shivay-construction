@@ -6,23 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/godown_master/models/godown_master_dm.dart';
 import 'package:shivay_construction/features/godown_master/repos/godown_master_repo.dart';
 import 'package:shivay_construction/features/indent_entry/controllers/indents_controller.dart';
 import 'package:shivay_construction/features/indent_entry/repos/indent_entry_repo.dart';
 import 'package:shivay_construction/features/item_master/models/item_master_dm.dart';
 import 'package:shivay_construction/features/item_master/repos/item_master_list_repo.dart';
-import 'package:shivay_construction/features/purchase_order_entry/repos/purchase_order_repo.dart';
 import 'package:shivay_construction/features/site_master/models/site_master_dm.dart';
 import 'package:shivay_construction/features/site_master/repos/site_master_list_repo.dart';
 import 'package:shivay_construction/services/api_service.dart';
-import 'package:shivay_construction/styles/font_sizes.dart';
-import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
-import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
-import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
-import 'package:shivay_construction/widgets/app_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class IndentEntryController extends GetxController {
@@ -75,20 +68,32 @@ class IndentEntryController extends GetxController {
     }
   }
 
+  /// UPDATED METHOD: Now loads godowns for selected site
   void onSiteSelected(String? siteName) async {
-    selectedSiteName.value = siteName!;
-    var selectedSiteObj = sites.firstWhere((s) => s.siteName == siteName);
-    selectedSiteCode.value = selectedSiteObj.siteCode;
+    if (siteName == null || siteName.isEmpty) return;
 
-    selectedGodownName.value = '';
-    selectedGodownCode.value = '';
+    try {
+      selectedSiteName.value = siteName;
+      var selectedSiteObj = sites.firstWhere((s) => s.siteName == siteName);
+      selectedSiteCode.value = selectedSiteObj.siteCode;
+
+      // Load godowns for the selected site
+      await getGodowns(selectedSiteObj.siteCode);
+
+      // Reset godown selection
+      selectedGodownName.value = '';
+      selectedGodownCode.value = '';
+    } catch (e) {
+      showErrorSnackbar('Error', 'Failed to load godowns: ${e.toString()}');
+    }
   }
 
+  /// UPDATED METHOD: Now filters godowns based on siteCode parameter
   Future<void> getGodowns([String siteCode = '']) async {
     try {
       isLoading.value = true;
       final fetchedGodowns = await GodownMasterRepo.getGodowns(
-        siteCode: siteCode,
+        siteCode: siteCode.isNotEmpty ? siteCode : selectedSiteCode.value,
       );
       final parentGodowns = fetchedGodowns
           .where((gd) => !gd.isSubGodown)
@@ -96,18 +101,29 @@ class IndentEntryController extends GetxController {
       godowns.assignAll(parentGodowns);
       godownNames.assignAll(parentGodowns.map((gd) => gd.gdName).toList());
     } catch (e) {
-      showErrorSnackbar('Error', e.toString());
+      showErrorSnackbar('Error', 'Failed to load godowns: ${e.toString()}');
     } finally {
       isLoading.value = false;
     }
   }
 
+  /// UPDATED METHOD: Now handles godown selection properly
   void onGodownSelected(String? godownName) {
-    selectedGodownName.value = godownName ?? '';
-    var selectedGodownObj = godowns.firstWhereOrNull(
-      (gd) => gd.gdName == godownName,
-    );
-    selectedGodownCode.value = selectedGodownObj?.gdCode ?? '';
+    if (godownName == null || godownName.isEmpty) {
+      selectedGodownName.value = '';
+      selectedGodownCode.value = '';
+      return;
+    }
+
+    try {
+      selectedGodownName.value = godownName;
+      var selectedGodownObj = godowns.firstWhereOrNull(
+        (gd) => gd.gdName == godownName,
+      );
+      selectedGodownCode.value = selectedGodownObj?.gdCode ?? '';
+    } catch (e) {
+      showErrorSnackbar('Error', 'Failed to select godown: ${e.toString()}');
+    }
   }
 
   Future<void> getItems() async {
@@ -124,126 +140,16 @@ class IndentEntryController extends GetxController {
   }
 
   void onItemSelected(String? itemName) async {
-    selectedItemName.value = itemName!;
-    var selectedItemObj = items.firstWhere((item) => item.iName == itemName);
-    selectedItemCode.value = selectedItemObj.iCode;
-    selectedUnit.value = selectedItemObj.unit;
-    qtyController.clear();
+    if (itemName == null || itemName.isEmpty) return;
 
     try {
-      final taxList = await PurchaseOrderRepo.getItemTax(
-        tCode: '',
-        iCode: selectedItemObj.iCode,
-      );
-
-      if (taxList.isEmpty ||
-          (taxList.first.hsnNo == null ||
-              taxList.first.hsnNo!.trim().isEmpty)) {
-        selectedItemName.value = '';
-        selectedItemCode.value = '';
-        selectedUnit.value = '';
-
-        Get.dialog(
-          Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            child: Container(
-              decoration: BoxDecoration(
-                color: kColorWhite,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: kColorRed.withOpacity(0.15),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: AppPaddings.combined(horizontal: 20, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: kColorRed.withOpacity(0.08),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: AppPaddings.p10,
-                          decoration: BoxDecoration(
-                            color: kColorRed.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(
-                            Icons.warning_amber_rounded,
-                            color: kColorRed,
-                            size: 22,
-                          ),
-                        ),
-                        AppSpaces.h10,
-                        Expanded(
-                          child: Text(
-                            'Item Not Allowed',
-                            style: TextStyles.kSemiBoldOutfit(
-                              fontSize: FontSizes.k18FontSize,
-                              color: kColorTextPrimary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: AppPaddings.p20,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '"${selectedItemObj.iName}"',
-                          style: TextStyles.kSemiBoldOutfit(
-                            fontSize: FontSizes.k14FontSize,
-                            color: kColorTextPrimary,
-                          ),
-                        ),
-                        AppSpaces.v8,
-                        Text(
-                          'This item does not have an HSN No. assigned. You cannot create an indent for this item.',
-                          style: TextStyles.kRegularOutfit(
-                            fontSize: FontSizes.k14FontSize,
-                            color: kColorDarkGrey,
-                          ),
-                        ),
-                        AppSpaces.v20,
-                        AppButton(
-                          title: 'OK',
-                          buttonColor: kColorRed,
-                          titleColor: kColorWhite,
-                          buttonHeight: 48,
-                          onPressed: () => Get.back(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          barrierDismissible: false,
-        );
-      }
+      selectedItemName.value = itemName;
+      var selectedItemObj = items.firstWhere((item) => item.iName == itemName);
+      selectedItemCode.value = selectedItemObj.iCode;
+      selectedUnit.value = selectedItemObj.unit;
+      qtyController.clear();
     } catch (e) {
-      showErrorSnackbar('Error', 'Failed to validate item: ${e.toString()}');
-      selectedItemName.value = '';
-      selectedItemCode.value = '';
-      selectedUnit.value = '';
+      showErrorSnackbar('Error', 'Failed to select item: ${e.toString()}');
     }
   }
 
@@ -400,11 +306,15 @@ class IndentEntryController extends GetxController {
   }
 
   void removeFile(int index) {
-    attachmentFiles.removeAt(index);
+    if (index >= 0 && index < attachmentFiles.length) {
+      attachmentFiles.removeAt(index);
+    }
   }
 
   void removeExistingAttachment(int index) {
-    existingAttachmentUrls.removeAt(index);
+    if (index >= 0 && index < existingAttachmentUrls.length) {
+      existingAttachmentUrls.removeAt(index);
+    }
   }
 
   Future<void> openAttachment(String fileUrl) async {
@@ -444,9 +354,7 @@ class IndentEntryController extends GetxController {
       var response = await IndentEntryRepo.saveIndentEntry(
         invNo: isEditMode.value ? currentInvNo.value : '',
         date: _convertToApiDateFormat(dateController.text),
-
         siteCode: selectedSiteCode.value,
-
         itemData: itemsToSend.toList(),
         newFiles: attachmentFiles.toList(),
         existingAttachments: existingAttachmentUrls.toList(),

@@ -1263,17 +1263,26 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                   tablet ? AppSpaces.v12 : AppSpaces.v10,
                 ],
 
-                Obx(
-                  () => AppDropdown(
-                    items: _controller.godownNames,
+                Obx(() {
+                  final siteCode = item['SiteCode']; // Get from selected item
+                  final filteredGodownNames = _controller.getGodownNamesBySite(
+                    siteCode,
+                  );
+
+                  return AppDropdown(
+                    items: filteredGodownNames,
                     hintText: 'Head',
-                    onChanged: (val) => _controller.onGodownSelected(key, val),
+                    onChanged: (val) => _controller.onGodownSelected(
+                      key,
+                      val,
+                      siteCode: siteCode,
+                    ),
                     selectedItem:
                         (_controller.selectedGodownName[key] ?? '').isNotEmpty
                         ? _controller.selectedGodownName[key]
                         : null,
-                  ),
-                ),
+                  );
+                }),
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
 
                 Row(

@@ -164,7 +164,7 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
                                     : null,
                                 validatorText: 'Please select a site',
                               ),
-                            ), // After site dropdown Obx block, add:
+                            ),
 
                             tablet ? AppSpaces.v20 : AppSpaces.v14,
                             Obx(
@@ -367,6 +367,22 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
                                       : 0.45.screenWidth,
                                   title: '+ Add Item',
                                   onPressed: () {
+                                    // VALIDATE SITE SELECTION BEFORE ADDING ITEM
+                                    if (_controller
+                                            .selectedSiteCode
+                                            .value
+                                            .isEmpty ||
+                                        _controller
+                                            .selectedSiteName
+                                            .value
+                                            .isEmpty) {
+                                      showErrorSnackbar(
+                                        'Site Required',
+                                        'Please select a site before adding items.',
+                                      );
+                                      return;
+                                    }
+
                                     _controller.prepareAddItem();
                                     _showItemDialog();
                                   },
@@ -1070,3 +1086,4 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
     );
   }
 }
+  

@@ -234,7 +234,7 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                           ),
                           AppSpaces.v4,
                           _buildInfoRow(
-                            label: 'Godown',
+                            label: 'Head',
                             value: widget.transfer.fromGodown,
                             tablet: tablet,
                           ),
@@ -263,7 +263,7 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                           ),
                           AppSpaces.v4,
                           _buildInfoRow(
-                            label: 'Godown',
+                            label: 'Head',
                             value: widget.transfer.toGodown,
                             tablet: tablet,
                           ),
@@ -421,7 +421,7 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                                         tablet,
                                       ),
                                       _buildQtyInfo(
-                                        'Dispute Godown Qty',
+                                        'Dispute Head Qty',
                                         detail.autoReturnQty,
                                         tablet,
                                       ),

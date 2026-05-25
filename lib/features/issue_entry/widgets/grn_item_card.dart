@@ -210,8 +210,12 @@ class GrnItemCardForIssue extends StatelessWidget {
                 Obx(() {
                   final selectedName =
                       controller.selectedItemGodownName[key] ?? '';
+                  final filteredGodowns = controller.godowns
+                      .where((gd) => gd.siteCode == grn.siteCode)
+                      .map((gd) => gd.gdName)
+                      .toList();
                   return AppDropdown(
-                    items: controller.godownNames,
+                    items: filteredGodowns,
                     hintText: 'Head',
                     onChanged: (val) =>
                         controller.onItemGodownSelected(key, val),

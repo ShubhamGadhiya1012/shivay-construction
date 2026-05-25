@@ -6,10 +6,12 @@ import 'package:shivay_construction/features/purchase_order_entry/models/auth_in
 import 'package:shivay_construction/features/purchase_order_entry/screens/last_purchase_rate_screen.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
+import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
+import 'package:shivay_construction/widgets/app_button.dart';
 import 'package:shivay_construction/widgets/app_date_picker_text_form_field.dart';
 import 'package:shivay_construction/widgets/app_dropdown.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
@@ -129,6 +131,172 @@ class AuthIndentItemCard extends StatelessWidget {
                           final remarkController =
                               controller.remarkControllers[key];
 
+                          Widget buildHsnInfoRow() {
+                            return Obx(() {
+                              final hsn =
+                                  controller
+                                          .selectedHsnForIndent[key]
+                                          ?.isNotEmpty ==
+                                      true
+                                  ? controller.selectedHsnForIndent[key]!
+                                  : indent.hsnNo;
+
+                              if (hsn.isEmpty) return const SizedBox.shrink();
+
+                              return Container(
+                                margin: AppPaddings.custom(top: 6),
+                                padding: tablet
+                                    ? AppPaddings.combined(
+                                        horizontal: 10,
+                                        vertical: 6,
+                                      )
+                                    : AppPaddings.combined(
+                                        horizontal: 8,
+                                        vertical: 5,
+                                      ),
+                                decoration: BoxDecoration(
+                                  color: kColorGreen.withOpacity(0.07),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: kColorGreen.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'HSN: $hsn',
+                                      style: TextStyles.kMediumOutfit(
+                                        fontSize: tablet
+                                            ? FontSizes.k12FontSize
+                                            : FontSizes.k10FontSize,
+                                        color: kColorGreen,
+                                      ),
+                                    ),
+
+                                    if (indent.igst > 0 ||
+                                        indent.cgst > 0 ||
+                                        indent.sgst > 0) ...[
+                                      AppSpaces.v4,
+
+                                      Text(
+                                        'IGST: ${indent.igst}%   '
+                                        'CGST: ${indent.cgst}%   '
+                                        'SGST: ${indent.sgst}%',
+                                        style: TextStyles.kRegularOutfit(
+                                          fontSize: tablet
+                                              ? FontSizes.k12FontSize
+                                              : FontSizes.k10FontSize,
+                                          color: kColorBlack,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              );
+                            });
+                          }
+
+                          Widget buildHsnDropdownRow() {
+                            return Obx(() {
+                              final currentHsn =
+                                  controller
+                                          .selectedHsnForIndent[key]
+                                          ?.isNotEmpty ==
+                                      true
+                                  ? controller.selectedHsnForIndent[key]!
+                                  : indent.hsnNo;
+
+                              if (currentHsn.isNotEmpty) {
+                                return const SizedBox.shrink();
+                              }
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  tablet ? AppSpaces.v10 : AppSpaces.v8,
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: AppDropdown(
+                                          hintText: 'Assign HSN No',
+                                          items: controller.hsnNumbers,
+                                          selectedItem:
+                                              controller
+                                                      .selectedHsnForIndent[key]
+                                                      ?.isNotEmpty ==
+                                                  true
+                                              ? controller
+                                                    .selectedHsnForIndent[key]
+                                              : null,
+                                          onChanged: (value) {
+                                            if (value != null &&
+                                                value.isNotEmpty) {
+                                              controller
+                                                      .selectedHsnForIndent[key] =
+                                                  value;
+                                              controller.selectedHsnForIndent
+                                                  .refresh();
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                      tablet ? AppSpaces.h10 : AppSpaces.h8,
+                                      Material(
+                                        color: kColorPrimary.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(
+                                          tablet ? 8 : 6,
+                                        ),
+                                        child: InkWell(
+                                          borderRadius: BorderRadius.circular(
+                                            tablet ? 8 : 6,
+                                          ),
+                                          onTap: () {
+                                            final selectedHsn =
+                                                controller
+                                                    .selectedHsnForIndent[key] ??
+                                                '';
+                                            if (selectedHsn.isEmpty) {
+                                              showErrorSnackbar(
+                                                'Error',
+                                                'Please select an HSN No',
+                                              );
+                                              return;
+                                            }
+                                            _showHsnConfirmDialog(
+                                              context,
+                                              tablet: tablet,
+                                              iCode: indent.iCode,
+                                              iName: indent.iName,
+                                              hsnNo: selectedHsn,
+                                              key: key,
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: tablet
+                                                ? AppPaddings.combined(
+                                                    horizontal: 12,
+                                                    vertical: 12,
+                                                  )
+                                                : AppPaddings.combined(
+                                                    horizontal: 10,
+                                                    vertical: 10,
+                                                  ),
+                                            child: Icon(
+                                              Icons.check_rounded,
+                                              size: tablet ? 20 : 18,
+                                              color: kColorPrimary,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            });
+                          }
+
                           return GestureDetector(
                             onTap: () => onIndentTap(index),
                             onLongPress: () => onIndentLongPress(index),
@@ -201,15 +369,13 @@ class AuthIndentItemCard extends StatelessWidget {
                                                             tablet ? 6 : 5,
                                                           ),
                                                       child: InkWell(
-                                                        onTap: () {
-                                                          Get.to(
-                                                            () =>
-                                                                SiteWiseStockScreen(
-                                                                  iCode: indent
-                                                                      .iCode,
-                                                                ),
-                                                          );
-                                                        },
+                                                        onTap: () => Get.to(
+                                                          () =>
+                                                              SiteWiseStockScreen(
+                                                                iCode: indent
+                                                                    .iCode,
+                                                              ),
+                                                        ),
                                                         borderRadius:
                                                             BorderRadius.circular(
                                                               tablet ? 6 : 5,
@@ -246,15 +412,13 @@ class AuthIndentItemCard extends StatelessWidget {
                                                             tablet ? 6 : 5,
                                                           ),
                                                       child: InkWell(
-                                                        onTap: () {
-                                                          Get.to(
-                                                            () =>
-                                                                LastPurchaseRateScreen(
-                                                                  iCode: indent
-                                                                      .iCode,
-                                                                ),
-                                                          );
-                                                        },
+                                                        onTap: () => Get.to(
+                                                          () =>
+                                                              LastPurchaseRateScreen(
+                                                                iCode: indent
+                                                                    .iCode,
+                                                              ),
+                                                        ),
                                                         borderRadius:
                                                             BorderRadius.circular(
                                                               tablet ? 6 : 5,
@@ -366,6 +530,8 @@ class AuthIndentItemCard extends StatelessWidget {
                                                     ),
                                               ),
                                             ],
+
+                                            buildHsnInfoRow(),
                                           ],
                                         ),
                                       ),
@@ -384,30 +550,35 @@ class AuthIndentItemCard extends StatelessWidget {
                                     ],
                                   ),
 
+                                  buildHsnDropdownRow(),
+
                                   if (indent.isSelected &&
                                       qtyController != null &&
                                       priceController != null &&
                                       dateController != null) ...[
                                     tablet ? AppSpaces.v12 : AppSpaces.v10,
-
                                     AppDatePickerTextFormField(
                                       dateController: dateController,
                                       hintText: 'Required Date',
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Required';
-                                        }
-                                        return null;
-                                      },
+                                      validator: (value) =>
+                                          (value == null || value.isEmpty)
+                                          ? 'Required'
+                                          : null,
                                     ),
                                     tablet ? AppSpaces.v12 : AppSpaces.v10,
-
                                     Obx(() {
+                                      final siteCode = indent.siteCode;
+                                      final filteredGodownNames = controller
+                                          .getGodownNamesBySite(siteCode);
                                       return AppDropdown(
-                                        items: controller.godownNames,
+                                        items: filteredGodownNames,
                                         hintText: 'Head',
-                                        onChanged: (val) => controller
-                                            .onGodownSelected(key, val),
+                                        onChanged: (val) =>
+                                            controller.onGodownSelected(
+                                              key,
+                                              val,
+                                              siteCode: siteCode,
+                                            ),
                                         selectedItem:
                                             (controller.selectedGodownName[key] ??
                                                     '')
@@ -417,7 +588,6 @@ class AuthIndentItemCard extends StatelessWidget {
                                       );
                                     }),
                                     tablet ? AppSpaces.v12 : AppSpaces.v10,
-
                                     Row(
                                       children: [
                                         Expanded(
@@ -437,29 +607,23 @@ class AuthIndentItemCard extends StatelessWidget {
                                               tablet
                                                   ? AppSpaces.v6
                                                   : AppSpaces.v4,
-                                              AbsorbPointer(
-                                                absorbing: false,
-                                                child: AppTextFormField(
-                                                  controller: qtyController,
-                                                  hintText: 'Enter Quantity',
-                                                  keyboardType:
-                                                      TextInputType.number,
-                                                  floatingLabelRequired: false,
-                                                  validator: (value) {
-                                                    if (value == null ||
-                                                        value.isEmpty) {
-                                                      return 'Required';
-                                                    }
-                                                    final qty = double.tryParse(
-                                                      value,
-                                                    );
-                                                    if (qty == null ||
-                                                        qty <= 0) {
-                                                      return 'Must be > 0';
-                                                    }
-                                                    return null;
-                                                  },
-                                                ),
+                                              AppTextFormField(
+                                                controller: qtyController,
+                                                hintText: 'Enter Quantity',
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                floatingLabelRequired: false,
+                                                validator: (value) {
+                                                  if (value == null ||
+                                                      value.isEmpty)
+                                                    return 'Required';
+                                                  final qty = double.tryParse(
+                                                    value,
+                                                  );
+                                                  if (qty == null || qty <= 0)
+                                                    return 'Must be > 0';
+                                                  return null;
+                                                },
                                               ),
                                             ],
                                           ),
@@ -482,37 +646,31 @@ class AuthIndentItemCard extends StatelessWidget {
                                               tablet
                                                   ? AppSpaces.v6
                                                   : AppSpaces.v4,
-                                              AbsorbPointer(
-                                                absorbing: false,
-                                                child: AppTextFormField(
-                                                  controller: priceController,
-                                                  hintText: 'Enter Price',
-                                                  keyboardType:
-                                                      TextInputType.number,
-                                                  floatingLabelRequired: false,
-                                                  validator: (value) {
-                                                    if (value == null ||
-                                                        value.isEmpty) {
-                                                      return 'Required';
-                                                    }
-                                                    final price =
-                                                        double.tryParse(value);
-                                                    if (price == null ||
-                                                        price <= 0) {
-                                                      return 'Must be > 0';
-                                                    }
-                                                    return null;
-                                                  },
-                                                ),
+                                              AppTextFormField(
+                                                controller: priceController,
+                                                hintText: 'Enter Price',
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                floatingLabelRequired: false,
+                                                validator: (value) {
+                                                  if (value == null ||
+                                                      value.isEmpty)
+                                                    return 'Required';
+                                                  final price = double.tryParse(
+                                                    value,
+                                                  );
+                                                  if (price == null ||
+                                                      price <= 0)
+                                                    return 'Must be > 0';
+                                                  return null;
+                                                },
                                               ),
                                             ],
                                           ),
                                         ),
                                       ],
                                     ),
-
                                     tablet ? AppSpaces.v12 : AppSpaces.v10,
-
                                     Obx(() {
                                       final percCtrl = controller
                                           .discountPercControllers[key];
@@ -600,9 +758,7 @@ class AuthIndentItemCard extends StatelessWidget {
                                         ],
                                       );
                                     }),
-
                                     tablet ? AppSpaces.v12 : AppSpaces.v10,
-
                                     if (remarkController != null) ...[
                                       Text(
                                         'Remark',
@@ -645,6 +801,180 @@ class AuthIndentItemCard extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showHsnConfirmDialog(
+    BuildContext context, {
+    required bool tablet,
+    required String iCode,
+    required String iName,
+    required String hsnNo,
+    required String key,
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(tablet ? 20 : 16),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: Container(
+          width: tablet ? 420 : double.infinity,
+          constraints: BoxConstraints(
+            maxWidth: tablet ? 420 : MediaQuery.of(context).size.width * 0.9,
+          ),
+          decoration: BoxDecoration(
+            color: kColorWhite,
+            borderRadius: BorderRadius.circular(tablet ? 20 : 16),
+            boxShadow: [
+              BoxShadow(
+                color: kColorPrimary.withOpacity(0.15),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: tablet
+                    ? AppPaddings.combined(horizontal: 24, vertical: 20)
+                    : AppPaddings.combined(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: kColorPrimary.withOpacity(0.08),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(tablet ? 20 : 16),
+                    topRight: Radius.circular(tablet ? 20 : 16),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: AppPaddings.p10,
+                      decoration: BoxDecoration(
+                        color: kColorPrimary.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(tablet ? 12 : 10),
+                      ),
+                      child: Icon(
+                        Icons.tag_rounded,
+                        color: kColorPrimary,
+                        size: tablet ? 26 : 22,
+                      ),
+                    ),
+                    tablet ? AppSpaces.h12 : AppSpaces.h10,
+                    Expanded(
+                      child: Text(
+                        'Update HSN No',
+                        style: TextStyles.kSemiBoldOutfit(
+                          fontSize: tablet
+                              ? FontSizes.k22FontSize
+                              : FontSizes.k18FontSize,
+                          color: kColorTextPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: tablet ? AppPaddings.p24 : AppPaddings.p20,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Are you sure you want to assign HSN No to this item?',
+                      style: TextStyles.kRegularOutfit(
+                        fontSize: tablet
+                            ? FontSizes.k16FontSize
+                            : FontSizes.k14FontSize,
+                        color: kColorDarkGrey,
+                      ),
+                    ),
+                    tablet ? AppSpaces.v10 : AppSpaces.v8,
+                    Text(
+                      'Item: $iName',
+                      style: TextStyles.kMediumOutfit(
+                        fontSize: tablet
+                            ? FontSizes.k14FontSize
+                            : FontSizes.k12FontSize,
+                        color: kColorTextPrimary,
+                      ),
+                    ),
+                    AppSpaces.v4,
+                    Text(
+                      'HSN No: $hsnNo',
+                      style: TextStyles.kMediumOutfit(
+                        fontSize: tablet
+                            ? FontSizes.k14FontSize
+                            : FontSizes.k12FontSize,
+                        color: kColorPrimary,
+                      ),
+                    ),
+                    tablet ? AppSpaces.v24 : AppSpaces.v20,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Get.back(),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: kColorLightGrey,
+                                width: 1.5,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  tablet ? 12 : 10,
+                                ),
+                              ),
+                              padding: AppPaddings.combined(
+                                vertical: tablet ? 16 : 14,
+                                horizontal: 0,
+                              ),
+                            ),
+                            child: Text(
+                              'Cancel',
+                              style: TextStyles.kMediumOutfit(
+                                color: kColorDarkGrey,
+                                fontSize: tablet
+                                    ? FontSizes.k16FontSize
+                                    : FontSizes.k14FontSize,
+                              ),
+                            ),
+                          ),
+                        ),
+                        tablet ? AppSpaces.h16 : AppSpaces.h12,
+                        Expanded(
+                          child: AppButton(
+                            title: 'Confirm',
+                            buttonColor: kColorPrimary,
+                            titleColor: kColorWhite,
+                            titleSize: tablet
+                                ? FontSizes.k16FontSize
+                                : FontSizes.k14FontSize,
+                            buttonHeight: tablet ? 54 : 48,
+                            onPressed: () {
+                              Get.back();
+                              controller.updateIndentHSN(
+                                key: key,
+                                iCode: iCode,
+                                hsnNo: hsnNo,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

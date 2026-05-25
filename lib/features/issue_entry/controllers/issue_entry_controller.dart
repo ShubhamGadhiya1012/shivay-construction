@@ -67,10 +67,12 @@ class IssueEntryController extends GetxController {
     qtyControllers.clear();
   }
 
-  Future<void> getGodowns() async {
+  Future<void> getGodowns({String siteCode = ''}) async {
     try {
       isLoading.value = true;
-      final fetchedGodowns = await GodownMasterRepo.getGodowns(siteCode: "");
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(
+        siteCode: siteCode,
+      );
       godowns.assignAll(fetchedGodowns);
       godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
     } catch (e) {

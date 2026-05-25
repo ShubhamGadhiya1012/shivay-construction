@@ -6,11 +6,9 @@ class PartyMasterListRepo {
   static Future<List<PartyMasterDm>> getParties({bool? isContSubCont}) async {
     String? token = await SecureStorageHelper.read('token');
 
-    String endpoint = '/Master/getParty';
-
     try {
       final response = await ApiService.getRequest(
-        endpoint: endpoint,
+        endpoint: '/Master/getParty',
         token: token,
         queryParams: isContSubCont != null
             ? {'IsContSubCont': isContSubCont.toString()}

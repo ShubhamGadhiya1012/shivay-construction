@@ -30,6 +30,10 @@ class IndentDm {
   final String gdName;
   final String reqDate;
   final String indentRemark;
+  final String hsnNo;
+  final double igst;
+  final double sgst;
+  final double cgst;
   bool isSelected;
 
   IndentDm({
@@ -46,6 +50,10 @@ class IndentDm {
     required this.gdName,
     required this.reqDate,
     this.indentRemark = '',
+    this.hsnNo = '',
+    this.igst = 0.0,
+    this.sgst = 0.0,
+    this.cgst = 0.0,
     this.isSelected = false,
   });
 
@@ -64,6 +72,10 @@ class IndentDm {
       gdName: json['gdName'] ?? '',
       reqDate: json['reqDate'] ?? '',
       indentRemark: json['indentRemark'] ?? '',
+      hsnNo: json['hsnNo'] ?? '',
+      igst: (json['igst'] as num?)?.toDouble() ?? 0.0,
+      sgst: (json['sgst'] as num?)?.toDouble() ?? 0.0,
+      cgst: (json['cgst'] as num?)?.toDouble() ?? 0.0,
       isSelected: false,
     );
   }

@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:shivay_construction/features/godown_master/models/godown_master_dm.dart';
+import 'package:shivay_construction/features/hsn_master/models/hsn_master_dm.dart';
+import 'package:shivay_construction/features/hsn_master/repos/hsn_master_list_repo.dart';
 import 'package:shivay_construction/features/party_masters/models/party_master_dm.dart';
 import 'package:shivay_construction/features/party_masters/repos/party_master_list_repo.dart';
 import 'package:shivay_construction/features/purchase_order_entry/controllers/purchase_order_list_controller.dart';
@@ -38,7 +41,7 @@ class PurchaseOrderController extends GetxController {
   var remarkControllers = <String, TextEditingController>{}.obs;
   var _userEditingDiscountAmount = false;
   var _userEditingDiscountPerc = false;
-  var godowns = <dynamic>[].obs;
+  var godowns = <GodownMasterDm>[].obs; // Make sure it's List<GodownMasterDm>
   var godownNames = <String>[].obs;
   var selectedGodownName = <String, String>{}.obs;
   var selectedGodownCode = <String, String>{}.obs;
@@ -94,6 +97,19 @@ class PurchaseOrderController extends GetxController {
   var manualTermControllers = <TextEditingController>[].obs;
 
   var currentStep = 0.obs;
+  var hsnList = <HsnMasterDm>[].obs;
+  var hsnNumbers = <String>[].obs;
+  var selectedHsnForIndent = <String, String>{}.obs; // key -> hsnNo
+
+  Future<void> getHsnList() async {
+    try {
+      final data = await HsnMasterListRepo.getHsnList();
+      hsnList.assignAll(data);
+      hsnNumbers.assignAll(data.map((e) => e.hsnNo));
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    }
+  }
 
   void onPartySelected(String? partyName) {
     selectedPartyName.value = partyName!;
@@ -114,7 +130,9 @@ class PurchaseOrderController extends GetxController {
   Future<void> getParties() async {
     try {
       isLoading.value = true;
-      final fetched = await PartyMasterListRepo.getParties();
+      final fetched = await PartyMasterListRepo.getParties(
+        isContSubCont: false,
+      );
       parties.assignAll(fetched);
       partyNames.assignAll(fetched.map((p) => p.accountName).toList());
     } catch (e) {
@@ -132,6 +150,34 @@ class PurchaseOrderController extends GetxController {
       taxTypeNames.assignAll(fetched.map((t) => t.taxName).toList());
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> updateIndentHSN({
+    required String key,
+    required String iCode,
+    required String hsnNo,
+  }) async {
+    isLoading.value = true;
+    try {
+      final response = await PurchaseOrderRepo.updateItemHSN(
+        iCode: iCode,
+        hsnNo: hsnNo,
+      );
+      if (response != null && response.containsKey('message')) {
+        selectedHsnForIndent[key] = hsnNo;
+        selectedHsnForIndent.refresh();
+        showSuccessSnackbar('Success', response['message']);
+        await getAuthIndentItems();
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
     } finally {
       isLoading.value = false;
     }
@@ -206,13 +252,22 @@ class PurchaseOrderController extends GetxController {
     return result;
   }
 
-  Future<void> getGodowns([String siteCode = '']) async {
+  Future<void> getGodowns({String siteCode = ''}) async {
     try {
       isLoading.value = true;
       final fetched = await GodownMasterRepo.getGodowns(siteCode: siteCode);
       final parentGodowns = fetched.where((gd) => !gd.isSubGodown).toList();
-      godowns.assignAll(parentGodowns);
-      godownNames.assignAll(parentGodowns.map((gd) => gd.gdName).toList());
+
+      if (siteCode.isNotEmpty) {
+        // Filter by site code if provided
+        godowns.assignAll(
+          parentGodowns.where((gd) => gd.siteCode == siteCode).toList(),
+        );
+      } else {
+        godowns.assignAll(parentGodowns);
+      }
+
+      godownNames.assignAll(godowns.map((gd) => gd.gdName).toList());
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
@@ -220,10 +275,29 @@ class PurchaseOrderController extends GetxController {
     }
   }
 
-  void onGodownSelected(String key, String? godownName) {
+  List<String> getGodownNamesBySite(String siteCode) {
+    if (siteCode.isEmpty) return godownNames.toList();
+
+    final filteredGodowns = godowns
+        .where((gd) => gd.siteCode == siteCode && !gd.isSubGodown)
+        .toList();
+
+    return filteredGodowns.map((gd) => gd.gdName).toList();
+  }
+
+  void onGodownSelected(String key, String? godownName, {String? siteCode}) {
     selectedGodownName[key] = godownName ?? '';
-    final obj = godowns.firstWhereOrNull((gd) => gd.gdName == godownName);
+
+    // Filter godowns by siteCode if provided
+    final filteredGodowns = siteCode != null && siteCode.isNotEmpty
+        ? godowns.where((gd) => gd.siteCode == siteCode).toList()
+        : godowns;
+
+    final obj = filteredGodowns.firstWhereOrNull(
+      (gd) => gd.gdName == godownName,
+    );
     selectedGodownCode[key] = obj?.gdCode ?? '';
+
     selectedGodownName.refresh();
     selectedGodownCode.refresh();
   }
@@ -974,6 +1048,7 @@ class PurchaseOrderController extends GetxController {
       }
 
       await getGodowns();
+      await getHsnList();
       _reapplySelectionsFromItems();
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
@@ -1168,7 +1243,7 @@ class PurchaseOrderController extends GetxController {
     isSGSTApplicable.value = false;
     lockedSiteCode.value = '';
     lockedSiteName.value = '';
-
+    selectedHsnForIndent.clear();
     attachmentFiles.clear();
     existingAttachmentUrls.clear();
     authIndentItems.clear();

@@ -155,7 +155,7 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                             Obx(
                               () => AppDropdown(
                                 items: _controller.godownNames,
-                                hintText: 'From Godown *',
+                                hintText: 'From Head *',
                                 onChanged:
                                     _controller.onFromGodownSelectedWithClear,
                                 selectedItem:
@@ -165,7 +165,7 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                                         .isNotEmpty
                                     ? _controller.selectedFromGodownName.value
                                     : null,
-                                validatorText: 'Please select from godown',
+                                validatorText: 'Please select from Head',
                               ),
                             ),
                             tablet ? AppSpaces.v12 : AppSpaces.v8,
@@ -201,7 +201,7 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                             Obx(
                               () => AppDropdown(
                                 items: _controller.godownNames,
-                                hintText: 'To Godown *',
+                                hintText: 'To Head *',
                                 onChanged: _controller.onToGodownSelected,
                                 selectedItem:
                                     _controller
@@ -210,7 +210,7 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                                         .isNotEmpty
                                     ? _controller.selectedToGodownName.value
                                     : null,
-                                validatorText: 'Please select to godown',
+                                validatorText: 'Please select to Head',
                               ),
                             ),
                             tablet ? AppSpaces.v12 : AppSpaces.v8,
