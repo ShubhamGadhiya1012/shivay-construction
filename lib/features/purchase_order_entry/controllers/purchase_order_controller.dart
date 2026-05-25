@@ -817,6 +817,19 @@ class PurchaseOrderController extends GetxController {
   bool toggleIndentSelection(int itemIndex, int indentIndex) {
     final indent = authIndentItems[itemIndex].items[indentIndex];
 
+    // Block selection if HSN not assigned
+    final key = '${authIndentItems[itemIndex].indentNo}_${indent.indentSrNo}';
+    final hasHsn =
+        (selectedHsnForIndent[key]?.isNotEmpty == true) ||
+        indent.hsnNo.isNotEmpty;
+    if (!hasHsn) {
+      showErrorSnackbar(
+        'HSN Required',
+        'Please assign HSN No to "${indent.iName}" before selecting.',
+      );
+      return false;
+    }
+
     if (lockedSiteCode.value.isEmpty) {
       lockedSiteCode.value = indent.siteCode;
       lockedSiteName.value = indent.siteName;
@@ -838,6 +851,20 @@ class PurchaseOrderController extends GetxController {
 
   void enableSelectionMode(int itemIndex, int indentIndex) {
     final indent = authIndentItems[itemIndex].items[indentIndex];
+
+    // Block selection if HSN not assigned
+    final key = '${authIndentItems[itemIndex].indentNo}_${indent.indentSrNo}';
+    final hasHsn =
+        (selectedHsnForIndent[key]?.isNotEmpty == true) ||
+        indent.hsnNo.isNotEmpty;
+    if (!hasHsn) {
+      showErrorSnackbar(
+        'HSN Required',
+        'Please assign HSN No to "${indent.iName}" before selecting.',
+      );
+      return;
+    }
+
     if (lockedSiteCode.value.isNotEmpty &&
         indent.siteCode != lockedSiteCode.value) {
       showErrorSnackbar(
@@ -1228,8 +1255,12 @@ class PurchaseOrderController extends GetxController {
     currentInvNo.value = '';
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
     remarksController.clear();
-    for (final c in discountPercControllers.values) c.dispose();
-    for (final c in discountAmountControllers.values) c.dispose();
+    for (final c in discountPercControllers.values) {
+      c.dispose();
+    }
+    for (final c in discountAmountControllers.values) {
+      c.dispose();
+    }
     discountPercControllers.clear();
     discountAmountControllers.clear();
     selectedSiteName.value = '';
@@ -1251,18 +1282,34 @@ class PurchaseOrderController extends GetxController {
     termsList.clear();
     selectedTermCodes.clear();
 
-    for (final c in editableTermDescriptions.values) c.dispose();
+    for (final c in editableTermDescriptions.values) {
+      c.dispose();
+    }
     editableTermDescriptions.clear();
 
-    for (final c in manualTermControllers) c.dispose();
+    for (final c in manualTermControllers) {
+      c.dispose();
+    }
     manualTermControllers.clear();
 
-    for (final c in remarkControllers.values) c.dispose();
-    for (final c in qtyControllers.values) c.dispose();
-    for (final c in priceControllers.values) c.dispose();
-    for (final c in dateControllers.values) c.dispose();
-    for (final c in customiseVoucherAmountControllers.values) c.dispose();
-    for (final c in customiseVoucherPercentageControllers.values) c.dispose();
+    for (final c in remarkControllers.values) {
+      c.dispose();
+    }
+    for (final c in qtyControllers.values) {
+      c.dispose();
+    }
+    for (final c in priceControllers.values) {
+      c.dispose();
+    }
+    for (final c in dateControllers.values) {
+      c.dispose();
+    }
+    for (final c in customiseVoucherAmountControllers.values) {
+      c.dispose();
+    }
+    for (final c in customiseVoucherPercentageControllers.values) {
+      c.dispose();
+    }
 
     remarkControllers.clear();
     qtyControllers.clear();
@@ -1294,16 +1341,36 @@ class PurchaseOrderController extends GetxController {
   void onClose() {
     dateController.dispose();
     remarksController.dispose();
-    for (final c in remarkControllers.values) c.dispose();
-    for (final c in qtyControllers.values) c.dispose();
-    for (final c in priceControllers.values) c.dispose();
-    for (final c in dateControllers.values) c.dispose();
-    for (final c in customiseVoucherAmountControllers.values) c.dispose();
-    for (final c in customiseVoucherPercentageControllers.values) c.dispose();
-    for (final c in editableTermDescriptions.values) c.dispose();
-    for (final c in manualTermControllers) c.dispose();
-    for (final c in discountPercControllers.values) c.dispose();
-    for (final c in discountAmountControllers.values) c.dispose();
+    for (final c in remarkControllers.values) {
+      c.dispose();
+    }
+    for (final c in qtyControllers.values) {
+      c.dispose();
+    }
+    for (final c in priceControllers.values) {
+      c.dispose();
+    }
+    for (final c in dateControllers.values) {
+      c.dispose();
+    }
+    for (final c in customiseVoucherAmountControllers.values) {
+      c.dispose();
+    }
+    for (final c in customiseVoucherPercentageControllers.values) {
+      c.dispose();
+    }
+    for (final c in editableTermDescriptions.values) {
+      c.dispose();
+    }
+    for (final c in manualTermControllers) {
+      c.dispose();
+    }
+    for (final c in discountPercControllers.values) {
+      c.dispose();
+    }
+    for (final c in discountAmountControllers.values) {
+      c.dispose();
+    }
     super.onClose();
   }
 }
