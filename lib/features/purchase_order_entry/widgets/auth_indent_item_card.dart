@@ -132,85 +132,64 @@ class AuthIndentItemCard extends StatelessWidget {
                               controller.remarkControllers[key];
 
                           Widget buildHsnInfoRow() {
-                            return Obx(() {
-                              final hsn =
-                                  controller
-                                          .selectedHsnForIndent[key]
-                                          ?.isNotEmpty ==
-                                      true
-                                  ? controller.selectedHsnForIndent[key]!
-                                  : indent.hsnNo;
+                            if (indent.hsnNo.isEmpty)
+                              return const SizedBox.shrink();
 
-                              if (hsn.isEmpty) return const SizedBox.shrink();
-
-                              return Container(
-                                margin: AppPaddings.custom(top: 6),
-                                padding: tablet
-                                    ? AppPaddings.combined(
-                                        horizontal: 10,
-                                        vertical: 6,
-                                      )
-                                    : AppPaddings.combined(
-                                        horizontal: 8,
-                                        vertical: 5,
-                                      ),
-                                decoration: BoxDecoration(
-                                  color: kColorGreen.withOpacity(0.07),
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
-                                    color: kColorGreen.withOpacity(0.3),
-                                  ),
+                            return Container(
+                              margin: AppPaddings.custom(top: 6),
+                              padding: tablet
+                                  ? AppPaddings.combined(
+                                      horizontal: 10,
+                                      vertical: 6,
+                                    )
+                                  : AppPaddings.combined(
+                                      horizontal: 8,
+                                      vertical: 5,
+                                    ),
+                              decoration: BoxDecoration(
+                                color: kColorGreen.withOpacity(0.07),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: kColorGreen.withOpacity(0.3),
                                 ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'HSN: ${indent.hsnNo}',
+                                    style: TextStyles.kMediumOutfit(
+                                      fontSize: tablet
+                                          ? FontSizes.k12FontSize
+                                          : FontSizes.k10FontSize,
+                                      color: kColorGreen,
+                                    ),
+                                  ),
+                                  if (indent.igst > 0 ||
+                                      indent.cgst > 0 ||
+                                      indent.sgst > 0) ...[
+                                    AppSpaces.v4,
                                     Text(
-                                      'HSN: $hsn',
-                                      style: TextStyles.kMediumOutfit(
+                                      'IGST: ${indent.igst}%   CGST: ${indent.cgst}%   SGST: ${indent.sgst}%',
+                                      style: TextStyles.kRegularOutfit(
                                         fontSize: tablet
                                             ? FontSizes.k12FontSize
                                             : FontSizes.k10FontSize,
-                                        color: kColorGreen,
+                                        color: kColorBlack,
                                       ),
                                     ),
-
-                                    if (indent.igst > 0 ||
-                                        indent.cgst > 0 ||
-                                        indent.sgst > 0) ...[
-                                      AppSpaces.v4,
-
-                                      Text(
-                                        'IGST: ${indent.igst}%   '
-                                        'CGST: ${indent.cgst}%   '
-                                        'SGST: ${indent.sgst}%',
-                                        style: TextStyles.kRegularOutfit(
-                                          fontSize: tablet
-                                              ? FontSizes.k12FontSize
-                                              : FontSizes.k10FontSize,
-                                          color: kColorBlack,
-                                        ),
-                                      ),
-                                    ],
                                   ],
-                                ),
-                              );
-                            });
+                                ],
+                              ),
+                            );
                           }
 
                           Widget buildHsnDropdownRow() {
+                            if (indent.hsnNo.isNotEmpty) {
+                              return const SizedBox.shrink();
+                            }
+
                             return Obx(() {
-                              final currentHsn =
-                                  controller
-                                          .selectedHsnForIndent[key]
-                                          ?.isNotEmpty ==
-                                      true
-                                  ? controller.selectedHsnForIndent[key]!
-                                  : indent.hsnNo;
-
-                              if (currentHsn.isNotEmpty) {
-                                return const SizedBox.shrink();
-                              }
-
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -232,11 +211,15 @@ class AuthIndentItemCard extends StatelessWidget {
                                           onChanged: (value) {
                                             if (value != null &&
                                                 value.isNotEmpty) {
-                                              controller
-                                                      .selectedHsnForIndent[key] =
-                                                  value;
-                                              controller.selectedHsnForIndent
-                                                  .refresh();
+                                              WidgetsBinding.instance
+                                                  .addPostFrameCallback((_) {
+                                                    controller
+                                                            .selectedHsnForIndent[key] =
+                                                        value;
+                                                    controller
+                                                        .selectedHsnForIndent
+                                                        .refresh();
+                                                  });
                                             }
                                           },
                                         ),
