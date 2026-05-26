@@ -341,7 +341,8 @@ class DlrCard extends StatelessWidget {
                                 ],
                               ),
                               if (data.activity.isNotEmpty ||
-                                  data.supervisorName.isNotEmpty) ...[
+                                  data.supervisorName.isNotEmpty ||
+                                  data.description.isNotEmpty) ...[
                                 tablet ? AppSpaces.v8 : AppSpaces.v6,
                                 Row(
                                   children: [
@@ -365,6 +366,14 @@ class DlrCard extends StatelessWidget {
                                         ),
                                       ),
                                   ],
+                                ),
+                              ],
+                              if (data.description.isNotEmpty) ...[
+                                tablet ? AppSpaces.v8 : AppSpaces.v6,
+                                _buildDetailColumn(
+                                  label: 'Description',
+                                  value: data.description,
+                                  tablet: tablet,
                                 ),
                               ],
                             ],

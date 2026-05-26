@@ -327,7 +327,8 @@ class DlrEntryScreen extends StatelessWidget {
                 ),
                 if ((item['Activity'] ?? '').toString().isNotEmpty ||
                     (item['supervisorName'] ?? '').toString().isNotEmpty ||
-                    (item['Remark'] ?? '').toString().isNotEmpty) ...[
+                    (item['Remark'] ?? '').toString().isNotEmpty ||
+                    (item['Description'] ?? '').toString().isNotEmpty) ...[
                   tablet ? AppSpaces.v8 : AppSpaces.v6,
                   Row(
                     children: [
@@ -352,12 +353,31 @@ class DlrEntryScreen extends StatelessWidget {
                         ),
                     ],
                   ),
-                  if ((item['Remark'] ?? '').toString().isNotEmpty) ...[
+                  if ((item['Remark'] ?? '').toString().isNotEmpty ||
+                      (item['Description'] ?? '').toString().isNotEmpty) ...[
                     tablet ? AppSpaces.v8 : AppSpaces.v6,
-                    _buildDetailColumn(
-                      label: 'Remark',
-                      value: item['Remark'],
-                      tablet: tablet,
+                    Row(
+                      children: [
+                        if ((item['Remark'] ?? '').toString().isNotEmpty)
+                          Expanded(
+                            child: _buildDetailColumn(
+                              label: 'Remark',
+                              value: item['Remark'],
+                              tablet: tablet,
+                            ),
+                          ),
+                        if ((item['Remark'] ?? '').toString().isNotEmpty &&
+                            (item['Description'] ?? '').toString().isNotEmpty)
+                          AppSpaces.h12,
+                        if ((item['Description'] ?? '').toString().isNotEmpty)
+                          Expanded(
+                            child: _buildDetailColumn(
+                              label: 'Description',
+                              value: item['Description'],
+                              tablet: tablet,
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ],
@@ -634,6 +654,14 @@ class DlrEntryScreen extends StatelessWidget {
                                 ? _controller.selectedActivityName.value
                                 : null,
                           ),
+                        ),
+                        tablet ? AppSpaces.v16 : AppSpaces.v12,
+
+                        // Description field
+                        AppTextFormField(
+                          controller: _controller.descriptionController,
+                          hintText: 'Description',
+                          maxLines: 2,
                         ),
                         tablet ? AppSpaces.v16 : AppSpaces.v12,
 
