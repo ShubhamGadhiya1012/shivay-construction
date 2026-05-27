@@ -57,11 +57,8 @@ class ProfileController extends GetxController {
     isLoading.value = true;
     try {
       await SecureStorageHelper.clearAll();
+
       Get.offAll(() => LoginScreen());
-      showSuccessSnackbar(
-        'Logged Out',
-        'You have been successfully logged out.',
-      );
     } catch (e) {
       showErrorSnackbar(
         'Logout Failed',

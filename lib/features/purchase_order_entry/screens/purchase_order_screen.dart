@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -1179,6 +1177,9 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
           final dateCtrl = _controller.dateControllers[key];
           final remarkController = _controller.remarkControllers[key];
 
+          final iCode = item['ICode'] as String;
+          final taxData = _controller.selectedItemsTaxData[iCode];
+
           return Padding(
             padding: tablet
                 ? AppPaddings.combined(horizontal: 16, vertical: 12)
@@ -1248,6 +1249,10 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                 ),
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
 
+                if (taxData != null &&
+                    (_controller.selectedTaxTypeCode.value.isNotEmpty))
+                  _buildTaxInfoCard(taxData, tablet),
+
                 if (dateCtrl != null) ...[
                   AppDatePickerTextFormField(
                     dateController: dateCtrl,
@@ -1265,26 +1270,7 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                   tablet ? AppSpaces.v12 : AppSpaces.v10,
                 ],
 
-                Obx(() {
-                  final siteCode = item['SiteCode']; // Get from selected item
-                  final filteredGodownNames = _controller.getGodownNamesBySite(
-                    siteCode,
-                  );
-
-                  return AppDropdown(
-                    items: filteredGodownNames,
-                    hintText: 'Head',
-                    onChanged: (val) => _controller.onGodownSelected(
-                      key,
-                      val,
-                      siteCode: siteCode,
-                    ),
-                    selectedItem:
-                        (_controller.selectedGodownName[key] ?? '').isNotEmpty
-                        ? _controller.selectedGodownName[key]
-                        : null,
-                  );
-                }),
+                _buildGodownDropdown(item, key, tablet),
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
 
                 Row(
@@ -1374,68 +1360,9 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                 ),
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
 
-                Obx(() {
-                  final percCtrl = _controller.discountPercControllers[key];
-                  final amtCtrl = _controller.discountAmountControllers[key];
-                  if (percCtrl == null || amtCtrl == null)
-                    return const SizedBox.shrink();
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Discount %',
-                              style: TextStyles.kRegularOutfit(
-                                fontSize: tablet
-                                    ? FontSizes.k12FontSize
-                                    : FontSizes.k10FontSize,
-                                color: kColorDarkGrey,
-                              ),
-                            ),
-                            AppSpaces.v4,
-                            AppTextFormField(
-                              controller: percCtrl,
-                              hintText: 'Disc %',
-                              keyboardType: TextInputType.number,
-                              floatingLabelRequired: true,
-                              onChanged: (val) =>
-                                  _controller.onDiscountPercChanged(key, val),
-                            ),
-                          ],
-                        ),
-                      ),
-                      tablet ? AppSpaces.h12 : AppSpaces.h10,
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Discount Amt',
-                              style: TextStyles.kRegularOutfit(
-                                fontSize: tablet
-                                    ? FontSizes.k12FontSize
-                                    : FontSizes.k10FontSize,
-                                color: kColorDarkGrey,
-                              ),
-                            ),
-                            AppSpaces.v4,
-                            AppTextFormField(
-                              controller: amtCtrl,
-                              hintText: 'Disc Amt',
-                              keyboardType: TextInputType.number,
-                              floatingLabelRequired: true,
-                              onChanged: (val) =>
-                                  _controller.onDiscountAmountChanged(key, val),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                }),
+                _buildDiscountRow(key, tablet),
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
+
                 if (remarkController != null) ...[
                   Text(
                     'Remark',
@@ -1464,6 +1391,134 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildTaxInfoCard(Map<String, dynamic> taxData, bool tablet) {
+    final hasHsn = taxData['HSNNo'].toString().isNotEmpty;
+    final igst = (taxData['IGST'] as num?)?.toDouble() ?? 0.0;
+    final cgst = (taxData['CGST'] as num?)?.toDouble() ?? 0.0;
+    final sgst = (taxData['SGST'] as num?)?.toDouble() ?? 0.0;
+
+    return Container(
+      margin: AppPaddings.custom(bottom: 12),
+      padding: tablet
+          ? AppPaddings.combined(horizontal: 12, vertical: 10)
+          : AppPaddings.combined(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: kColorGreen.withOpacity(0.07),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: kColorGreen.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (hasHsn)
+            Text(
+              'HSN: ${taxData['HSNNo']}',
+              style: TextStyles.kMediumOutfit(
+                fontSize: tablet
+                    ? FontSizes.k14FontSize
+                    : FontSizes.k12FontSize,
+                color: kColorGreen,
+              ),
+            ),
+          if (hasHsn && (igst > 0 || cgst > 0 || sgst > 0)) AppSpaces.v4,
+          if (igst > 0 || cgst > 0 || sgst > 0)
+            Text(
+              'IGST: ${igst.toStringAsFixed(2)}%  |  CGST: ${cgst.toStringAsFixed(2)}%  |  SGST: ${sgst.toStringAsFixed(2)}%',
+              style: TextStyles.kRegularOutfit(
+                fontSize: tablet
+                    ? FontSizes.k12FontSize
+                    : FontSizes.k10FontSize,
+                color: kColorBlack,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGodownDropdown(
+    Map<String, dynamic> item,
+    String key,
+    bool tablet,
+  ) {
+    final siteCode = item['SiteCode'];
+    final filteredGodownNames = _controller.getGodownNamesBySite(siteCode);
+
+    return AppDropdown(
+      items: filteredGodownNames,
+      hintText: 'Head',
+      onChanged: (val) =>
+          _controller.onGodownSelected(key, val, siteCode: siteCode),
+      selectedItem: (_controller.selectedGodownName[key] ?? '').isNotEmpty
+          ? _controller.selectedGodownName[key]
+          : null,
+    );
+  }
+
+  Widget _buildDiscountRow(String key, bool tablet) {
+    final percCtrl = _controller.discountPercControllers[key];
+    final amtCtrl = _controller.discountAmountControllers[key];
+
+    if (percCtrl == null || amtCtrl == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Discount %',
+                style: TextStyles.kRegularOutfit(
+                  fontSize: tablet
+                      ? FontSizes.k12FontSize
+                      : FontSizes.k10FontSize,
+                  color: kColorDarkGrey,
+                ),
+              ),
+              AppSpaces.v4,
+              AppTextFormField(
+                controller: percCtrl,
+                hintText: 'Disc %',
+                keyboardType: TextInputType.number,
+                floatingLabelRequired: true,
+                onChanged: (val) => _controller.onDiscountPercChanged(key, val),
+              ),
+            ],
+          ),
+        ),
+        tablet ? AppSpaces.h12 : AppSpaces.h10,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Discount Amt',
+                style: TextStyles.kRegularOutfit(
+                  fontSize: tablet
+                      ? FontSizes.k12FontSize
+                      : FontSizes.k10FontSize,
+                  color: kColorDarkGrey,
+                ),
+              ),
+              AppSpaces.v4,
+              AppTextFormField(
+                controller: amtCtrl,
+                hintText: 'Disc Amt',
+                keyboardType: TextInputType.number,
+                floatingLabelRequired: true,
+                onChanged: (val) =>
+                    _controller.onDiscountAmountChanged(key, val),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

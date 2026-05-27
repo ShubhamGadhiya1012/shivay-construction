@@ -9,12 +9,8 @@ class HsnMasterRepo {
     required String unit,
     required String ewbUnit,
     required String description,
-    required String effectDate,
-    required double igst,
-    required double sgst,
-    required double cgst,
     required bool sac,
-    required String tCode,
+    required List<Map<String, dynamic>> hsnDetail,
   }) async {
     String? token = await SecureStorageHelper.read('token');
 
@@ -25,20 +21,17 @@ class HsnMasterRepo {
       "Unit": unit,
       "EWBUnit": ewbUnit,
       "Description": description,
-      "EffectDate": effectDate,
-      "IGST": igst,
-      "SGST": sgst,
-      "CGST": cgst,
       "SAC": sac,
-      "tCode": tCode,
+      "HSNDetail": hsnDetail,
     };
-
+    print(requestBody);
     try {
       final response = await ApiService.postRequest(
         endpoint: '/Master/AddUpdateHSNMaster',
         requestBody: requestBody,
         token: token,
       );
+      print(response);
       return response;
     } catch (e) {
       rethrow;

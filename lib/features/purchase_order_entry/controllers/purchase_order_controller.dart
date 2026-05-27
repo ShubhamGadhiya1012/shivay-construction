@@ -51,7 +51,7 @@ class PurchaseOrderController extends GetxController {
 
   var dateController = TextEditingController();
   var remarksController = TextEditingController();
-
+  var selectedItemsTaxData = <String, Map<String, dynamic>>{}.obs; // key: iCode
   var selectedSiteName = ''.obs;
   var selectedSiteCode = ''.obs;
 
@@ -125,6 +125,65 @@ class PurchaseOrderController extends GetxController {
     isIGSTApplicable.value = obj.igst;
     isCGSTApplicable.value = obj.cgst;
     isSGSTApplicable.value = obj.sgst;
+
+    // FETCH TAX DATA FOR ALL SELECTED ITEMS WHEN TAX TYPE CHANGES
+    if (selectedPurchaseItems.isNotEmpty) {
+      fetchTaxDataForAllItems();
+    }
+  }
+
+  Future<void> fetchTaxDataForAllItems() async {
+    if (selectedTaxTypeCode.value.isEmpty) {
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      selectedItemsTaxData.clear();
+
+      for (var item in selectedPurchaseItems) {
+        final iCode = item['ICode'] as String;
+        final taxData = await PurchaseOrderRepo.getItemTax(
+          tCode: selectedTaxTypeCode.value,
+          iCode: iCode,
+        );
+
+        if (taxData.isNotEmpty) {
+          final td = taxData.first;
+          selectedItemsTaxData[iCode] = {
+            'HSNNo': td.hsnNo ?? '',
+            'IGST': td.igst,
+            'CGST': td.cgst,
+            'SGST': td.sgst,
+          };
+
+          // Update selectedPurchaseItems with tax data
+          item['IGSTPerc'] = td.igst;
+          item['CGSTPerc'] = td.cgst;
+          item['SGSTPerc'] = td.sgst;
+          item['HSNNo'] = td.hsnNo ?? '';
+        } else {
+          selectedItemsTaxData[iCode] = {
+            'HSNNo': '',
+            'IGST': 0.0,
+            'CGST': 0.0,
+            'SGST': 0.0,
+          };
+
+          item['IGSTPerc'] = 0.0;
+          item['CGSTPerc'] = 0.0;
+          item['SGSTPerc'] = 0.0;
+          item['HSNNo'] = '';
+        }
+      }
+
+      selectedPurchaseItems.refresh();
+      selectedItemsTaxData.refresh();
+    } catch (e) {
+      showErrorSnackbar('Error', 'Failed to fetch tax data');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> getParties() async {
@@ -400,27 +459,7 @@ class PurchaseOrderController extends GetxController {
       }
       selectedPurchaseItems.refresh();
 
-      for (var item in selectedPurchaseItems) {
-        final iCode = item['ICode'] as String;
-        final taxData = await PurchaseOrderRepo.getItemTax(
-          tCode: selectedTaxTypeCode.value,
-          iCode: iCode,
-        );
-        if (taxData.isNotEmpty) {
-          final td = taxData.first;
-          item['IGSTPerc'] = td.igst;
-          item['CGSTPerc'] = td.cgst;
-          item['SGSTPerc'] = td.sgst;
-          item['HSNNo'] = td.hsnNo ?? '';
-        } else {
-          item['IGSTPerc'] = 0.0;
-          item['CGSTPerc'] = 0.0;
-          item['SGSTPerc'] = 0.0;
-          item['HSNNo'] = '';
-        }
-      }
-      selectedPurchaseItems.refresh();
-
+      // TAX DATA ALREADY FETCHED - NO NEED TO FETCH AGAIN
       updateGrossTotal();
 
       final bookCode = '1001';
@@ -1275,6 +1314,7 @@ class PurchaseOrderController extends GetxController {
     lockedSiteCode.value = '';
     lockedSiteName.value = '';
     selectedHsnForIndent.clear();
+    selectedItemsTaxData.clear(); // ADD THIS LINE
     attachmentFiles.clear();
     existingAttachmentUrls.clear();
     authIndentItems.clear();

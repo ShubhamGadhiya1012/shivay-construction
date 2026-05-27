@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shivay_construction/features/company_master/models/company_master_dm.dart';
+import 'package:shivay_construction/features/site_master/repos/site_master_repo.dart';
 import 'package:shivay_construction/features/user_settings/controllers/users_controller.dart';
 import 'package:shivay_construction/features/user_settings/repos/user_management_repo.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
+import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
 class UserManagementController extends GetxController {
   var isLoading = false.obs;
@@ -34,6 +37,12 @@ class UserManagementController extends GetxController {
   var userTypes = {0: 'Admin', 1: 'User'}.obs;
   var selectedUserType = Rxn<int>();
 
+  var companies = <CompanyMasterDm>[].obs;
+  var filteredCompanies = <CompanyMasterDm>[].obs;
+  var selectedCompanies = <String>[].obs;
+  var selectedCompanyNames = <String>[].obs;
+  var searchCompanyController = TextEditingController();
+
   void onUserTypeChanged(String selectedValue) async {
     final selectedIndex = userTypes.values.toList().indexOf(selectedValue);
 
@@ -41,6 +50,42 @@ class UserManagementController extends GetxController {
   }
 
   final UsersController usersController = Get.find<UsersController>();
+
+  Future<void> getCompanies() async {
+    isLoading.value = true;
+    try {
+      final fetchedCompanies = await SiteMasterRepo.getCompanies();
+      companies.assignAll(fetchedCompanies);
+
+      // Read coCodes from secure storage
+      String userCoCodes = await SecureStorageHelper.read('coCodes') ?? '';
+
+      // Filter companies - only show assigned companies
+      if (userCoCodes.isNotEmpty) {
+        List<String> assignedCoCodes = userCoCodes
+            .split(',')
+            .map((code) => code.trim())
+            .toList();
+        filteredCompanies.assignAll(
+          fetchedCompanies
+              .where((co) => assignedCoCodes.contains(co.coCode.toString()))
+              .toList(),
+        );
+      } else {
+        filteredCompanies.assignAll(fetchedCompanies);
+      }
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Add this method for select all companies
+  void selectAllCompanies() {
+    selectedCompanies.assignAll(companies.map((co) => co.coCode.toString()));
+    selectedCompanyNames.assignAll(companies.map((co) => co.name));
+  }
 
   Future<void> manageUser({required int userId}) async {
     isLoading.value = true;
@@ -55,6 +100,7 @@ class UserManagementController extends GetxController {
         pCodes: '',
         seCodes: '',
         eCodes: '',
+        coCodes: selectedCompanies.isEmpty ? '' : selectedCompanies.join(','),
       );
 
       if (response != null && response.containsKey('message')) {
