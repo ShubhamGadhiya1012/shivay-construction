@@ -593,13 +593,20 @@ class DlrReportExcelFile {
     cell.cellStyle = headerStyle;
     rowIndex++;
 
-    // ── Build agency data ─────────────────────────────────────────────────────
+    // ── Build agency data grouped by Agency + Activity ─────────────────────
     final Map<String, Map<String, double>> agencyData = {};
+    final Map<String, String> agencyActivityMap = {};
     final Map<String, String> agencyDescMap = {};
 
     for (var item in companyItems) {
-      final key = '${item.agencyName}__${item.description}';
-      agencyDescMap[key] = item.description;
+      final key = '${item.agencyName}__${item.activity}';
+      agencyActivityMap[key] = item.activity;
+      // Store description (use first non-empty one found)
+      if (!agencyDescMap.containsKey(key)) {
+        agencyDescMap[key] = item.description.isNotEmpty
+            ? item.description
+            : '-';
+      }
       agencyData.putIfAbsent(key, () => {});
       agencyData[key]![item.siteName] =
           (agencyData[key]![item.siteName] ?? 0) + item.total;
@@ -617,7 +624,7 @@ class DlrReportExcelFile {
     agencyData.forEach((key, siteMap) {
       final parts = key.split('__');
       final agencyName = parts[0];
-      final desc = agencyDescMap[key] ?? '';
+      final activity = agencyActivityMap[key] ?? '';
       double rowTotal = siteMap.values.fold(0, (a, b) => a + b);
 
       // Sr. No
@@ -636,7 +643,7 @@ class DlrReportExcelFile {
       cell = sheet.cell(
         CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: rowIndex),
       );
-      cell.value = TextCellValue(desc.isNotEmpty ? desc : '-');
+      cell.value = TextCellValue(activity.isNotEmpty ? activity : '-');
       cell.cellStyle = dataStyle;
       // Site columns
       for (int i = 0; i < siteNames.length; i++) {

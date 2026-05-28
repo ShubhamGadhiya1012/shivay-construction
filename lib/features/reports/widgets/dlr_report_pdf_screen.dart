@@ -8,9 +8,6 @@ import 'package:shivay_construction/features/reports/models/dlr_report_dm.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 
 class DlrReportPdfScreen {
-  // ─────────────────────────────────────────────────────────────────────────
-  // SITE WISE PDF
-  // ─────────────────────────────────────────────────────────────────────────
   static Future<void> generateSiteWisePdf({
     required List<DlrReportDm> reportData,
     required String fromDate,
@@ -30,13 +27,11 @@ class DlrReportPdfScreen {
       final textColor = PdfColor.fromHex('#333333');
       final reportDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
 
-      // Group data by SiteCode
       final Map<String, List<DlrReportDm>> groupedBySite = {};
       for (var item in reportData) {
         groupedBySite.putIfAbsent(item.siteCode, () => []).add(item);
       }
 
-      // One page per site
       groupedBySite.forEach((siteCode, siteItems) {
         final siteName = siteItems.first.siteName;
         final companyName = siteItems.first.coName;
@@ -111,11 +106,8 @@ class DlrReportPdfScreen {
     double grandTotalUnSkill = 0;
     double grandTotalAmount = 0;
 
-    // We build a list of widgets (containers + tables per activity)
-    // then a final grand total table row at the bottom
     List<pw.Widget> contentWidgets = [];
 
-    // ── Column header table (shown once at top) ──────────────────────────────
     contentWidgets.add(
       pw.Table(
         border: pw.TableBorder.all(color: PdfColors.grey, width: 0.5),
@@ -149,7 +141,6 @@ class DlrReportPdfScreen {
       double activityTotalUnSkill = 0;
       double activityTotal = 0;
 
-      // ── Activity name: full-width Container (true span) ────────────────────
       contentWidgets.add(
         pw.Container(
           width: double.infinity,
@@ -172,7 +163,6 @@ class DlrReportPdfScreen {
         ),
       );
 
-      // ── Data rows + sub total for this activity ────────────────────────────
       List<pw.TableRow> activityRows = [];
 
       for (int i = 0; i < activityItems.length; i++) {
@@ -213,7 +203,6 @@ class DlrReportPdfScreen {
         );
       }
 
-      // Sub Total row
       activityRows.add(
         pw.TableRow(
           decoration: pw.BoxDecoration(color: subTotalColor),
@@ -260,7 +249,6 @@ class DlrReportPdfScreen {
       grandTotalAmount += activityTotal;
     });
 
-    // ── Grand Total row ────────────────────────────────────────────────────
     contentWidgets.add(
       pw.Table(
         border: pw.TableBorder.all(color: PdfColors.grey, width: 0.5),
@@ -319,7 +307,6 @@ class DlrReportPdfScreen {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
       children: [
-        // Company Name
         pw.Center(
           child: pw.Text(
             companyName.toUpperCase(),
@@ -327,7 +314,7 @@ class DlrReportPdfScreen {
           ),
         ),
         pw.SizedBox(height: 4),
-        // Site Name
+
         pw.Center(
           child: pw.Text(
             siteName.toUpperCase(),
@@ -335,7 +322,7 @@ class DlrReportPdfScreen {
           ),
         ),
         pw.SizedBox(height: 6),
-        // Date row
+
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
@@ -347,15 +334,12 @@ class DlrReportPdfScreen {
           ],
         ),
         pw.SizedBox(height: 8),
-        // All activity blocks stacked
+
         ...contentWidgets,
       ],
     );
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // SUMMARY PDF
-  // ─────────────────────────────────────────────────────────────────────────
   static Future<void> generateSummaryPdf({
     required List<DlrReportDm> reportData,
     required String fromDate,
@@ -374,7 +358,6 @@ class DlrReportPdfScreen {
       final textColor = PdfColor.fromHex('#333333');
       final reportDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
 
-      // Group data by CoCode
       final Map<String, List<DlrReportDm>> groupedByCompany = {};
       for (var item in reportData) {
         final key = '${item.coCode}_${item.coName}';
@@ -393,10 +376,17 @@ class DlrReportPdfScreen {
 
         final Map<String, Map<String, double>> agencyData = {};
         final Map<String, String> agencyDescMap = {};
+        final Map<String, String> agencyActivityMap = {};
 
         for (var item in companyItems) {
-          final key = '${item.agencyName}__${item.description}';
-          agencyDescMap[key] = item.description;
+          final key = '${item.agencyName}__${item.activity}';
+          agencyActivityMap[key] = item.activity;
+          // Store description (use first non-empty one found)
+          if (!agencyDescMap.containsKey(key)) {
+            agencyDescMap[key] = item.description.isNotEmpty
+                ? item.description
+                : '-';
+          }
           agencyData.putIfAbsent(key, () => {});
           agencyData[key]![item.siteName] =
               (agencyData[key]![item.siteName] ?? 0) + item.total;
@@ -470,7 +460,6 @@ class DlrReportPdfScreen {
 
     List<pw.TableRow> rows = [];
 
-    // Header row
     List<pw.Widget> headerCells = [
       _headerCell('Sr.\nNo.'),
       _headerCell('Name of Agency'),
@@ -492,13 +481,13 @@ class DlrReportPdfScreen {
     agencyData.forEach((key, siteMap) {
       final parts = key.split('__');
       final agencyName = parts[0];
-      final desc = agencyDescMap[key] ?? '';
+      final activity = parts.length > 1 ? parts[1] : '';
       double rowTotal = siteMap.values.fold(0, (a, b) => a + b);
 
       List<pw.Widget> cells = [
         _dataCell(srNo.toString(), align: pw.TextAlign.center),
         _dataCell(agencyName),
-        _dataCell(desc.isNotEmpty ? desc : '-'),
+        _dataCell(activity.isNotEmpty ? activity : '-'),
       ];
 
       for (var site in siteNames) {
@@ -530,7 +519,6 @@ class DlrReportPdfScreen {
       srNo++;
     });
 
-    // 2 blank rows
     for (int i = 0; i < 2; i++) {
       rows.add(
         pw.TableRow(
@@ -545,7 +533,6 @@ class DlrReportPdfScreen {
       );
     }
 
-    // Total footer row
     List<pw.Widget> totalCells = [
       _dataCell('', align: pw.TextAlign.center),
       _dataCell('', align: pw.TextAlign.center),
@@ -632,9 +619,6 @@ class DlrReportPdfScreen {
     );
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // HELPERS
-  // ─────────────────────────────────────────────────────────────────────────
   static pw.Widget _headerCell(String text, {double fontSize = 8}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.all(4),
