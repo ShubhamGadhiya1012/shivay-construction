@@ -8,6 +8,8 @@ class IssueDetailDm {
   final String gdCode;
   final String gdName;
   final String poRemark;
+  final String cpCode;
+  final String cpName;
 
   IssueDetailDm({
     required this.srNo,
@@ -19,6 +21,8 @@ class IssueDetailDm {
     required this.gdCode,
     required this.gdName,
     this.poRemark = '',
+    this.cpCode = '',
+    this.cpName = '',
   });
 
   factory IssueDetailDm.fromJson(Map<String, dynamic> json) {
@@ -32,6 +36,8 @@ class IssueDetailDm {
       gdCode: json['GDCode'] ?? '',
       gdName: json['GDName'] ?? '',
       poRemark: json['PORemark'] ?? '',
+      cpCode: json['CPCode'] ?? '',
+      cpName: json['CPName'] ?? '',
     );
   }
 }

@@ -31,11 +31,7 @@ class _PartyMasterListScreenState extends State<PartyMasterListScreen> {
 
   void _handleCardTap(int index) {
     setState(() {
-      if (expandedIndex == index) {
-        expandedIndex = null;
-      } else {
-        expandedIndex = index;
-      }
+      expandedIndex = expandedIndex == index ? null : index;
     });
   }
 
@@ -65,18 +61,64 @@ class _PartyMasterListScreenState extends State<PartyMasterListScreen> {
                   : AppPaddings.p12,
               child: Column(
                 children: [
+                  // ── Search ──
                   AppTextFormField(
                     controller: _controller.searchController,
                     hintText: 'Search Party',
                     onChanged: (value) {
                       _controller.filterParties(value);
-
-                      setState(() {
-                        expandedIndex = null;
-                      });
+                      setState(() => expandedIndex = null);
                     },
                   ),
-                  tablet ? AppSpaces.v16 : AppSpaces.v12,
+                  tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                  // ── Filter Chips ──
+                  Obx(
+                    () => Row(
+                      children: [
+                        _FilterChip(
+                          label: 'All',
+                          isSelected:
+                              _controller.selectedFilter.value ==
+                              PartyFilterType.all,
+                          tablet: tablet,
+                          onTap: () {
+                            setState(() => expandedIndex = null);
+                            _controller.onFilterChanged(PartyFilterType.all);
+                          },
+                        ),
+                        AppSpaces.h8,
+                        _FilterChip(
+                          label: 'Vendor',
+                          isSelected:
+                              _controller.selectedFilter.value ==
+                              PartyFilterType.vendor,
+                          tablet: tablet,
+                          onTap: () {
+                            setState(() => expandedIndex = null);
+                            _controller.onFilterChanged(PartyFilterType.vendor);
+                          },
+                        ),
+                        AppSpaces.h8,
+                        _FilterChip(
+                          label: 'Contractor',
+                          isSelected:
+                              _controller.selectedFilter.value ==
+                              PartyFilterType.contractor,
+                          tablet: tablet,
+                          onTap: () {
+                            setState(() => expandedIndex = null);
+                            _controller.onFilterChanged(
+                              PartyFilterType.contractor,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                  // ── List ──
                   Obx(() {
                     if (_controller.filteredParties.isEmpty &&
                         !_controller.isLoading.value) {
@@ -122,9 +164,7 @@ class _PartyMasterListScreenState extends State<PartyMasterListScreen> {
                         color: kColorPrimary,
                         strokeWidth: 2.5,
                         onRefresh: () async {
-                          setState(() {
-                            expandedIndex = null;
-                          });
+                          setState(() => expandedIndex = null);
                           await _controller.getParties();
                         },
                         child: ListView.builder(
@@ -194,6 +234,58 @@ class _PartyMasterListScreenState extends State<PartyMasterListScreen> {
         ),
         Obx(() => AppLoadingOverlay(isLoading: _controller.isLoading.value)),
       ],
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({
+    required this.label,
+    required this.isSelected,
+    required this.tablet,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isSelected;
+  final bool tablet;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(
+          horizontal: tablet ? 18 : 14,
+          vertical: tablet ? 8 : 6,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? kColorPrimary : kColorWhite,
+          borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+          border: Border.all(
+            color: isSelected ? kColorPrimary : kColorLightGrey,
+            width: 1.5,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: kColorPrimary.withOpacity(0.2),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : [],
+        ),
+        child: Text(
+          label,
+          style: TextStyles.kSemiBoldOutfit(
+            fontSize: tablet ? FontSizes.k14FontSize : FontSizes.k12FontSize,
+            color: isSelected ? kColorWhite : kColorDarkGrey,
+          ),
+        ),
+      ),
     );
   }
 }

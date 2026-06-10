@@ -271,6 +271,14 @@ class SiteMasterCard extends StatelessWidget {
                         ),
                         tablet ? AppSpaces.v12 : AppSpaces.v10,
                       ],
+                      if (site.companyName.isNotEmpty) ...[
+                        _buildInfoRow(
+                          label: 'Company',
+                          value: site.companyName,
+                          tablet: tablet,
+                        ),
+                        tablet ? AppSpaces.v12 : AppSpaces.v10,
+                      ],
 
                       if (site.pan.isNotEmpty || site.gstNumber.isNotEmpty) ...[
                         Row(

@@ -36,6 +36,7 @@ class ItemMasterController extends GetxController {
   var itemSubGroupNames = <String>[].obs;
   var selectedItemSubGroup = ''.obs;
   var selectedItemSubGroupCode = ''.obs;
+
   var isEditMode = false.obs;
   var currentICode = ''.obs;
 
@@ -48,6 +49,7 @@ class ItemMasterController extends GetxController {
   var rentRateController = TextEditingController();
 
   static const List<String> frequencyOptions = ['Hourly', 'Daily', 'Monthly'];
+
   void toggleRentItem() {
     rentItem.value = !rentItem.value;
     if (!rentItem.value) {
@@ -60,6 +62,10 @@ class ItemMasterController extends GetxController {
     if (hsnNo != null && hsnNo.isNotEmpty) {
       selectedHsnNo.value = hsnNo;
     }
+  }
+
+  void clearHsn() {
+    selectedHsnNo.value = '';
   }
 
   void onFrequencySelected(String? frequency) {
@@ -88,7 +94,7 @@ class ItemMasterController extends GetxController {
     await getCategories();
     await getItemGroups();
     await getItemSubGroups();
-    await getHsnList(); // ADD THIS
+    await getHsnList();
     isLoading.value = false;
   }
 
@@ -106,10 +112,14 @@ class ItemMasterController extends GetxController {
     try {
       final data = await CategoryMasterRepo.getCategories();
       categoryList.assignAll(data);
-      categoryNames.assignAll(data.map((e) => e.cName));
+      _updateCategoryNames();
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     }
+  }
+
+  void _updateCategoryNames() {
+    categoryNames.assignAll(categoryList.map((e) => e.cName));
   }
 
   void onCategorySelected(String? category) {
@@ -120,14 +130,42 @@ class ItemMasterController extends GetxController {
     }
   }
 
+  Future<void> addNewCategory(String categoryName) async {
+    isLoading.value = true;
+    try {
+      final response = await CategoryMasterRepo.addUpdateCategory(
+        cCode: '',
+        cName: categoryName,
+      );
+
+      if (response != null && response.containsKey('message')) {
+        await getCategories();
+        onCategorySelected(categoryName);
+        showSuccessSnackbar('Success', response['message']);
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> getItemGroups() async {
     try {
       final data = await ItemGroupMasterRepo.getItemGroups();
       itemGroupList.assignAll(data);
-      itemGroupNames.assignAll(data.map((e) => e.igName));
+      _updateItemGroupNames();
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     }
+  }
+
+  void _updateItemGroupNames() {
+    itemGroupNames.assignAll(itemGroupList.map((e) => e.igName));
   }
 
   void onItemGroupSelected(String? itemGroup) {
@@ -138,14 +176,42 @@ class ItemMasterController extends GetxController {
     }
   }
 
+  Future<void> addNewItemGroup(String itemGroupName) async {
+    isLoading.value = true;
+    try {
+      final response = await ItemGroupMasterRepo.addUpdateItemGroup(
+        igCode: '',
+        igName: itemGroupName,
+      );
+
+      if (response != null && response.containsKey('message')) {
+        await getItemGroups();
+        onItemGroupSelected(itemGroupName);
+        showSuccessSnackbar('Success', response['message']);
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> getItemSubGroups() async {
     try {
       final data = await ItemSubGroupMasterRepo.getItemSubGroups();
       itemSubGroupList.assignAll(data);
-      itemSubGroupNames.assignAll(data.map((e) => e.icName));
+      _updateItemSubGroupNames();
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     }
+  }
+
+  void _updateItemSubGroupNames() {
+    itemSubGroupNames.assignAll(itemSubGroupList.map((e) => e.icName));
   }
 
   void onItemSubGroupSelected(String? itemSubGroup) {
@@ -155,6 +221,30 @@ class ItemMasterController extends GetxController {
         (e) => e.icName == itemSubGroup,
       );
       selectedItemSubGroupCode.value = selected.icCode;
+    }
+  }
+
+  Future<void> addNewItemSubGroup(String itemSubGroupName) async {
+    isLoading.value = true;
+    try {
+      final response = await ItemSubGroupMasterRepo.addUpdateItemSubGroup(
+        icCode: '',
+        icName: itemSubGroupName,
+      );
+
+      if (response != null && response.containsKey('message')) {
+        await getItemSubGroups();
+        onItemSubGroupSelected(itemSubGroupName);
+        showSuccessSnackbar('Success', response['message']);
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
+    } finally {
+      isLoading.value = false;
     }
   }
 

@@ -180,7 +180,20 @@ class ProfileScreen extends StatelessWidget {
                                 );
                               },
                             ),
-
+                            Divider(
+                              indent: tablet ? 40 : 20,
+                              endIndent: tablet ? 40 : 20,
+                              color: kColorGrey,
+                            ),
+                            ProfileListTile(
+                              leading: Icons.refresh,
+                              title: 'Change  Company',
+                              onTap: () {
+                                _controller.changeCompany(
+                                  context,
+                                ); // <-- only this line changes
+                              },
+                            ),
                             Divider(
                               indent: tablet ? 40 : 20,
                               endIndent: tablet ? 40 : 20,

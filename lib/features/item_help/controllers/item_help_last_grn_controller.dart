@@ -27,7 +27,7 @@ class ItemHelpLastGrnController extends GetxController {
   Future<void> getParties() async {
     try {
       isLoading.value = true;
-      final fetchedParties = await PartyMasterListRepo.getParties();
+      final fetchedParties = await PartyMasterListRepo.getParties(isContSubCont : false);
       parties.assignAll(fetchedParties);
       partyNames.assignAll(fetchedParties.map((party) => party.accountName));
     } catch (e) {

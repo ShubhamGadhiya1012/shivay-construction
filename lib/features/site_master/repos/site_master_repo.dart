@@ -1,3 +1,4 @@
+import 'package:shivay_construction/features/company_master/models/company_master_dm.dart';
 import 'package:shivay_construction/features/party_masters/models/city_dm.dart';
 import 'package:shivay_construction/features/party_masters/models/state_dm.dart';
 import 'package:shivay_construction/services/api_service.dart';
@@ -50,6 +51,30 @@ class SiteMasterRepo {
     }
   }
 
+  /// Fetches company list from /Master/getCompany for the Company dropdown.
+  static Future<List<CompanyMasterDm>> getCompanies() async {
+    String? token = await SecureStorageHelper.read('token');
+
+    try {
+      final response = await ApiService.getRequest(
+        endpoint: '/Master/getCompany',
+        token: token,
+      );
+
+      if (response == null) return [];
+
+      if (response['data'] != null) {
+        return (response['data'] as List<dynamic>)
+            .map((item) => CompanyMasterDm.fromJson(item))
+            .toList();
+      }
+
+      return [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   static Future<dynamic> addUpdateSiteMaster({
     required String siteCode,
     required String siteName,
@@ -63,23 +88,25 @@ class SiteMasterRepo {
     required String email,
     required String pan,
     required String gstNumber,
+    required String company,
   }) async {
     String? token = await SecureStorageHelper.read('token');
 
     final Map<String, dynamic> requestBody = {
-      "SiteCode": siteCode,
-      "SiteName": siteName,
-      "Address1": address1,
-      "Address2": address2,
-      "City": city,
-      "State": state,
-      "PinCode": pinCode,
-      "Phone": phone,
-      "Fax": fax,
-      "EMail": email,
-      "Pan": pan,
-      "GSTNumber": gstNumber,
-    };  
+      "siteCode": siteCode,
+      "siteName": siteName,
+      "address1": address1,
+      "address2": address2,
+      "city": city,
+      "state": state,
+      "pinCode": pinCode,
+      "phone": phone,
+      "fax": fax,
+      "eMail": email,
+      "pan": pan,
+      "gstNumber": gstNumber,
+      "Company": company,
+    };
 
     try {
       final response = await ApiService.postRequest(

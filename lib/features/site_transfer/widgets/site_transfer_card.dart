@@ -6,7 +6,6 @@ import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/site_transfer/controllers/site_transfer_list_controller.dart';
 import 'package:shivay_construction/features/site_transfer/models/site_transfer_dm.dart';
 import 'package:shivay_construction/features/site_transfer/screens/site_transfer_pdf_screen.dart';
-import 'package:shivay_construction/features/site_transfer/screens/site_transfer_screen.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
@@ -15,6 +14,7 @@ import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
 import 'package:shivay_construction/widgets/app_button.dart';
 import 'package:shivay_construction/widgets/app_date_picker_text_form_field.dart';
+import 'package:shivay_construction/widgets/app_dropdown.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
 class SiteTransferCard extends StatefulWidget {
@@ -137,45 +137,45 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                         ),
                       ),
                     ),
-                    AppSpaces.h8,
-                    if (widget.transfer.status == 'PENDING')
-                      Material(
-                        color: kColorPrimary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(tablet ? 10 : 8),
-                        child: InkWell(
-                          onTap: () async {
-                            await widget.controller.getTransferDetails(
-                              invNo: widget.transfer.invNo,
-                            );
-                            Get.to(
-                              () => SiteTransferScreen(
-                                transfer: widget.transfer,
-                                transferDetails: widget
-                                    .controller
-                                    .transferDetails
-                                    .toList(),
-                              ),
-                            );
-                          },
-                          borderRadius: BorderRadius.circular(tablet ? 10 : 8),
-                          child: Container(
-                            padding: tablet
-                                ? AppPaddings.combined(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  )
-                                : AppPaddings.combined(
-                                    horizontal: 10,
-                                    vertical: 6,
-                                  ),
-                            child: Icon(
-                              Icons.edit_rounded,
-                              size: tablet ? 18 : 16,
-                              color: kColorPrimary,
-                            ),
-                          ),
-                        ),
-                      ),
+                    // AppSpaces.h8,
+                    // if (widget.transfer.status == 'PENDING')
+                    //   Material(
+                    //     color: kColorPrimary.withOpacity(0.1),
+                    //     borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                    //     child: InkWell(
+                    //       onTap: () async {
+                    //         await widget.controller.getTransferDetails(
+                    //           invNo: widget.transfer.invNo,
+                    //         );
+                    //         Get.to(
+                    //           () => SiteTransferScreen(
+                    //             transfer: widget.transfer,
+                    //             transferDetails: widget
+                    //                 .controller
+                    //                 .transferDetails
+                    //                 .toList(),
+                    //           ),
+                    //         );
+                    //       },
+                    //       borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                    //       child: Container(
+                    //         padding: tablet
+                    //             ? AppPaddings.combined(
+                    //                 horizontal: 12,
+                    //                 vertical: 8,
+                    //               )
+                    //             : AppPaddings.combined(
+                    //                 horizontal: 10,
+                    //                 vertical: 6,
+                    //               ),
+                    //         child: Icon(
+                    //           Icons.edit_rounded,
+                    //           size: tablet ? 18 : 16,
+                    //           color: kColorPrimary,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ),
                     if (widget.transfer.status == 'PENDING') AppSpaces.h8,
                     if (widget.transfer.status == 'PENDING')
                       Material(
@@ -202,7 +202,7 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                           ),
                         ),
                       ),
-                    if (widget.transfer.status == 'Pending') AppSpaces.h8,
+                    if (widget.transfer.status == 'PENDING') AppSpaces.h8,
                     AnimatedRotation(
                       turns: widget.isExpanded ? 0.5 : 0,
                       duration: const Duration(milliseconds: 300),
@@ -234,12 +234,6 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                           ),
                           AppSpaces.v4,
                           _buildInfoRow(
-                            label: 'Godown',
-                            value: widget.transfer.fromGodown,
-                            tablet: tablet,
-                          ),
-                          tablet ? AppSpaces.v8 : AppSpaces.v6,
-                          _buildInfoRow(
                             label: 'Site',
                             value: widget.transfer.fromSiteName,
                             tablet: tablet,
@@ -262,12 +256,6 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                             ),
                           ),
                           AppSpaces.v4,
-                          _buildInfoRow(
-                            label: 'Godown',
-                            value: widget.transfer.toGodown,
-                            tablet: tablet,
-                          ),
-                          tablet ? AppSpaces.v8 : AppSpaces.v6,
                           _buildInfoRow(
                             label: 'Site',
                             value: widget.transfer.toSiteName,
@@ -294,12 +282,12 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                           ? AppPaddings.combined(horizontal: 12, vertical: 6)
                           : AppPaddings.combined(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: widget.transfer.status == 'COMPLETED'
+                        color: widget.transfer.status == 'COMPLETE'
                             ? kColorGreen.withOpacity(0.1)
                             : kColorSecondary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                          color: widget.transfer.status == 'COMPLETED'
+                          color: widget.transfer.status == 'COMPLETE'
                               ? kColorGreen.withOpacity(0.3)
                               : kColorSecondary.withOpacity(0.3),
                         ),
@@ -310,7 +298,7 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                           fontSize: tablet
                               ? FontSizes.k14FontSize
                               : FontSizes.k12FontSize,
-                          color: widget.transfer.status == 'COMPLETED'
+                          color: widget.transfer.status == 'COMPLETE'
                               ? kColorGreen
                               : kColorSecondary,
                         ),
@@ -331,7 +319,6 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                             widget.controller.prepareReceiveDialog(
                               widget.transfer,
                             );
-                            // ignore: use_build_context_synchronously
                             _showReceiveDialog(context);
                           },
                         ),
@@ -411,6 +398,26 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                                   ),
                                   tablet ? AppSpaces.v8 : AppSpaces.v6,
                                   Row(
+                                    children: [
+                                      Expanded(
+                                        child: _buildInfoRow(
+                                          label: 'From Head',
+                                          value: detail.fromGodown,
+                                          tablet: tablet,
+                                        ),
+                                      ),
+                                      AppSpaces.h12,
+                                      Expanded(
+                                        child: _buildInfoRow(
+                                          label: 'To Head',
+                                          value: detail.toGodown,
+                                          tablet: tablet,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  tablet ? AppSpaces.v8 : AppSpaces.v6,
+                                  Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
@@ -421,7 +428,7 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                                         tablet,
                                       ),
                                       _buildQtyInfo(
-                                        'Dispute Godown Qty',
+                                        'Dispute',
                                         detail.autoReturnQty,
                                         tablet,
                                       ),
@@ -737,7 +744,7 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'From',
+                                            'From Site',
                                             style: TextStyles.kMediumOutfit(
                                               fontSize: tablet
                                                   ? FontSizes.k12FontSize
@@ -747,22 +754,12 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                                           ),
                                           AppSpaces.v4,
                                           Text(
-                                            widget.transfer.fromGodown,
+                                            widget.transfer.fromSiteName,
                                             style: TextStyles.kSemiBoldOutfit(
                                               fontSize: tablet
                                                   ? FontSizes.k14FontSize
                                                   : FontSizes.k12FontSize,
                                               color: kColorTextPrimary,
-                                            ),
-                                          ),
-                                          AppSpaces.v2,
-                                          Text(
-                                            widget.transfer.fromSiteName,
-                                            style: TextStyles.kRegularOutfit(
-                                              fontSize: tablet
-                                                  ? FontSizes.k12FontSize
-                                                  : FontSizes.k10FontSize,
-                                              color: kColorDarkGrey,
                                             ),
                                           ),
                                         ],
@@ -775,7 +772,7 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'To',
+                                            'To Site',
                                             style: TextStyles.kMediumOutfit(
                                               fontSize: tablet
                                                   ? FontSizes.k12FontSize
@@ -785,22 +782,12 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                                           ),
                                           AppSpaces.v4,
                                           Text(
-                                            widget.transfer.toGodown,
+                                            widget.transfer.toSiteName,
                                             style: TextStyles.kSemiBoldOutfit(
                                               fontSize: tablet
                                                   ? FontSizes.k14FontSize
                                                   : FontSizes.k12FontSize,
                                               color: kColorTextPrimary,
-                                            ),
-                                          ),
-                                          AppSpaces.v2,
-                                          Text(
-                                            widget.transfer.toSiteName,
-                                            style: TextStyles.kRegularOutfit(
-                                              fontSize: tablet
-                                                  ? FontSizes.k12FontSize
-                                                  : FontSizes.k10FontSize,
-                                              color: kColorDarkGrey,
                                             ),
                                           ),
                                         ],
@@ -844,6 +831,22 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                               final detail =
                                   widget.controller.transferDetails[index];
 
+                              // Get or create controller
+                              final controller =
+                                  widget.controller.receiveControllers[detail
+                                      .srNo] ??
+                                  TextEditingController(
+                                    text: detail.qty.toStringAsFixed(2),
+                                  );
+
+                              // Ensure it's in the map
+                              if (!widget.controller.receiveControllers
+                                  .containsKey(detail.srNo)) {
+                                widget.controller.receiveControllers[detail
+                                        .srNo] =
+                                    controller;
+                              }
+
                               return Container(
                                 margin: AppPaddings.custom(bottom: 12),
                                 padding: tablet
@@ -873,22 +876,30 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            'Transfer Qty: ${detail.qty.toStringAsFixed(2)}',
+                                            'From Head: ${detail.fromGodown}',
                                             style: TextStyles.kMediumOutfit(
                                               fontSize: tablet
-                                                  ? FontSizes.k14FontSize
-                                                  : FontSizes.k12FontSize,
-                                              color: kColorSecondary,
+                                                  ? FontSizes.k12FontSize
+                                                  : FontSizes.k10FontSize,
+                                              color: kColorDarkGrey,
                                             ),
                                           ),
                                         ),
                                       ],
                                     ),
+                                    AppSpaces.v8,
+                                    Text(
+                                      'Transfer Qty: ${detail.qty.toStringAsFixed(2)}',
+                                      style: TextStyles.kSemiBoldOutfit(
+                                        fontSize: tablet
+                                            ? FontSizes.k14FontSize
+                                            : FontSizes.k12FontSize,
+                                        color: kColorSecondary,
+                                      ),
+                                    ),
                                     AppSpaces.v12,
                                     AppTextFormField(
-                                      controller: widget
-                                          .controller
-                                          .receiveControllers[detail.srNo]!,
+                                      controller: controller,
                                       hintText: 'Received Qty *',
                                       keyboardType: TextInputType.number,
                                       validator: (value) {
@@ -904,6 +915,36 @@ class _SiteTransferCardState extends State<SiteTransferCard> {
                                         }
                                         return null;
                                       },
+                                    ),
+
+                                    AppSpaces.v6,
+                                    Obx(
+                                      () => AppDropdown(
+                                        items: widget
+                                            .controller
+                                            .toHeadNamesForReceive,
+                                        hintText: 'Select To Head *',
+                                        onChanged: (selectedName) {
+                                          widget.controller
+                                              .setSelectedToHeadForReceive(
+                                                detail.srNo,
+                                                selectedName,
+                                              );
+                                        },
+                                        selectedItem: widget
+                                            .controller
+                                            .toHeadsForReceive
+                                            .firstWhereOrNull(
+                                              (gd) =>
+                                                  gd.gdCode ==
+                                                  widget
+                                                      .controller
+                                                      .selectedToHeadCodesForReceive[detail
+                                                      .srNo],
+                                            )
+                                            ?.gdName,
+                                        validatorText: 'Please select to head',
+                                      ),
                                     ),
                                   ],
                                 ),

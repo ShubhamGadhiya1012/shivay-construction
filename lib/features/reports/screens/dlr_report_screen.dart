@@ -97,21 +97,17 @@ class DlrReportScreen extends StatelessWidget {
                               ],
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
+
                             Obx(
                               () => AppDropdown(
-                                items: _controller.partyNames,
-                                hintText: 'Party',
-                                onChanged: _controller.onPartySelected,
-                                selectedItem:
-                                    _controller
-                                        .selectedPartyName
-                                        .value
-                                        .isNotEmpty
-                                    ? _controller.selectedPartyName.value
-                                    : null,
+                                items: _controller.rTypeOptions,
+                                hintText: 'Report Type *',
+                                onChanged: _controller.onRTypeSelected,
+                                selectedItem: _controller.selectedRType.value,
                               ),
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
+
                             Obx(
                               () => AppDropdown(
                                 items: _controller.siteNames,
@@ -137,7 +133,7 @@ class DlrReportScreen extends StatelessWidget {
                     buttonHeight: tablet ? 54 : 48,
                     onPressed: () {
                       if (_controller.reportFormKey.currentState!.validate()) {
-                        _controller.generateReport();
+                        _controller.generateReport(context);
                       }
                     },
                   ),

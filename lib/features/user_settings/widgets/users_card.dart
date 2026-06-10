@@ -82,6 +82,7 @@ class UsersCard extends StatelessWidget {
               pCodes: user.pCodes,
               eCodes: '',
               gdCodes: user.gdCodes,
+              coCodes: user.coCodes,
             ),
           );
         }

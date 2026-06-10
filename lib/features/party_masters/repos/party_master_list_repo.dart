@@ -3,13 +3,16 @@ import 'package:shivay_construction/services/api_service.dart';
 import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
 class PartyMasterListRepo {
-  static Future<List<PartyMasterDm>> getParties() async {
+  static Future<List<PartyMasterDm>> getParties({bool? isContSubCont}) async {
     String? token = await SecureStorageHelper.read('token');
 
     try {
       final response = await ApiService.getRequest(
         endpoint: '/Master/getParty',
         token: token,
+        queryParams: isContSubCont != null
+            ? {'IsContSubCont': isContSubCont.toString()}
+            : null,
       );
 
       if (response == null) return [];

@@ -6,7 +6,6 @@ import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/features/indent_entry/screens/site_wise_stock_screen.dart';
 import 'package:shivay_construction/features/purchase_order_entry/controllers/purchase_order_list_controller.dart';
 import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_list_dm.dart';
-import 'package:shivay_construction/features/purchase_order_entry/screens/purchase_order_pdf_screen.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/helpers/date_format_helper.dart';
@@ -109,15 +108,20 @@ class _PurchaseOrderCardState extends State<PurchaseOrderCard> {
                       borderRadius: BorderRadius.circular(tablet ? 10 : 8),
                       child: InkWell(
                         onTap: () async {
-                          await widget.controller.getOrderDetailsForCard(
+                          await widget.controller.printPurchaseOrder(
                             widget.order.invNo,
                           );
-                          PurchaseOrderPdfScreen.generatePurchaseOrderPdf(
-                            order: widget.order,
-                            orderDetails: widget.controller.orderDetails
-                                .toList(),
-                          );
                         },
+                        // onTap: () async {
+                        //   await widget.controller.getOrderDetailsForCard(
+                        //     widget.order.invNo,
+                        //   );
+                        //   PurchaseOrderPdfScreen.generatePurchaseOrderPdf(
+                        //     order: widget.order,
+                        //     orderDetails: widget.controller.orderDetails
+                        //         .toList(),
+                        //   );
+                        // },
                         borderRadius: BorderRadius.circular(tablet ? 10 : 8),
                         child: Container(
                           padding: tablet

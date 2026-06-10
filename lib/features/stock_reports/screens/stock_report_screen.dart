@@ -184,7 +184,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
                     Obx(
                       () => AppDropdown(
                         items: _controller.godownNames,
-                        hintText: 'Godown',
+                        hintText: 'Head',
                         onChanged: _controller.onGodownSelected,
                         selectedItem:
                             _controller.selectedGodownName.value.isNotEmpty

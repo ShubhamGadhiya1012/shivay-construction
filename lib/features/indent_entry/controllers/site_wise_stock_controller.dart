@@ -13,11 +13,12 @@ class SiteWiseStockController extends GetxController {
   var itemUnit = ''.obs;
   var totalItemStock = 0.0.obs;
 
-  Future<void> getSiteWiseStock({String? iCode}) async {
+  Future<void> getSiteWiseStock({String? iCode, String? siteCode}) async {
     try {
       isLoading.value = true;
       final fetchedStock = await SiteWiseStockRepo.getSiteWiseStock(
         iCode: iCode,
+        siteCode: siteCode,
       );
       stockList.assignAll(fetchedStock);
 

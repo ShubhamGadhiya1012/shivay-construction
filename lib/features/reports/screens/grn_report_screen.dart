@@ -138,7 +138,7 @@ class GrnReportScreen extends StatelessWidget {
                             Obx(
                               () => AppDropdown(
                                 items: _controller.godownNames,
-                                hintText: 'Godown',
+                                hintText: 'Head',
                                 onChanged: _controller.onGodownSelected,
                                 selectedItem:
                                     _controller

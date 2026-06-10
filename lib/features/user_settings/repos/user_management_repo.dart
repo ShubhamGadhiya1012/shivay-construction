@@ -11,6 +11,7 @@ class UserManagementRepo {
     required String pCodes,
     required String seCodes,
     required String eCodes,
+    required String coCodes,
   }) async {
     String? token = await SecureStorageHelper.read('token');
 
@@ -23,15 +24,16 @@ class UserManagementRepo {
       "PCODEs": pCodes,
       "SECODEs": seCodes,
       "ECODEs": eCodes,
+      "coCodes": coCodes,
     };
-
+    print(requestBody);
     try {
       var response = await ApiService.postRequest(
         endpoint: '/User/manageUser',
         requestBody: requestBody,
         token: token,
       );
-
+      print(response);
       return response;
     } catch (e) {
       rethrow;

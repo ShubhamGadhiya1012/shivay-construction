@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
+import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 
 class AppAppbar extends StatelessWidget implements PreferredSizeWidget {
@@ -28,6 +29,14 @@ class AppAppbar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final Color? bgColor;
   final PreferredSizeWidget? bottom;
+
+  static const String _companyKey = 'company';
+
+  Future<String?> _loadCompanySubtitle() async {
+    final String? companyName = await SecureStorageHelper.read(_companyKey);
+    if (companyName?.isNotEmpty == true) return companyName;
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,10 +74,32 @@ class AppAppbar extends StatelessWidget implements PreferredSizeWidget {
                   subtitleStyle ??
                   TextStyles.kRegularOutfit(
                     fontSize: tablet
-                        ? FontSizes.k20FontSize
-                        : FontSizes.k14FontSize,
-                    color: kColorDarkGrey,
+                        ? FontSizes.k14FontSize
+                        : FontSizes.k10FontSize,
+                    color: kColorBlack,
                   ),
+            )
+          else
+            FutureBuilder<String?>(
+              future: _loadCompanySubtitle(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting ||
+                    snapshot.data == null ||
+                    snapshot.data!.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return Text(
+                  snapshot.data!,
+                  style:
+                      subtitleStyle ??
+                      TextStyles.kRegularOutfit(
+                        fontSize: tablet
+                            ? FontSizes.k20FontSize
+                            : FontSizes.k14FontSize,
+                        color: kColorDarkGrey,
+                      ),
+                );
+              },
             ),
         ],
       ),

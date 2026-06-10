@@ -9,6 +9,7 @@ class DlrDataDm {
   final int supervisor;
   final String supervisorName;
   final String remark;
+  final String description;
 
   DlrDataDm({
     required this.pCode,
@@ -21,6 +22,7 @@ class DlrDataDm {
     required this.supervisor,
     required this.supervisorName,
     required this.remark,
+    required this.description,
   });
 
   factory DlrDataDm.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class DlrDataDm {
       supervisor: json['supervisor'] ?? 0,
       supervisorName: json['supervisorName'] ?? '',
       remark: json['remark'] ?? '',
+      description: json['description'] ?? '',
     );
   }
 
@@ -50,6 +53,7 @@ class DlrDataDm {
       'supervisor': supervisor,
       'supervisorName': supervisorName,
       'remark': remark,
+      'description': description,
     };
   }
 }

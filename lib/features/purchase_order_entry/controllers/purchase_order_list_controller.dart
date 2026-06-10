@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_detail_dm.dart';
 import 'package:shivay_construction/features/purchase_order_entry/models/purchase_order_list_dm.dart';
+import 'package:shivay_construction/features/purchase_order_entry/repos/order_print_repo.dart';
 import 'package:shivay_construction/features/purchase_order_entry/repos/purchase_order_list_repo.dart';
+import 'package:shivay_construction/features/purchase_order_entry/widgets/po_order_pdf.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
@@ -172,6 +174,23 @@ class PurchaseOrderListController extends GetxController {
       } else {
         showErrorSnackbar('Error', e.toString());
       }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> printPurchaseOrder(String invNo) async {
+    if (invNo.isEmpty) return;
+    isLoading.value = true;
+    try {
+      final data = await OrderPrintRepo.getOrderPrintData(invNo: invNo);
+      if (data != null) {
+        await PoPdfWidget.generatePurchaseOrderPdf(pdfData: data);
+      } else {
+        showErrorSnackbar('Error', 'Failed to fetch print data');
+      }
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
     } finally {
       isLoading.value = false;
     }

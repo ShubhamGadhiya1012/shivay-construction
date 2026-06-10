@@ -7,6 +7,8 @@ import 'package:shivay_construction/features/issue_entry/controllers/issues_cont
 import 'package:shivay_construction/features/issue_entry/models/grn_item_dm.dart';
 import 'package:shivay_construction/features/issue_entry/repos/grn_items_repo.dart';
 import 'package:shivay_construction/features/issue_entry/repos/issue_entry_repo.dart';
+import 'package:shivay_construction/features/party_masters/models/party_master_dm.dart';
+import 'package:shivay_construction/features/party_masters/repos/party_master_list_repo.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 
 class IssueEntryController extends GetxController {
@@ -35,6 +37,12 @@ class IssueEntryController extends GetxController {
   var selectedItemGodownCode = <String, String>{}.obs;
   var selectedItemGodownName = <String, String>{}.obs;
 
+  // Contractors/Sub-Contractors - key: grnInvNo_grnSrNo
+  var selectedItemCpCode = <String, String>{}.obs;
+  var selectedItemCpName = <String, String>{}.obs;
+  var contractorList = <PartyMasterDm>[].obs;
+  var contractorNames = <String>[].obs;
+
   // Locked GRN (only one GRN's items can be selected at a time)
   var lockedGrnInvNo = ''.obs;
   var lockedGrnPCode = ''.obs;
@@ -43,8 +51,6 @@ class IssueEntryController extends GetxController {
   var lockedGrnSiteName = ''.obs;
 
   final IssuesController issuesController = Get.find<IssuesController>();
-
-
 
   @override
   void onClose() {
@@ -61,12 +67,32 @@ class IssueEntryController extends GetxController {
     qtyControllers.clear();
   }
 
-  Future<void> getGodowns() async {
+  Future<void> getGodowns({String siteCode = ''}) async {
     try {
       isLoading.value = true;
-      final fetchedGodowns = await GodownMasterRepo.getGodowns(siteCode: "");
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(
+        siteCode: siteCode,
+      );
       godowns.assignAll(fetchedGodowns);
       godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> getContractors() async {
+    try {
+      isLoading.value = true;
+      // Fetch contractors and sub-contractors where isContSubCont = true
+      final fetchedContractors = await PartyMasterListRepo.getParties(
+        isContSubCont: true,
+      );
+      contractorList.assignAll(fetchedContractors);
+      contractorNames.assignAll(
+        fetchedContractors.map((c) => c.accountName).toList(),
+      );
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
@@ -91,7 +117,7 @@ class IssueEntryController extends GetxController {
         expandedGrnIndices.add(i);
       }
 
-      // Init qty controllers and default godown for each item
+      // Init qty controllers and default godown/contractor for each item
       for (var grn in fetched) {
         for (var item in grn.items) {
           final key = '${grn.grnInvNo}_${item.grnSrNo}';
@@ -104,6 +130,11 @@ class IssueEntryController extends GetxController {
           if (!selectedItemGodownCode.containsKey(key)) {
             selectedItemGodownCode[key] = item.gdCode;
             selectedItemGodownName[key] = item.gdName;
+          }
+          // Pre-fill contractor from item's cpCode/cpName
+          if (!selectedItemCpCode.containsKey(key)) {
+            selectedItemCpCode[key] = item.cpCode;
+            selectedItemCpName[key] = item.cpName;
           }
         }
       }
@@ -128,6 +159,24 @@ class IssueEntryController extends GetxController {
 
     selectedItemGodownName.refresh();
     selectedItemGodownCode.refresh();
+  }
+
+  void onItemContractorSelected(String key, String? contractorName) {
+    selectedItemCpName[key] = contractorName ?? '';
+    final contractor = contractorList.firstWhereOrNull(
+      (c) => c.accountName == contractorName,
+    );
+    selectedItemCpCode[key] = contractor?.pCode ?? '';
+
+    // Update selectedItems map if item is selected
+    if (selectedItems.containsKey(key)) {
+      selectedItems[key]!['cpCode'] = selectedItemCpCode[key];
+      selectedItems[key]!['cpName'] = contractorName ?? '';
+      selectedItems.refresh();
+    }
+
+    selectedItemCpName.refresh();
+    selectedItemCpCode.refresh();
   }
 
   void toggleGrnExpansion(int index) {
@@ -184,6 +233,8 @@ class IssueEntryController extends GetxController {
       'issueQty': issueQty,
       'gdCode': selectedItemGodownCode[key] ?? item.gdCode,
       'gdName': selectedItemGodownName[key] ?? item.gdName,
+      'cpCode': selectedItemCpCode[key] ?? item.cpCode,
+      'cpName': selectedItemCpName[key] ?? item.cpName,
     };
 
     return true;
@@ -288,6 +339,7 @@ class IssueEntryController extends GetxController {
               'qty': item['issueQty'],
               'rate': item['rate'],
               'gdCode': item['gdCode'] ?? '',
+              'cpCode': item['cpCode'] ?? '',
             },
           )
           .toList();
@@ -337,5 +389,7 @@ class IssueEntryController extends GetxController {
     _disposeQtyControllers();
     selectedItemGodownCode.clear();
     selectedItemGodownName.clear();
+    selectedItemCpCode.clear();
+    selectedItemCpName.clear();
   }
 }

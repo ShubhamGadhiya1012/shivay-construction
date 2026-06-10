@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:shivay_construction/features/godown_master/models/godown_master_dm.dart';
+import 'package:shivay_construction/features/hsn_master/models/hsn_master_dm.dart';
+import 'package:shivay_construction/features/hsn_master/repos/hsn_master_list_repo.dart';
 import 'package:shivay_construction/features/party_masters/models/party_master_dm.dart';
 import 'package:shivay_construction/features/party_masters/repos/party_master_list_repo.dart';
 import 'package:shivay_construction/features/purchase_order_entry/controllers/purchase_order_list_controller.dart';
@@ -38,7 +41,7 @@ class PurchaseOrderController extends GetxController {
   var remarkControllers = <String, TextEditingController>{}.obs;
   var _userEditingDiscountAmount = false;
   var _userEditingDiscountPerc = false;
-  var godowns = <dynamic>[].obs;
+  var godowns = <GodownMasterDm>[].obs; // Make sure it's List<GodownMasterDm>
   var godownNames = <String>[].obs;
   var selectedGodownName = <String, String>{}.obs;
   var selectedGodownCode = <String, String>{}.obs;
@@ -48,7 +51,7 @@ class PurchaseOrderController extends GetxController {
 
   var dateController = TextEditingController();
   var remarksController = TextEditingController();
-
+  var selectedItemsTaxData = <String, Map<String, dynamic>>{}.obs; // key: iCode
   var selectedSiteName = ''.obs;
   var selectedSiteCode = ''.obs;
 
@@ -94,6 +97,19 @@ class PurchaseOrderController extends GetxController {
   var manualTermControllers = <TextEditingController>[].obs;
 
   var currentStep = 0.obs;
+  var hsnList = <HsnMasterDm>[].obs;
+  var hsnNumbers = <String>[].obs;
+  var selectedHsnForIndent = <String, String>{}.obs; // key -> hsnNo
+
+  Future<void> getHsnList() async {
+    try {
+      final data = await HsnMasterListRepo.getHsnList();
+      hsnList.assignAll(data);
+      hsnNumbers.assignAll(data.map((e) => e.hsnNo));
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    }
+  }
 
   void onPartySelected(String? partyName) {
     selectedPartyName.value = partyName!;
@@ -109,12 +125,73 @@ class PurchaseOrderController extends GetxController {
     isIGSTApplicable.value = obj.igst;
     isCGSTApplicable.value = obj.cgst;
     isSGSTApplicable.value = obj.sgst;
+
+    // FETCH TAX DATA FOR ALL SELECTED ITEMS WHEN TAX TYPE CHANGES
+    if (selectedPurchaseItems.isNotEmpty) {
+      fetchTaxDataForAllItems();
+    }
+  }
+
+  Future<void> fetchTaxDataForAllItems() async {
+    if (selectedTaxTypeCode.value.isEmpty) {
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      selectedItemsTaxData.clear();
+
+      for (var item in selectedPurchaseItems) {
+        final iCode = item['ICode'] as String;
+        final taxData = await PurchaseOrderRepo.getItemTax(
+          tCode: selectedTaxTypeCode.value,
+          iCode: iCode,
+        );
+
+        if (taxData.isNotEmpty) {
+          final td = taxData.first;
+          selectedItemsTaxData[iCode] = {
+            'HSNNo': td.hsnNo ?? '',
+            'IGST': td.igst,
+            'CGST': td.cgst,
+            'SGST': td.sgst,
+          };
+
+          // Update selectedPurchaseItems with tax data
+          item['IGSTPerc'] = td.igst;
+          item['CGSTPerc'] = td.cgst;
+          item['SGSTPerc'] = td.sgst;
+          item['HSNNo'] = td.hsnNo ?? '';
+        } else {
+          selectedItemsTaxData[iCode] = {
+            'HSNNo': '',
+            'IGST': 0.0,
+            'CGST': 0.0,
+            'SGST': 0.0,
+          };
+
+          item['IGSTPerc'] = 0.0;
+          item['CGSTPerc'] = 0.0;
+          item['SGSTPerc'] = 0.0;
+          item['HSNNo'] = '';
+        }
+      }
+
+      selectedPurchaseItems.refresh();
+      selectedItemsTaxData.refresh();
+    } catch (e) {
+      showErrorSnackbar('Error', 'Failed to fetch tax data');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> getParties() async {
     try {
       isLoading.value = true;
-      final fetched = await PartyMasterListRepo.getParties();
+      final fetched = await PartyMasterListRepo.getParties(
+        isContSubCont: false,
+      );
       parties.assignAll(fetched);
       partyNames.assignAll(fetched.map((p) => p.accountName).toList());
     } catch (e) {
@@ -132,6 +209,34 @@ class PurchaseOrderController extends GetxController {
       taxTypeNames.assignAll(fetched.map((t) => t.taxName).toList());
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> updateIndentHSN({
+    required String key,
+    required String iCode,
+    required String hsnNo,
+  }) async {
+    isLoading.value = true;
+    try {
+      final response = await PurchaseOrderRepo.updateItemHSN(
+        iCode: iCode,
+        hsnNo: hsnNo,
+      );
+      if (response != null && response.containsKey('message')) {
+        selectedHsnForIndent[key] = hsnNo;
+        selectedHsnForIndent.refresh();
+        showSuccessSnackbar('Success', response['message']);
+        await getAuthIndentItems();
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
     } finally {
       isLoading.value = false;
     }
@@ -206,13 +311,22 @@ class PurchaseOrderController extends GetxController {
     return result;
   }
 
-  Future<void> getGodowns([String siteCode = '']) async {
+  Future<void> getGodowns({String siteCode = ''}) async {
     try {
       isLoading.value = true;
       final fetched = await GodownMasterRepo.getGodowns(siteCode: siteCode);
       final parentGodowns = fetched.where((gd) => !gd.isSubGodown).toList();
-      godowns.assignAll(parentGodowns);
-      godownNames.assignAll(parentGodowns.map((gd) => gd.gdName).toList());
+
+      if (siteCode.isNotEmpty) {
+        // Filter by site code if provided
+        godowns.assignAll(
+          parentGodowns.where((gd) => gd.siteCode == siteCode).toList(),
+        );
+      } else {
+        godowns.assignAll(parentGodowns);
+      }
+
+      godownNames.assignAll(godowns.map((gd) => gd.gdName).toList());
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
@@ -220,10 +334,29 @@ class PurchaseOrderController extends GetxController {
     }
   }
 
-  void onGodownSelected(String key, String? godownName) {
+  List<String> getGodownNamesBySite(String siteCode) {
+    if (siteCode.isEmpty) return godownNames.toList();
+
+    final filteredGodowns = godowns
+        .where((gd) => gd.siteCode == siteCode && !gd.isSubGodown)
+        .toList();
+
+    return filteredGodowns.map((gd) => gd.gdName).toList();
+  }
+
+  void onGodownSelected(String key, String? godownName, {String? siteCode}) {
     selectedGodownName[key] = godownName ?? '';
-    final obj = godowns.firstWhereOrNull((gd) => gd.gdName == godownName);
+
+    // Filter godowns by siteCode if provided
+    final filteredGodowns = siteCode != null && siteCode.isNotEmpty
+        ? godowns.where((gd) => gd.siteCode == siteCode).toList()
+        : godowns;
+
+    final obj = filteredGodowns.firstWhereOrNull(
+      (gd) => gd.gdName == godownName,
+    );
     selectedGodownCode[key] = obj?.gdCode ?? '';
+
     selectedGodownName.refresh();
     selectedGodownCode.refresh();
   }
@@ -326,27 +459,7 @@ class PurchaseOrderController extends GetxController {
       }
       selectedPurchaseItems.refresh();
 
-      for (var item in selectedPurchaseItems) {
-        final iCode = item['ICode'] as String;
-        final taxData = await PurchaseOrderRepo.getItemTax(
-          tCode: selectedTaxTypeCode.value,
-          iCode: iCode,
-        );
-        if (taxData.isNotEmpty) {
-          final td = taxData.first;
-          item['IGSTPerc'] = td.igst;
-          item['CGSTPerc'] = td.cgst;
-          item['SGSTPerc'] = td.sgst;
-          item['HSNNo'] = td.hsnNo ?? '';
-        } else {
-          item['IGSTPerc'] = 0.0;
-          item['CGSTPerc'] = 0.0;
-          item['SGSTPerc'] = 0.0;
-          item['HSNNo'] = '';
-        }
-      }
-      selectedPurchaseItems.refresh();
-
+      // TAX DATA ALREADY FETCHED - NO NEED TO FETCH AGAIN
       updateGrossTotal();
 
       final bookCode = '1001';
@@ -743,6 +856,19 @@ class PurchaseOrderController extends GetxController {
   bool toggleIndentSelection(int itemIndex, int indentIndex) {
     final indent = authIndentItems[itemIndex].items[indentIndex];
 
+    // Block selection if HSN not assigned
+    final key = '${authIndentItems[itemIndex].indentNo}_${indent.indentSrNo}';
+    final hasHsn =
+        (selectedHsnForIndent[key]?.isNotEmpty == true) ||
+        indent.hsnNo.isNotEmpty;
+    if (!hasHsn) {
+      showErrorSnackbar(
+        'HSN Required',
+        'Please assign HSN No to "${indent.iName}" before selecting.',
+      );
+      return false;
+    }
+
     if (lockedSiteCode.value.isEmpty) {
       lockedSiteCode.value = indent.siteCode;
       lockedSiteName.value = indent.siteName;
@@ -764,6 +890,20 @@ class PurchaseOrderController extends GetxController {
 
   void enableSelectionMode(int itemIndex, int indentIndex) {
     final indent = authIndentItems[itemIndex].items[indentIndex];
+
+    // Block selection if HSN not assigned
+    final key = '${authIndentItems[itemIndex].indentNo}_${indent.indentSrNo}';
+    final hasHsn =
+        (selectedHsnForIndent[key]?.isNotEmpty == true) ||
+        indent.hsnNo.isNotEmpty;
+    if (!hasHsn) {
+      showErrorSnackbar(
+        'HSN Required',
+        'Please assign HSN No to "${indent.iName}" before selecting.',
+      );
+      return;
+    }
+
     if (lockedSiteCode.value.isNotEmpty &&
         indent.siteCode != lockedSiteCode.value) {
       showErrorSnackbar(
@@ -974,6 +1114,7 @@ class PurchaseOrderController extends GetxController {
       }
 
       await getGodowns();
+      await getHsnList();
       _reapplySelectionsFromItems();
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
@@ -1153,8 +1294,12 @@ class PurchaseOrderController extends GetxController {
     currentInvNo.value = '';
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
     remarksController.clear();
-    for (final c in discountPercControllers.values) c.dispose();
-    for (final c in discountAmountControllers.values) c.dispose();
+    for (final c in discountPercControllers.values) {
+      c.dispose();
+    }
+    for (final c in discountAmountControllers.values) {
+      c.dispose();
+    }
     discountPercControllers.clear();
     discountAmountControllers.clear();
     selectedSiteName.value = '';
@@ -1168,7 +1313,8 @@ class PurchaseOrderController extends GetxController {
     isSGSTApplicable.value = false;
     lockedSiteCode.value = '';
     lockedSiteName.value = '';
-
+    selectedHsnForIndent.clear();
+    selectedItemsTaxData.clear(); // ADD THIS LINE
     attachmentFiles.clear();
     existingAttachmentUrls.clear();
     authIndentItems.clear();
@@ -1176,18 +1322,34 @@ class PurchaseOrderController extends GetxController {
     termsList.clear();
     selectedTermCodes.clear();
 
-    for (final c in editableTermDescriptions.values) c.dispose();
+    for (final c in editableTermDescriptions.values) {
+      c.dispose();
+    }
     editableTermDescriptions.clear();
 
-    for (final c in manualTermControllers) c.dispose();
+    for (final c in manualTermControllers) {
+      c.dispose();
+    }
     manualTermControllers.clear();
 
-    for (final c in remarkControllers.values) c.dispose();
-    for (final c in qtyControllers.values) c.dispose();
-    for (final c in priceControllers.values) c.dispose();
-    for (final c in dateControllers.values) c.dispose();
-    for (final c in customiseVoucherAmountControllers.values) c.dispose();
-    for (final c in customiseVoucherPercentageControllers.values) c.dispose();
+    for (final c in remarkControllers.values) {
+      c.dispose();
+    }
+    for (final c in qtyControllers.values) {
+      c.dispose();
+    }
+    for (final c in priceControllers.values) {
+      c.dispose();
+    }
+    for (final c in dateControllers.values) {
+      c.dispose();
+    }
+    for (final c in customiseVoucherAmountControllers.values) {
+      c.dispose();
+    }
+    for (final c in customiseVoucherPercentageControllers.values) {
+      c.dispose();
+    }
 
     remarkControllers.clear();
     qtyControllers.clear();
@@ -1219,16 +1381,36 @@ class PurchaseOrderController extends GetxController {
   void onClose() {
     dateController.dispose();
     remarksController.dispose();
-    for (final c in remarkControllers.values) c.dispose();
-    for (final c in qtyControllers.values) c.dispose();
-    for (final c in priceControllers.values) c.dispose();
-    for (final c in dateControllers.values) c.dispose();
-    for (final c in customiseVoucherAmountControllers.values) c.dispose();
-    for (final c in customiseVoucherPercentageControllers.values) c.dispose();
-    for (final c in editableTermDescriptions.values) c.dispose();
-    for (final c in manualTermControllers) c.dispose();
-    for (final c in discountPercControllers.values) c.dispose();
-    for (final c in discountAmountControllers.values) c.dispose();
+    for (final c in remarkControllers.values) {
+      c.dispose();
+    }
+    for (final c in qtyControllers.values) {
+      c.dispose();
+    }
+    for (final c in priceControllers.values) {
+      c.dispose();
+    }
+    for (final c in dateControllers.values) {
+      c.dispose();
+    }
+    for (final c in customiseVoucherAmountControllers.values) {
+      c.dispose();
+    }
+    for (final c in customiseVoucherPercentageControllers.values) {
+      c.dispose();
+    }
+    for (final c in editableTermDescriptions.values) {
+      c.dispose();
+    }
+    for (final c in manualTermControllers) {
+      c.dispose();
+    }
+    for (final c in discountPercControllers.values) {
+      c.dispose();
+    }
+    for (final c in discountAmountControllers.values) {
+      c.dispose();
+    }
     super.onClose();
   }
 }

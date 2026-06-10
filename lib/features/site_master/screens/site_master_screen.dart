@@ -66,6 +66,8 @@ class SiteMasterScreen extends StatelessWidget {
                         child: Column(
                           children: [
                             tablet ? AppSpaces.v6 : AppSpaces.v4,
+
+                            // Site Name
                             AppTextFormField(
                               controller: _controller.siteNameController,
                               hintText: 'Site Name *',
@@ -78,6 +80,7 @@ class SiteMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
+                            // Address 1
                             AppTextFormField(
                               controller: _controller.address1Controller,
                               hintText: 'Address Line 1 *',
@@ -88,12 +91,14 @@ class SiteMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
+                            // Address 2
                             AppTextFormField(
                               controller: _controller.address2Controller,
                               hintText: 'Address Line 2',
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
+                            // City & State
                             Row(
                               children: [
                                 Expanded(
@@ -117,9 +122,8 @@ class SiteMasterScreen extends StatelessWidget {
                                             context,
                                             title: 'Add New City',
                                             hintText: 'Enter city name',
-                                            onAdd: (value) {
-                                              _controller.addNewCity(value);
-                                            },
+                                            onAdd: (value) =>
+                                                _controller.addNewCity(value),
                                           );
                                         } else {
                                           _controller.onCitySelected(
@@ -154,9 +158,8 @@ class SiteMasterScreen extends StatelessWidget {
                                             context,
                                             title: 'Add New State',
                                             hintText: 'Enter state name',
-                                            onAdd: (value) {
-                                              _controller.addNewState(value);
-                                            },
+                                            onAdd: (value) =>
+                                                _controller.addNewState(value),
                                           );
                                         } else {
                                           _controller.onStateSelected(
@@ -172,6 +175,7 @@ class SiteMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
+                            // Pin Code
                             AppTextFormField(
                               controller: _controller.pinCodeController,
                               hintText: 'Pin Code *',
@@ -189,6 +193,7 @@ class SiteMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
+                            // Phone & Fax
                             Row(
                               children: [
                                 Expanded(
@@ -216,6 +221,7 @@ class SiteMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
+                            // Email
                             AppTextFormField(
                               controller: _controller.emailController,
                               hintText: 'Email',
@@ -234,6 +240,7 @@ class SiteMasterScreen extends StatelessWidget {
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
 
+                            // PAN & GST Number
                             Row(
                               children: [
                                 Expanded(
@@ -263,12 +270,34 @@ class SiteMasterScreen extends StatelessWidget {
                                 ),
                               ],
                             ),
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
+
+                            // Company dropdown — mandatory
+                            Obx(
+                              () => AppDropdown(
+                                hintText: 'Company *',
+                                items: _controller.companyNames,
+                                selectedItem:
+                                    _controller
+                                        .selectedCompanyName
+                                        .value
+                                        .isNotEmpty
+                                    ? _controller.selectedCompanyName.value
+                                    : null,
+                                onChanged: (selectedValue) {
+                                  _controller.onCompanySelected(selectedValue);
+                                },
+                                validatorText: 'Please select a company',
+                              ),
+                            ),
                             tablet ? AppSpaces.v20 : AppSpaces.v16,
                           ],
                         ),
                       ),
                     ),
                   ),
+
+                  // Submit / Update button
                   Obx(
                     () => AppButton(
                       title: _controller.isEditMode.value ? 'Update' : 'Submit',
@@ -300,6 +329,7 @@ class SiteMasterScreen extends StatelessWidget {
     final bool tablet = AppScreenUtils.isTablet(context);
     final newItemController = TextEditingController();
     final dialogFormKey = GlobalKey<FormState>();
+
     showDialog(
       context: context,
       barrierDismissible: false,

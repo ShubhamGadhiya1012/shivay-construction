@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shivay_construction/features/godown_master/models/godown_master_dm.dart';
+import 'package:shivay_construction/features/godown_master/repos/godown_master_repo.dart';
 import 'package:shivay_construction/features/site_transfer/models/site_transfer_dm.dart';
 import 'package:shivay_construction/features/site_transfer/models/site_transfer_detail_dm.dart';
 import 'package:shivay_construction/features/site_transfer/repos/site_transfer_list_repo.dart';
@@ -30,6 +32,9 @@ class SiteTransferListController extends GetxController {
   var remarksController = TextEditingController();
   Map<int, TextEditingController> receiveControllers = {};
 
+  var toHeadsForReceive = <GodownMasterDm>[].obs;
+  var toHeadNamesForReceive = <String>[].obs;
+  Map<int, String> selectedToHeadCodesForReceive = {};
   @override
   void onInit() async {
     super.onInit();
@@ -110,17 +115,53 @@ class SiteTransferListController extends GetxController {
     }
   }
 
-  void prepareReceiveDialog(SiteTransferDm transfer) {
+  Future<void> getToHeadsForReceive(String toSiteCode) async {
+    try {
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(
+        siteCode: toSiteCode,
+      );
+      final parentGodowns = fetchedGodowns
+          .where((gd) => !gd.isSubGodown)
+          .toList();
+
+      toHeadsForReceive.assignAll(parentGodowns);
+      toHeadNamesForReceive.assignAll(
+        parentGodowns.map((gd) => gd.gdName).toList(),
+      );
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    }
+  }
+
+  // Method to set selected to head for an item
+  void setSelectedToHeadForReceive(int srNo, String? gdName) {
+    if (gdName == null || gdName.isEmpty) return;
+
+    var selectedGodown = toHeadsForReceive.firstWhere(
+      (gd) => gd.gdName == gdName,
+    );
+    selectedToHeadCodesForReceive[srNo] = selectedGodown.gdCode;
+  }
+
+  void prepareReceiveDialog(SiteTransferDm transfer) async {
     for (var controller in receiveControllers.values) {
       controller.dispose();
     }
     receiveControllers.clear();
+    selectedToHeadCodesForReceive.clear();
 
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
     remarksController.clear();
 
+    // Load to heads for receive
+    await getToHeadsForReceive(transfer.toSiteCode);
+
     for (var detail in transferDetails) {
-      receiveControllers[detail.srNo] = TextEditingController();
+      // Make sure to use detail.srNo as key
+      receiveControllers[detail.srNo] = TextEditingController(
+        text: detail.qty.toStringAsFixed(2),
+      );
+      selectedToHeadCodesForReceive[detail.srNo] = detail.toGDCode;
     }
   }
 
@@ -138,11 +179,20 @@ class SiteTransferListController extends GetxController {
       for (var detail in transferDetails) {
         final controller = receiveControllers[detail.srNo];
         if (controller != null && controller.text.isNotEmpty) {
-          itemData.add({
-            "SrNo": detail.srNo,
-            "ICode": detail.iCode,
-            "Qty": double.parse(controller.text),
-          });
+          double receivedQty = double.tryParse(controller.text) ?? 0;
+          if (receivedQty > 0) {
+            // Get selected ToGDCode or use original
+            final selectedToGDCode =
+                selectedToHeadCodesForReceive[detail.srNo] ?? detail.toGDCode;
+
+            itemData.add({
+              "SrNo": detail.srNo,
+              "ICode": detail.iCode,
+              "Qty": receivedQty,
+              "FromGDCode": detail.fromGDCode, // Source head code
+              "ToGDCode": selectedToGDCode, // Selected/changeable head code
+            });
+          }
         }
       }
 
@@ -158,9 +208,7 @@ class SiteTransferListController extends GetxController {
         refInvNo: transfer.invNo,
         date: convertToApiDateFormat(dateController.text),
         fromSite: transfer.fromSiteCode,
-        fromGDCode: transfer.fromGDCode,
         toSite: transfer.toSiteCode,
-        toGDCode: transfer.toGDCode,
         itemData: itemData,
         remarks: remarksController.text.trim(),
       );
@@ -168,6 +216,7 @@ class SiteTransferListController extends GetxController {
       if (response != null && response.containsKey('message')) {
         Get.back();
         showSuccessSnackbar('Success', response['message']);
+        clearReceiveForm();
         await getSiteTransfers();
       }
     } catch (e) {

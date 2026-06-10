@@ -25,7 +25,7 @@ class DlrRepo {
         token: token,
         queryParams: queryParams,
       );
-
+      // print(response);
       if (response == null || response['data'] == null) {
         return [];
       }
@@ -79,7 +79,7 @@ class DlrRepo {
       'SiteCode': siteCode,
       'DLRData': dlrData,
     };
-
+    // print(requestBody);
     try {
       var response = await ApiService.postRequest(
         endpoint: '/DLR/dlrEntry',

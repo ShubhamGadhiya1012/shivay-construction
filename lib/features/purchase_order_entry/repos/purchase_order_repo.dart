@@ -213,4 +213,24 @@ class PurchaseOrderRepo {
       rethrow;
     }
   }
+
+  static Future<dynamic> updateItemHSN({
+    required String iCode,
+    required String hsnNo,
+  }) async {
+    String? token = await SecureStorageHelper.read('token');
+    print(iCode);
+    print(hsnNo);
+
+    try {
+      final response = await ApiService.postRequest(
+        endpoint: '/Master/updateItemHSN',
+        requestBody: {'ICode': iCode, 'HsnNo': hsnNo},
+        token: token,
+      );
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

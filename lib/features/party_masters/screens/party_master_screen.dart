@@ -14,6 +14,7 @@ import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:shivay_construction/utils/screen_utils/app_spacings.dart';
 import 'package:shivay_construction/widgets/app_appbar.dart';
 import 'package:shivay_construction/widgets/app_button.dart';
+import 'package:shivay_construction/widgets/app_checkbox_row.dart';
 import 'package:shivay_construction/widgets/app_dropdown.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
@@ -112,9 +113,7 @@ class PartyMasterScreen extends StatelessWidget {
                                       context,
                                       title: 'Add New Location',
                                       hintText: 'Enter location name',
-                                      onAdd: (value) {
-                                        _controller.addNewLocation(value);
-                                      },
+                                      onAdd: _controller.addNewLocation,
                                     );
                                   } else {
                                     _controller.onLocationSelected(
@@ -168,9 +167,7 @@ class PartyMasterScreen extends StatelessWidget {
                                             context,
                                             title: 'Add New City',
                                             hintText: 'Enter city name',
-                                            onAdd: (value) {
-                                              _controller.addNewCity(value);
-                                            },
+                                            onAdd: _controller.addNewCity,
                                           );
                                         } else {
                                           _controller.onCitySelected(
@@ -205,9 +202,7 @@ class PartyMasterScreen extends StatelessWidget {
                                             context,
                                             title: 'Add New State',
                                             hintText: 'Enter state name',
-                                            onAdd: (value) {
-                                              _controller.addNewState(value);
-                                            },
+                                            onAdd: _controller.addNewState,
                                           );
                                         } else {
                                           _controller.onStateSelected(
@@ -298,6 +293,17 @@ class PartyMasterScreen extends StatelessWidget {
                                 ),
                               ],
                             ),
+                            tablet ? AppSpaces.v16 : AppSpaces.v10,
+
+                            // ── Is Contractor Checkbox ──
+                            Obx(
+                              () => AppCheckboxRow(
+                                title: 'Is Contractor / Sub-Contractor',
+                                value: _controller.isContSubCont.value,
+                                onChanged: _controller.toggleIsContSubCont,
+                              ),
+                            ),
+
                             tablet ? AppSpaces.v20 : AppSpaces.v16,
                           ],
                         ),

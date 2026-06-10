@@ -15,6 +15,7 @@ class PartyMasterDm {
   final String mobile;
   final String gstNumber;
   final String pan;
+  final bool isContSubCont;
 
   PartyMasterDm({
     required this.pCode,
@@ -33,6 +34,7 @@ class PartyMasterDm {
     required this.mobile,
     required this.gstNumber,
     required this.pan,
+    required this.isContSubCont,
   });
 
   factory PartyMasterDm.fromJson(Map<String, dynamic> json) {
@@ -53,6 +55,7 @@ class PartyMasterDm {
       mobile: json['Mobile'] ?? '',
       gstNumber: json['GSTNumber'] ?? '',
       pan: json['Pan'] ?? '',
+      isContSubCont: json['IsContSubCont'] ?? false,
     );
   }
 
@@ -74,6 +77,7 @@ class PartyMasterDm {
       'Mobile': mobile,
       'GSTNumber': gstNumber,
       'PANNumber': pan,
+      'IsContSubCont': isContSubCont,
     };
   }
 }

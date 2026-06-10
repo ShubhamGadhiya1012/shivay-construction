@@ -27,6 +27,7 @@ class IssueEntryRepo {
                 'Qty': item['qty'],
                 'Rate': item['rate'],
                 'GDCode': item['gdCode'],
+                'CPCode': item['cpCode'],
               },
             )
             .toList(),

@@ -46,6 +46,7 @@ class DlrEntryController extends GetxController {
   var unskillController = TextEditingController();
   var unskillRateController = TextEditingController();
   var remarkController = TextEditingController();
+  var descriptionController = TextEditingController();
 
   var supervisors = <UserDm>[].obs;
   var supervisorNames = <String>[].obs;
@@ -98,7 +99,9 @@ class DlrEntryController extends GetxController {
   Future<void> getParties() async {
     try {
       isLoading.value = true;
-      final fetchedParties = await PartyMasterListRepo.getParties();
+      final fetchedParties = await PartyMasterListRepo.getParties(
+        isContSubCont: true,
+      );
       parties.assignAll(fetchedParties);
       partyNames.assignAll(fetchedParties.map((p) => p.accountName).toList());
     } catch (e) {
@@ -187,6 +190,7 @@ class DlrEntryController extends GetxController {
       selectedSupervisorId.value = item['Supervisor'] ?? 0;
       selectedActivityName.value = item['Activity'] ?? '';
       remarkController.text = item['Remark'] ?? '';
+      descriptionController.text = item['Description'] ?? '';
       isEditingItem.value = true;
       editingItemIndex.value = index;
     } catch (_) {
@@ -206,6 +210,7 @@ class DlrEntryController extends GetxController {
     selectedSupervisorId.value = 0;
     selectedActivityName.value = '';
     remarkController.clear();
+    descriptionController.clear();
   }
 
   void addOrUpdateItem() {
@@ -233,6 +238,7 @@ class DlrEntryController extends GetxController {
       'supervisorName': selectedSupervisorName.value,
       'Activity': selectedActivityName.value,
       'Remark': remarkController.text.trim(),
+      'Description': descriptionController.text.trim(),
     };
 
     if (isEditingItem.value) {
@@ -271,6 +277,7 @@ class DlrEntryController extends GetxController {
           'supervisorName': d.supervisorName,
           'Activity': d.activity,
           'Remark': d.remark,
+          'Description': d.description,
         };
       }).toList(),
     );
@@ -311,6 +318,7 @@ class DlrEntryController extends GetxController {
           'Supervisor': item['Supervisor'],
           'Activity': item['Activity'],
           'Remark': item['Remark'] ?? '',
+          'Description': item['Description'] ?? '',
         };
       }).toList();
 

@@ -103,6 +103,18 @@ class GrnItemCardForIssue extends StatelessWidget {
                           ),
                           AppSpaces.v2,
                         ],
+                        if (!isSelected && item.cpName.isNotEmpty) ...[
+                          Text(
+                            'Contractor: ${item.cpName}',
+                            style: TextStyles.kRegularOutfit(
+                              fontSize: tablet
+                                  ? FontSizes.k12FontSize
+                                  : FontSizes.k10FontSize,
+                              color: kColorDarkGrey,
+                            ),
+                          ),
+                          AppSpaces.v2,
+                        ],
                       ],
                     ),
                   ),
@@ -198,11 +210,29 @@ class GrnItemCardForIssue extends StatelessWidget {
                 Obx(() {
                   final selectedName =
                       controller.selectedItemGodownName[key] ?? '';
+                  final filteredGodowns = controller.godowns
+                      .where((gd) => gd.siteCode == grn.siteCode)
+                      .map((gd) => gd.gdName)
+                      .toList();
                   return AppDropdown(
-                    items: controller.godownNames,
+                    items: filteredGodowns,
                     hintText: 'Head',
                     onChanged: (val) =>
                         controller.onItemGodownSelected(key, val),
+                    selectedItem: selectedName.isNotEmpty ? selectedName : null,
+                  );
+                }),
+
+                tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                // Contractor/Sub-Contractor dropdown
+                Obx(() {
+                  final selectedName = controller.selectedItemCpName[key] ?? '';
+                  return AppDropdown(
+                    items: controller.contractorNames,
+                    hintText: 'Contractor / Sub-Contractor',
+                    onChanged: (val) =>
+                        controller.onItemContractorSelected(key, val),
                     selectedItem: selectedName.isNotEmpty ? selectedName : null,
                   );
                 }),

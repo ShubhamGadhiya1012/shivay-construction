@@ -312,14 +312,14 @@ class DlrCard extends StatelessWidget {
                                       tablet: tablet,
                                     ),
                                   ),
-                                  AppSpaces.h8,
-                                  Expanded(
-                                    child: _buildDetailColumn(
-                                      label: 'Skill Rate',
-                                      value: data.skillRate.toStringAsFixed(2),
-                                      tablet: tablet,
-                                    ),
-                                  ),
+                                  // AppSpaces.h8,
+                                  // Expanded(
+                                  //   child: _buildDetailColumn(
+                                  //     label: 'Skill Rate',
+                                  //     value: data.skillRate.toStringAsFixed(2),
+                                  //     tablet: tablet,
+                                  //   ),
+                                  // ),
                                   AppSpaces.h8,
                                   Expanded(
                                     child: _buildDetailColumn(
@@ -328,20 +328,21 @@ class DlrCard extends StatelessWidget {
                                       tablet: tablet,
                                     ),
                                   ),
-                                  AppSpaces.h8,
-                                  Expanded(
-                                    child: _buildDetailColumn(
-                                      label: 'Unskill Rate',
-                                      value: data.unSkillRate.toStringAsFixed(
-                                        2,
-                                      ),
-                                      tablet: tablet,
-                                    ),
-                                  ),
+                                  // AppSpaces.h8,
+                                  // Expanded(
+                                  //   child: _buildDetailColumn(
+                                  //     label: 'Unskill Rate',
+                                  //     value: data.unSkillRate.toStringAsFixed(
+                                  //       2,
+                                  //     ),
+                                  //     tablet: tablet,
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                               if (data.activity.isNotEmpty ||
-                                  data.supervisorName.isNotEmpty) ...[
+                                  data.supervisorName.isNotEmpty ||
+                                  data.description.isNotEmpty) ...[
                                 tablet ? AppSpaces.v8 : AppSpaces.v6,
                                 Row(
                                   children: [
@@ -365,6 +366,14 @@ class DlrCard extends StatelessWidget {
                                         ),
                                       ),
                                   ],
+                                ),
+                              ],
+                              if (data.description.isNotEmpty) ...[
+                                tablet ? AppSpaces.v8 : AppSpaces.v6,
+                                _buildDetailColumn(
+                                  label: 'Description',
+                                  value: data.description,
+                                  tablet: tablet,
                                 ),
                               ],
                             ],

@@ -209,9 +209,33 @@ class ItemMasterCard extends StatelessWidget {
                   ],
                 ),
 
-                // ── Rent Item Badge (always visible if rentItem true) ──
-                if (item.rentItem) ...[
+                // ── Category Badge ──
+                if (item.cName.isNotEmpty) ...[
                   tablet ? AppSpaces.v12 : AppSpaces.v8,
+                  Container(
+                    padding: tablet
+                        ? AppPaddings.combined(horizontal: 12, vertical: 6)
+                        : AppPaddings.combined(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: kColorPrimary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: kColorPrimary.withOpacity(0.3)),
+                    ),
+                    child: Text(
+                      item.cName,
+                      style: TextStyles.kMediumOutfit(
+                        fontSize: tablet
+                            ? FontSizes.k14FontSize
+                            : FontSizes.k12FontSize,
+                        color: kColorPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+
+                // ── Rent Item Badge ──
+                if (item.rentItem) ...[
+                  tablet ? AppSpaces.v8 : AppSpaces.v6,
                   Container(
                     padding: tablet
                         ? AppPaddings.combined(horizontal: 12, vertical: 6)
@@ -249,16 +273,7 @@ class ItemMasterCard extends StatelessWidget {
                           label: 'HSN No',
                           value: item.hsnNo,
                           tablet: tablet,
-                        ),
-                        tablet ? AppSpaces.v12 : AppSpaces.v10,
-                      ],
-
-                      // Category
-                      if (item.cName.isNotEmpty) ...[
-                        _buildInfoRow(
-                          label: 'Category',
-                          value: item.cName,
-                          tablet: tablet,
+                          valueColor: kColorPrimary,
                         ),
                         tablet ? AppSpaces.v12 : AppSpaces.v10,
                       ],
@@ -316,7 +331,7 @@ class ItemMasterCard extends StatelessWidget {
                                   label: 'Frequency',
                                   value: item.frequency,
                                   tablet: tablet,
-                                  valueColor: kColorPrimary,
+                                  valueColor: kColorSecondary,
                                 ),
                               ),
                             if (item.frequency.isNotEmpty)
@@ -326,7 +341,7 @@ class ItemMasterCard extends StatelessWidget {
                                 label: 'Rent Rate',
                                 value: '₹${item.rentRate.toStringAsFixed(2)}',
                                 tablet: tablet,
-                                valueColor: kColorPrimary,
+                                valueColor: kColorSecondary,
                               ),
                             ),
                           ],

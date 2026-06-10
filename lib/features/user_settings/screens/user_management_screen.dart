@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shivay_construction/constants/color_constants.dart';
+import 'package:shivay_construction/features/company_master/models/company_master_dm.dart';
 import 'package:shivay_construction/features/user_settings/controllers/user_management_controller.dart';
 import 'package:shivay_construction/utils/formatters/text_input_formatters.dart';
 import 'package:shivay_construction/utils/screen_utils/app_paddings.dart';
@@ -11,6 +12,8 @@ import 'package:shivay_construction/widgets/app_appbar.dart';
 import 'package:shivay_construction/widgets/app_button.dart';
 import 'package:shivay_construction/widgets/app_dropdown.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
+import 'package:shivay_construction/widgets/app_multiple_selection_bottom_sheet.dart';
+import 'package:shivay_construction/widgets/app_multiple_selection_field.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
 
 class UserManagementScreen extends StatefulWidget {
@@ -26,6 +29,7 @@ class UserManagementScreen extends StatefulWidget {
     this.pCodes,
     this.eCodes,
     this.gdCodes,
+    this.coCodes,
   });
 
   final bool isEdit;
@@ -38,6 +42,7 @@ class UserManagementScreen extends StatefulWidget {
   final String? pCodes;
   final String? eCodes;
   final String? gdCodes;
+  final String? coCodes;
 
   @override
   State<UserManagementScreen> createState() => _UserManagementScreenState();
@@ -56,10 +61,24 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   }
 
   void initialize() async {
+    await _controller.getCompanies();
     if (widget.isEdit) {
       _controller.fullNameController.text = widget.fullName!;
       _controller.mobileNoController.text = widget.mobileNo!;
       _controller.selectedUserType.value = widget.userType!;
+
+      if (widget.coCodes?.isNotEmpty ?? false) {
+        _controller.selectedCompanies.addAll(
+          widget.coCodes!.split(',').map((co) => co.trim()),
+        );
+      }
+      // Use filteredCompanies instead of companies
+      for (var company in _controller.filteredCompanies) {
+        if (_controller.selectedCompanies.contains(company.coCode.toString())) {
+          _controller.selectedCompanyNames.add(company.name);
+        }
+      }
+      _controller.selectedCompanyNames.refresh();
     }
   }
 
@@ -166,6 +185,18 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                           validatorText: 'Please select a user type.',
                         ),
                       ),
+                      tablet ? AppSpaces.v16 : AppSpaces.v10,
+                      GestureDetector(
+                        onTap: () {
+                          showCompanySelectionBottomSheet(context);
+                        },
+                        child: AppMultipleSelectionField(
+                          placeholder: 'Companies',
+                          selectedItems: _controller.selectedCompanyNames,
+                          onTap: () => showCompanySelectionBottomSheet(context),
+                          showFullList: true,
+                        ),
+                      ),
                       tablet ? AppSpaces.v30 : AppSpaces.v24,
                       AppButton(
                         title: 'Save',
@@ -188,6 +219,42 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         ),
         Obx(() => AppLoadingOverlay(isLoading: _controller.isLoading.value)),
       ],
+    );
+  }
+
+  void showCompanySelectionBottomSheet(BuildContext context) {
+    Get.bottomSheet(
+      SelectionBottomSheet<CompanyMasterDm>(
+        title: 'Select Company',
+        items: _controller.filteredCompanies,
+        selectedCodes: _controller.selectedCompanies,
+        selectedNames: _controller.selectedCompanyNames,
+        itemNameGetter: (co) => co.name,
+        itemCodeGetter: (co) => co.coCode.toString(),
+        searchController: _controller.searchCompanyController,
+        onSelectionChanged: (selected, co) {
+          if (selected == true) {
+            _controller.selectedCompanies.add(co.coCode.toString());
+            _controller.selectedCompanyNames.add(co.name);
+          } else {
+            _controller.selectedCompanies.remove(co.coCode.toString());
+            _controller.selectedCompanyNames.remove(co.name);
+          }
+        },
+        onSelectAll: _controller.selectAllCompanies,
+        onClearAll: () {
+          _controller.selectedCompanies.clear();
+          _controller.selectedCompanyNames.clear();
+        },
+        onSearchChanged: (value) {
+          _controller.filteredCompanies.value = _controller.companies
+              .where(
+                (co) => co.name.toLowerCase().contains(value.toLowerCase()),
+              )
+              .toList();
+        },
+      ),
+      isScrollControlled: true,
     );
   }
 }

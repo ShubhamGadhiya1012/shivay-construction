@@ -42,7 +42,8 @@ class _IssueEntryScreenState extends State<IssueEntryScreen> {
       'dd-MM-yyyy',
     ).format(DateTime.now());
     await _controller.getGrnItems();
-    await _controller.getGodowns();
+    await _controller.getGodowns(siteCode: _controller.lockedGrnSiteCode.value);
+    await _controller.getContractors();
   }
 
   void _handleBackPress() {

@@ -126,22 +126,46 @@ class SiteTransferItemCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: kColorPrimary.withOpacity(0.2)),
             ),
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: _buildDetailColumn(
-                    label: 'Transfer Qty',
-                    value: (item['Qty'] ?? 0.0).toStringAsFixed(2),
-                    tablet: tablet,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildDetailColumn(
+                        label: 'From Head',
+                        value: item['FromGDName'] ?? '',
+                        tablet: tablet,
+                      ),
+                    ),
+                    // AppSpaces.h12,
+                    // Expanded(
+                    //   child: _buildDetailColumn(
+                    //     label: 'To Head',
+                    //     value: item['ToGDName'] ?? '',
+                    //     tablet: tablet,
+                    //   ),
+                    // ),
+                  ],
                 ),
-                AppSpaces.h12,
-                Expanded(
-                  child: _buildDetailColumn(
-                    label: 'Unit',
-                    value: item['unit'] ?? '',
-                    tablet: tablet,
-                  ),
+                if (tablet) AppSpaces.v8 else AppSpaces.v6,
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildDetailColumn(
+                        label: 'Transfer Qty',
+                        value: (item['Qty'] ?? 0.0).toStringAsFixed(2),
+                        tablet: tablet,
+                      ),
+                    ),
+                    AppSpaces.h12,
+                    Expanded(
+                      child: _buildDetailColumn(
+                        label: 'Unit',
+                        value: item['unit'] ?? '',
+                        tablet: tablet,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -173,6 +197,8 @@ class SiteTransferItemCard extends StatelessWidget {
             fontSize: tablet ? FontSizes.k14FontSize : FontSizes.k12FontSize,
             color: kColorTextPrimary,
           ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

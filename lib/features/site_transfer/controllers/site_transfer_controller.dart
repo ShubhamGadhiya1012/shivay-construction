@@ -3,10 +3,12 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shivay_construction/features/godown_master/models/godown_master_dm.dart';
 import 'package:shivay_construction/features/godown_master/repos/godown_master_repo.dart';
+import 'package:shivay_construction/features/indent_entry/repos/site_wise_stock_repo.dart';
+import 'package:shivay_construction/features/item_master/models/item_master_dm.dart';
+import 'package:shivay_construction/features/item_master/repos/item_master_list_repo.dart';
 import 'package:shivay_construction/features/site_master/models/site_master_dm.dart';
 import 'package:shivay_construction/features/site_master/repos/site_master_list_repo.dart';
 import 'package:shivay_construction/features/site_transfer/controllers/site_transfer_list_controller.dart';
-import 'package:shivay_construction/features/site_transfer/models/site_transfer_stock_dm.dart';
 import 'package:shivay_construction/features/site_transfer/repos/site_transfer_repo.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 
@@ -19,21 +21,26 @@ class SiteTransferController extends GetxController {
   var isEditMode = false.obs;
   var currentInvNo = ''.obs;
 
-  var godowns = <GodownMasterDm>[].obs;
-  var godownNames = <String>[].obs;
-  var selectedFromGodownName = ''.obs;
-  var selectedFromGodownCode = ''.obs;
-  var selectedFromSiteCode = ''.obs;
-  var fromSiteNameController = TextEditingController();
-
-  var selectedToGodownName = ''.obs;
-  var selectedToGodownCode = ''.obs;
-  var selectedToSiteCode = ''.obs;
-  var toSiteNameController = TextEditingController();
-
   var sites = <SiteMasterDm>[].obs;
+  var siteNames = <String>[].obs;
 
-  var stockItems = <SiteTransferStockDm>[].obs;
+  var selectedFromSiteCode = ''.obs;
+  var selectedFromSiteName = ''.obs;
+
+  var selectedToSiteCode = ''.obs;
+  var selectedToSiteName = ''.obs;
+
+  var fromGodownsForItem = <GodownMasterDm>[].obs;
+  var fromGodownNamesForItem = <String>[].obs;
+  var selectedFromGodownCodeForItem = ''.obs;
+  var selectedFromGodownNameForItem = ''.obs;
+
+  var toGodownsForItem = <GodownMasterDm>[].obs;
+  var toGodownNamesForItem = <String>[].obs;
+  var selectedToGodownCodeForItem = ''.obs;
+  var selectedToGodownNameForItem = ''.obs;
+
+  var allItems = <ItemMasterDm>[].obs;
   var itemNames = <String>[].obs;
   var selectedItemName = ''.obs;
   var selectedItemCode = ''.obs;
@@ -51,11 +58,18 @@ class SiteTransferController extends GetxController {
   final SiteTransferListController siteTransferListController =
       Get.find<SiteTransferListController>();
 
+  @override
+  void onInit() {
+    super.onInit();
+    dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
+  }
+
   Future<void> getSites() async {
     try {
       isLoading.value = true;
       final fetchedSites = await SiteMasterListRepo.getSites();
       sites.assignAll(fetchedSites);
+      siteNames.assignAll(fetchedSites.map((s) => s.siteName).toList());
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
     } finally {
@@ -63,105 +77,71 @@ class SiteTransferController extends GetxController {
     }
   }
 
-  Future<void> getGodowns() async {
+  Future<void> getGodownsForItemFromStock(String iCode, String siteCode) async {
     try {
       isLoading.value = true;
-      final fetchedGodowns = await GodownMasterRepo.getGodowns(siteCode: "");
-      godowns.assignAll(fetchedGodowns);
-      godownNames.assignAll(fetchedGodowns.map((gd) => gd.gdName).toList());
+      final stockList = await SiteWiseStockRepo.getSiteWiseStock(
+        iCode: iCode,
+        siteCode: siteCode,
+      );
+
+      // Build godown list from stock response
+      final godowns = stockList
+          .map(
+            (s) => GodownMasterDm(
+              gdCode: s.gdCode,
+              gdName: s.gdName,
+              isSubGodown: false,
+              siteCode: '',
+              // fill other required fields as per your model
+            ),
+          )
+          .toList();
+
+      fromGodownsForItem.assignAll(godowns);
+      fromGodownNamesForItem.assignAll(godowns.map((gd) => gd.gdName).toList());
+
+      // Show total stock (sum of all godowns) initially
+      availableQty.value = stockList.fold(0.0, (sum, s) => sum + s.stockQty);
     } catch (e) {
+      availableQty.value = 0.0;
       showErrorSnackbar('Error', e.toString());
     } finally {
       isLoading.value = false;
     }
   }
 
-  void onFromGodownSelected(String? godownName) {
-    selectedFromGodownName.value = godownName!;
-    var selectedGodownObj = godowns.firstWhere((gd) => gd.gdName == godownName);
-    selectedFromGodownCode.value = selectedGodownObj.gdCode;
-    selectedFromSiteCode.value = selectedGodownObj.siteCode;
+  void onFromSiteSelected(String? siteName) {
+    if (siteName == null || siteName.isEmpty) return;
 
-    if (selectedGodownObj.siteCode.isNotEmpty) {
-      final site = sites.firstWhereOrNull(
-        (s) => s.siteCode == selectedGodownObj.siteCode,
-      );
-      fromSiteNameController.text = site?.siteName ?? '';
-    } else {
-      fromSiteNameController.clear();
-    }
+    selectedFromSiteName.value = siteName;
+    var selectedSite = sites.firstWhere((s) => s.siteName == siteName);
+    selectedFromSiteCode.value = selectedSite.siteCode;
 
     _checkCanAddItem();
-
-    if (selectedFromSiteCode.value.isNotEmpty &&
-        selectedFromGodownCode.value.isNotEmpty) {
-      getStockItems();
-    }
   }
 
-  void onToGodownSelected(String? godownName) {
-    selectedToGodownName.value = godownName!;
-    var selectedGodownObj = godowns.firstWhere((gd) => gd.gdName == godownName);
-    selectedToGodownCode.value = selectedGodownObj.gdCode;
-    selectedToSiteCode.value = selectedGodownObj.siteCode;
+  void onToSiteSelected(String? siteName) {
+    if (siteName == null || siteName.isEmpty) return;
 
-    if (selectedGodownObj.siteCode.isNotEmpty) {
-      final site = sites.firstWhereOrNull(
-        (s) => s.siteCode == selectedGodownObj.siteCode,
-      );
-      toSiteNameController.text = site?.siteName ?? '';
-    } else {
-      toSiteNameController.clear();
-    }
+    selectedToSiteName.value = siteName;
+    var selectedSite = sites.firstWhere((s) => s.siteName == siteName);
+    selectedToSiteCode.value = selectedSite.siteCode;
 
     _checkCanAddItem();
   }
 
   void _checkCanAddItem() {
-    canAddItem.value = selectedFromGodownCode.value.isNotEmpty;
+    canAddItem.value =
+        selectedFromSiteCode.value.isNotEmpty &&
+        selectedToSiteCode.value.isNotEmpty;
   }
 
-  void onFromGodownSelectedWithClear(String? godownName) {
-    selectedFromGodownName.value = godownName!;
-    var selectedGodownObj = godowns.firstWhere((gd) => gd.gdName == godownName);
-
-    bool isGodownChanging =
-        selectedFromGodownCode.value.isNotEmpty &&
-        selectedFromGodownCode.value != selectedGodownObj.gdCode;
-
-    selectedFromGodownCode.value = selectedGodownObj.gdCode;
-    selectedFromSiteCode.value = selectedGodownObj.siteCode;
-
-    if (isGodownChanging && itemsToSend.isNotEmpty) {
-      itemsToSend.clear();
-      stockItems.clear();
-    }
-
-    if (selectedGodownObj.siteCode.isNotEmpty) {
-      final site = sites.firstWhereOrNull(
-        (s) => s.siteCode == selectedGodownObj.siteCode,
-      );
-      fromSiteNameController.text = site?.siteName ?? '';
-    } else {
-      fromSiteNameController.clear();
-    }
-
-    _checkCanAddItem();
-
-    if (selectedFromSiteCode.value.isNotEmpty &&
-        selectedFromGodownCode.value.isNotEmpty) {
-      getStockItems();
-    }
-  }
-
-  Future<void> getStockItems() async {
+  Future<void> getItems() async {
     try {
       isLoading.value = true;
-      final fetchedItems = await SiteTransferRepo.getSiteStock(
-        siteCode: selectedFromSiteCode.value,
-        gdCode: selectedFromGodownCode.value,
-      );
-      stockItems.assignAll(fetchedItems);
+      final fetchedItems = await ItemMasterListRepo.getItems();
+      allItems.assignAll(fetchedItems);
       itemNames.assignAll(fetchedItems.map((item) => item.iName));
     } catch (e) {
       showErrorSnackbar('Error', e.toString());
@@ -170,24 +150,126 @@ class SiteTransferController extends GetxController {
     }
   }
 
-  void onItemSelected(String? itemName) {
-    selectedItemName.value = itemName!;
-    var selectedItemObj = stockItems.firstWhere(
-      (item) => item.iName == itemName,
-    );
-    selectedItemCode.value = selectedItemObj.iCode;
-    selectedUnit.value = selectedItemObj.unit;
-    availableQty.value = selectedItemObj.stockQty;
-    qtyController.clear();
+  Future<void> getItemStockForGodown(String iCode, String gdCode) async {
+    try {
+      isLoading.value = true;
+      final stock = await SiteTransferRepo.getItemStockForGodown(
+        siteCode: selectedFromSiteCode.value,
+        gdCode: gdCode,
+        iCode: iCode,
+      );
+
+      if (stock.isNotEmpty) {
+        availableQty.value = stock.first['stockQty'] ?? 0.0;
+      } else {
+        availableQty.value = 0.0;
+      }
+    } catch (e) {
+      availableQty.value = 0.0;
+      showErrorSnackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  void prepareAddItem() {
+  void onItemSelected(String? itemName) {
+    if (itemName == null || itemName.isEmpty) return;
+
+    selectedItemName.value = itemName;
+    var selectedItem = allItems.firstWhere((item) => item.iName == itemName);
+    selectedItemCode.value = selectedItem.iCode;
+    selectedUnit.value = selectedItem.unit;
+
+    // Reset
+    availableQty.value = 0.0;
+    selectedFromGodownNameForItem.value = '';
+    selectedFromGodownCodeForItem.value = '';
+    fromGodownsForItem.clear();
+    fromGodownNamesForItem.clear();
+    qtyController.clear();
+
+    // Fetch stock-based godowns for from-head dropdown
+    if (selectedFromSiteCode.value.isNotEmpty) {
+      getGodownsForItemFromStock(
+        selectedItem.iCode,
+        selectedFromSiteCode.value,
+      );
+    }
+  }
+
+  void onFromGodownForItemSelected(String? godownName) {
+    if (godownName == null || godownName.isEmpty) {
+      selectedFromGodownNameForItem.value = '';
+      selectedFromGodownCodeForItem.value = '';
+      // Reset to total stock sum
+      availableQty.value = fromGodownsForItem.isNotEmpty
+          ? 0.0 // or recalculate sum if you store stock per godown
+          : 0.0;
+      return;
+    }
+
+    selectedFromGodownNameForItem.value = godownName;
+    var selectedGodown = fromGodownsForItem.firstWhere(
+      (gd) => gd.gdName == godownName,
+    );
+    selectedFromGodownCodeForItem.value = selectedGodown.gdCode;
+
+    // Fetch stock for this specific godown
+    if (selectedItemCode.value.isNotEmpty) {
+      getItemStockForGodown(selectedItemCode.value, selectedGodown.gdCode);
+    }
+  }
+
+  void onToGodownForItemSelected(String? godownName) {
+    if (godownName == null || godownName.isEmpty) {
+      selectedToGodownNameForItem.value = '';
+      selectedToGodownCodeForItem.value = '';
+      return;
+    }
+
+    selectedToGodownNameForItem.value = godownName;
+    var selectedGodown = toGodownsForItem.firstWhere(
+      (gd) => gd.gdName == godownName,
+    );
+    selectedToGodownCodeForItem.value = selectedGodown.gdCode;
+  }
+
+  void prepareAddItem() async {
     clearItemForm();
     isEditingItem.value = false;
     editingItemIndex.value = -1;
+
+    // From-site godowns are now loaded dynamically on item selection (via stock API)
+    // Only pre-load to-site godowns
+    if (selectedToSiteCode.value.isNotEmpty) {
+      await getGodownsForSite(selectedToSiteCode.value, false);
+    }
+    await getItems();
   }
 
-  void prepareEditItem(int index) {
+  Future<void> getGodownsForSite(String siteCode, bool isFromSite) async {
+    try {
+      isLoading.value = true;
+      final fetchedGodowns = await GodownMasterRepo.getGodowns(
+        siteCode: siteCode,
+      );
+      final parentGodowns = fetchedGodowns
+          .where((gd) => !gd.isSubGodown)
+          .toList();
+
+      // isFromSite will always be false now (only used for to-site)
+      toGodownsForItem.assignAll(parentGodowns);
+      toGodownNamesForItem.assignAll(
+        parentGodowns.map((gd) => gd.gdName).toList(),
+      );
+    } catch (e) {
+      showErrorSnackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> prepareEditItem(int index) async {
     isLoading.value = true;
     try {
       final item = itemsToSend[index];
@@ -195,14 +277,35 @@ class SiteTransferController extends GetxController {
       selectedItemCode.value = item['ICode'] ?? '';
       selectedUnit.value = item['unit'] ?? '';
       qtyController.text = (item['Qty'] ?? 0).toString();
-
-      final stockItem = stockItems.firstWhereOrNull(
-        (si) => si.iCode == selectedItemCode.value,
-      );
-      availableQty.value = stockItem?.stockQty ?? 0.0;
+      selectedFromGodownNameForItem.value = item['FromGDName'] ?? '';
+      selectedFromGodownCodeForItem.value = item['FromGDCode'] ?? '';
+      selectedToGodownNameForItem.value = item['ToGDName'] ?? '';
+      selectedToGodownCodeForItem.value = item['ToGDCode'] ?? '';
 
       isEditingItem.value = true;
       editingItemIndex.value = index;
+
+      // Load from-godowns based on stock, then restore selected
+      if (selectedFromSiteCode.value.isNotEmpty &&
+          selectedItemCode.value.isNotEmpty) {
+        await getGodownsForItemFromStock(
+          selectedItemCode.value,
+          selectedFromSiteCode.value,
+        );
+
+        // After loading godowns, fetch stock for the specific selected godown
+        if (selectedFromGodownCodeForItem.value.isNotEmpty) {
+          await getItemStockForGodown(
+            selectedItemCode.value,
+            selectedFromGodownCodeForItem.value,
+          );
+        }
+      }
+
+      // Load to-godowns
+      if (selectedToSiteCode.value.isNotEmpty) {
+        await getGodownsForSite(selectedToSiteCode.value, false);
+      }
     } catch (_) {
     } finally {
       isLoading.value = false;
@@ -215,6 +318,10 @@ class SiteTransferController extends GetxController {
     selectedUnit.value = '';
     availableQty.value = 0.0;
     qtyController.clear();
+    selectedFromGodownNameForItem.value = '';
+    selectedFromGodownCodeForItem.value = '';
+    selectedToGodownNameForItem.value = '';
+    selectedToGodownCodeForItem.value = '';
   }
 
   void addOrUpdateItem() {
@@ -243,6 +350,10 @@ class SiteTransferController extends GetxController {
       "unit": selectedUnit.value,
       "Qty": qty,
       "availableQty": availableQty.value,
+      "FromGDCode": selectedFromGodownCodeForItem.value,
+      "FromGDName": selectedFromGodownNameForItem.value,
+      "ToGDCode": selectedToGodownCodeForItem.value,
+      "ToGDName": selectedToGodownNameForItem.value,
     };
 
     if (isEditingItem.value) {
@@ -278,11 +389,10 @@ class SiteTransferController extends GetxController {
     isLoading.value = true;
 
     try {
-      if (selectedFromSiteCode.value == selectedToSiteCode.value &&
-          selectedFromGodownCode.value == selectedToGodownCode.value) {
+      if (selectedFromSiteCode.value == selectedToSiteCode.value) {
         showErrorSnackbar(
           'Invalid Transfer',
-          'Cannot transfer to the same site and godown. Please select a different destination.',
+          'Cannot transfer to the same site. Please select a different destination site.',
         );
         isLoading.value = false;
         return;
@@ -298,6 +408,8 @@ class SiteTransferController extends GetxController {
           "SrNo": item["SrNo"],
           "ICode": item["ICode"],
           "Qty": item["Qty"],
+          "FromGDCode": item["FromGDCode"],
+          "ToGDCode": item["ToGDCode"],
         };
       }).toList();
 
@@ -306,8 +418,6 @@ class SiteTransferController extends GetxController {
         date: _convertToApiDateFormat(dateController.text),
         fromSite: selectedFromSiteCode.value,
         toSite: selectedToSiteCode.value,
-        fromGDCode: selectedFromGodownCode.value,
-        toGDCode: selectedToGodownCode.value,
         remarks: remarksController.text.trim(),
         itemData: itemData,
       );
@@ -334,16 +444,12 @@ class SiteTransferController extends GetxController {
     currentInvNo.value = '';
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
     remarksController.clear();
-    fromSiteNameController.clear();
-    toSiteNameController.clear();
-    selectedFromGodownName.value = '';
-    selectedFromGodownCode.value = '';
     selectedFromSiteCode.value = '';
-    selectedToGodownName.value = '';
-    selectedToGodownCode.value = '';
+    selectedFromSiteName.value = '';
     selectedToSiteCode.value = '';
+    selectedToSiteName.value = '';
     itemsToSend.clear();
-    stockItems.clear();
+    allItems.clear();
     itemNames.clear();
     canAddItem.value = false;
     isEditMode.value = false;
