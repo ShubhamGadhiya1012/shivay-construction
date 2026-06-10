@@ -3,13 +3,50 @@ import 'package:shivay_construction/services/api_service.dart';
 import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
 class SiteTransferRepo {
+  static Future<List<Map<String, dynamic>>> getItemStockForGodown({
+    required String siteCode,
+    required String gdCode,
+    required String iCode,
+  }) async {
+    String? token = await SecureStorageHelper.read('token');
+
+    try {
+      final response = await ApiService.getRequest(
+        endpoint: '/Indent/getSiteWiseStock?ICode=$iCode&SiteCode=$siteCode',
+        token: token,
+      );
+
+      if (response == null) return [];
+
+      if (response['data'] != null) {
+        final List<dynamic> data = response['data'];
+        // Filter by GDCode
+        final filtered = data
+            .where((item) => item['GDCode'] == gdCode)
+            .toList();
+
+        return filtered
+            .map(
+              (item) => {
+                'stockQty': (item['StockQty'] as num?)?.toDouble() ?? 0.0,
+                'unit': item['Unit'] ?? '',
+              },
+            )
+            .toList();
+      }
+
+      return [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   static Future<List<SiteTransferStockDm>> getSiteStock({
     required String siteCode,
     required String gdCode,
   }) async {
     String? token = await SecureStorageHelper.read('token');
-    print(siteCode);
-    print(gdCode);
+
     try {
       final response = await ApiService.getRequest(
         endpoint: '/Transfer/getSiteStock?SiteCode=$siteCode&GDCode=$gdCode',
@@ -35,8 +72,6 @@ class SiteTransferRepo {
     required String date,
     required String fromSite,
     required String toSite,
-    required String fromGDCode,
-    required String toGDCode,
     required String remarks,
     required List<Map<String, dynamic>> itemData,
   }) async {
@@ -48,12 +83,10 @@ class SiteTransferRepo {
         "Date": date,
         "FromSite": fromSite,
         "ToSite": toSite,
-        "FromGDCode": fromGDCode,
-        "ToGDCode": toGDCode,
         "Remarks": remarks,
         "ItemData": itemData,
       };
-
+      print(requestBody);
       final response = await ApiService.postRequest(
         endpoint: '/Transfer/siteTransferIssue',
         requestBody: requestBody,
@@ -70,9 +103,7 @@ class SiteTransferRepo {
     required String refInvNo,
     required String date,
     required String fromSite,
-    required String fromGDCode,
     required String toSite,
-    required String toGDCode,
     required List<Map<String, dynamic>> itemData,
     required String remarks,
   }) async {
@@ -83,13 +114,11 @@ class SiteTransferRepo {
         "RefInvno": refInvNo,
         "Date": date,
         "FromSite": fromSite,
-        "FromGDCode": fromGDCode,
         "ToSite": toSite,
-        "ToGDCode": toGDCode,
         "ItemData": itemData,
         "Remarks": remarks,
       };
-      //  print(requestBody);
+      print(requestBody);
       final response = await ApiService.postRequest(
         endpoint: '/Transfer/siteTransferReceive',
         requestBody: requestBody,

@@ -22,14 +22,14 @@ class HomeController extends GetxController {
   var isLoading = false.obs;
   var company = ''.obs;
   var menuAccess = <MenuAccessDm>[].obs;
-
+  var coCode = ''.obs;
+  var companyName = ''.obs;
   var currentBannerIndex = 0.obs;
-  final List<String> bannerImages = [
-    kImagebanner1,
-    kImagebanner2,
-    kImagebanner3,
-    kImagebanner4,
-  ];
+  List<String> get bannerImages {
+    return coCode.value == '1'
+        ? [kImageSCBanner1, kImageSCBanner2, kImageSCBanner3, kImageSCBanner4]
+        : [kImagebanner1, kImagebanner2, kImagebanner3, kImagebanner4];
+  }
 
   void updateBannerIndex(int index) {
     currentBannerIndex.value = index;
@@ -46,11 +46,13 @@ class HomeController extends GetxController {
 
   Future<void> loadCompany() async {
     try {
-      String? companyName = await SecureStorageHelper.read('company');
+      var companyName = await SecureStorageHelper.read('company');
       company.value = companyName ?? 'Shivay Construction';
     } catch (e) {
       company.value = 'Shivay Construction';
     }
+    // Move coCode load outside catch so it always runs:
+    coCode.value = await SecureStorageHelper.read('coCode') ?? '1';
   }
 
   List<Map<String, dynamic>> getQuickActions() {

@@ -110,57 +110,59 @@ class HomeScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CarouselSlider(
-                          options: CarouselOptions(
-                            height: tablet ? 200 : 160,
-                            autoPlay: true,
-                            autoPlayInterval: const Duration(seconds: 3),
-                            autoPlayAnimationDuration: const Duration(
-                              milliseconds: 800,
-                            ),
-                            autoPlayCurve: Curves.fastOutSlowIn,
-                            enlargeCenterPage: false,
-                            viewportFraction: 1.0,
-                            padEnds: false,
-                            onPageChanged: (index, reason) {
-                              _controller.updateBannerIndex(index);
-                            },
-                          ),
-                          items: _controller.bannerImages.map((imagePath) {
-                            return Builder(
-                              builder: (BuildContext context) {
-                                return Container(
-                                  width: double.infinity,
-                                  margin: AppPaddings.combined(
-                                    horizontal: tablet ? 16 : 12,
-                                    vertical: 0,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(
-                                      tablet ? 16 : 12,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: kColorPrimary.withOpacity(0.2),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(
-                                      tablet ? 16 : 12,
-                                    ),
-                                    child: Image.asset(
-                                      imagePath,
-                                      fit: BoxFit.contain,
-                                      width: double.infinity,
-                                    ),
-                                  ),
-                                );
+                        Obx(
+                          () => CarouselSlider(
+                            options: CarouselOptions(
+                              height: tablet ? 200 : 160,
+                              autoPlay: true,
+                              autoPlayInterval: const Duration(seconds: 3),
+                              autoPlayAnimationDuration: const Duration(
+                                milliseconds: 800,
+                              ),
+                              autoPlayCurve: Curves.fastOutSlowIn,
+                              enlargeCenterPage: false,
+                              viewportFraction: 1.0,
+                              padEnds: false,
+                              onPageChanged: (index, reason) {
+                                _controller.updateBannerIndex(index);
                               },
-                            );
-                          }).toList(),
+                            ),
+                            items: _controller.bannerImages.map((imagePath) {
+                              return Builder(
+                                builder: (BuildContext context) {
+                                  return Container(
+                                    width: double.infinity,
+                                    margin: AppPaddings.combined(
+                                      horizontal: tablet ? 16 : 12,
+                                      vertical: 0,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(
+                                        tablet ? 16 : 12,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: kColorPrimary.withOpacity(0.2),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(
+                                        tablet ? 16 : 12,
+                                      ),
+                                      child: Image.asset(
+                                        imagePath,
+                                        fit: BoxFit.contain,
+                                        width: double.infinity,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            }).toList(),
+                          ),
                         ),
                         tablet ? AppSpaces.v12 : AppSpaces.v8,
                         Obx(

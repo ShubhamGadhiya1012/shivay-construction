@@ -4,7 +4,9 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:shivay_construction/constants/image_constants.dart';
 import 'package:shivay_construction/features/purchase_order_entry/models/order_print_dm.dart';
+import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
 class PoPdfWidget {
   static Future<void> generatePurchaseOrderPdf({
@@ -12,9 +14,15 @@ class PoPdfWidget {
   }) async {
     final pdf = pw.Document();
 
+    // Read coCode and pick logo accordingly
+    final String? coCode = await SecureStorageHelper.read('coCode');
+    final String logoAssetPath = coCode == '1'
+        ? kImageSCLogo
+        : kImageUrbanspaceLogo;
+
     pw.ImageProvider? logo;
     try {
-      final logoData = await rootBundle.load('assets/images/logo.png');
+      final logoData = await rootBundle.load(logoAssetPath);
       logo = pw.MemoryImage(logoData.buffer.asUint8List());
     } catch (e) {}
 
@@ -129,7 +137,7 @@ class PoPdfWidget {
             child: pw.Padding(
               padding: const pw.EdgeInsets.all(5),
               child: logo != null
-                  ? pw.Center(child: pw.Image(logo, height: 60))
+                  ? pw.Center(child: pw.Image(logo, height: 80))
                   : pw.SizedBox(),
             ),
           ),

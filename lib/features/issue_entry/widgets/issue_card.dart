@@ -251,6 +251,18 @@ class IssueCard extends StatelessWidget {
                                       ),
                                     ],
                                   ),
+                                  AppSpaces.v8,
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _buildDetailRow(
+                                          label: 'Contractor Name',
+                                          value: detail.cpName,
+                                          tablet: tablet,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             );

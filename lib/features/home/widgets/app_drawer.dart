@@ -28,6 +28,7 @@ import 'package:shivay_construction/features/reports/screens/dlr_report_screen.d
 import 'package:shivay_construction/features/reports/screens/grn_report_screen.dart';
 import 'package:shivay_construction/features/reports/screens/indent_report_screen.dart';
 import 'package:shivay_construction/features/reports/screens/issue_repair_report_screen.dart';
+import 'package:shivay_construction/features/reports/screens/issue_report_screen.dart';
 import 'package:shivay_construction/features/reports/screens/opening_stock_report_screen.dart';
 import 'package:shivay_construction/features/reports/screens/purchase_order_report_screen.dart';
 import 'package:shivay_construction/features/reports/screens/site_transfer_report_screen.dart';
@@ -109,10 +110,14 @@ class AppDrawer extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     padding: tablet ? AppPaddings.p10 : AppPaddings.p8,
-                    child: Image.asset(
-                      kImagelogo,
-                      fit: BoxFit.contain,
-                      color: kColorWhite,
+                    child: Obx(
+                      () => Image.asset(
+                        controller.coCode.value == '1'
+                            ? kImageSCLogo
+                            : kImageUrbanspaceLogo,
+                        fit: BoxFit.contain,
+                        color: kColorWhite,
+                      ),
                     ),
                   ),
 
@@ -123,22 +128,12 @@ class AppDrawer extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Shivay Construction',
+                          controller.company.value,
                           style: TextStyles.kBoldOutfit(
                             fontSize: tablet
                                 ? FontSizes.k22FontSize
                                 : FontSizes.k18FontSize,
                             color: kColorPrimary,
-                          ),
-                        ),
-                        AppSpaces.v2,
-                        Text(
-                          'Mobile App',
-                          style: TextStyles.kRegularOutfit(
-                            fontSize: tablet
-                                ? FontSizes.k14FontSize
-                                : FontSizes.k12FontSize,
-                            color: kColorSecondary,
                           ),
                         ),
                       ],
@@ -147,7 +142,6 @@ class AppDrawer extends StatelessWidget {
                 ],
               ),
             ),
-            tablet ? AppSpaces.v20 : AppSpaces.v16,
 
             Obx(() {
               final accessibleMenus = controller.menuAccess
@@ -529,6 +523,9 @@ class AppDrawer extends StatelessWidget {
         break;
       case 'issue repair report':
         Get.to(() => IssueRepairReportScreen());
+        break;
+      case 'issue report':
+        Get.to(() => IssueReportScreen());
         break;
       case 'dlr report':
         Get.to(() => DlrReportScreen());

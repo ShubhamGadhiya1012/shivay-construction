@@ -15,8 +15,9 @@ import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 
 class SiteWiseStockScreen extends StatefulWidget {
   final String? iCode;
+  final String? siteCode; // Added siteCode parameter
 
-  const SiteWiseStockScreen({super.key, this.iCode});
+  const SiteWiseStockScreen({super.key, this.iCode, this.siteCode});
 
   @override
   State<SiteWiseStockScreen> createState() => _SiteWiseStockScreenState();
@@ -35,9 +36,12 @@ class _SiteWiseStockScreenState extends State<SiteWiseStockScreen> {
 
   void _initialize() {
     if (widget.iCode != null && widget.iCode!.isNotEmpty) {
-      _controller.getSiteWiseStock(iCode: widget.iCode);
+      _controller.getSiteWiseStock(
+        iCode: widget.iCode,
+        siteCode: widget.siteCode,
+      );
     } else {
-      _controller.getSiteWiseStock();
+      _controller.getSiteWiseStock(siteCode: widget.siteCode);
     }
   }
 
@@ -65,8 +69,10 @@ class _SiteWiseStockScreenState extends State<SiteWiseStockScreen> {
               elevation: 0,
               backgroundColor: kColorWhite,
               color: kColorPrimary,
-              onRefresh: () =>
-                  _controller.getSiteWiseStock(iCode: widget.iCode),
+              onRefresh: () => _controller.getSiteWiseStock(
+                iCode: widget.iCode,
+                siteCode: widget.siteCode,
+              ),
               child: Padding(
                 padding: tablet
                     ? AppPaddings.combined(horizontal: 24, vertical: 12)

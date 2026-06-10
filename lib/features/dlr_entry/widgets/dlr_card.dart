@@ -312,14 +312,14 @@ class DlrCard extends StatelessWidget {
                                       tablet: tablet,
                                     ),
                                   ),
-                                  AppSpaces.h8,
-                                  Expanded(
-                                    child: _buildDetailColumn(
-                                      label: 'Skill Rate',
-                                      value: data.skillRate.toStringAsFixed(2),
-                                      tablet: tablet,
-                                    ),
-                                  ),
+                                  // AppSpaces.h8,
+                                  // Expanded(
+                                  //   child: _buildDetailColumn(
+                                  //     label: 'Skill Rate',
+                                  //     value: data.skillRate.toStringAsFixed(2),
+                                  //     tablet: tablet,
+                                  //   ),
+                                  // ),
                                   AppSpaces.h8,
                                   Expanded(
                                     child: _buildDetailColumn(
@@ -328,16 +328,16 @@ class DlrCard extends StatelessWidget {
                                       tablet: tablet,
                                     ),
                                   ),
-                                  AppSpaces.h8,
-                                  Expanded(
-                                    child: _buildDetailColumn(
-                                      label: 'Unskill Rate',
-                                      value: data.unSkillRate.toStringAsFixed(
-                                        2,
-                                      ),
-                                      tablet: tablet,
-                                    ),
-                                  ),
+                                  // AppSpaces.h8,
+                                  // Expanded(
+                                  //   child: _buildDetailColumn(
+                                  //     label: 'Unskill Rate',
+                                  //     value: data.unSkillRate.toStringAsFixed(
+                                  //       2,
+                                  //     ),
+                                  //     tablet: tablet,
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                               if (data.activity.isNotEmpty ||

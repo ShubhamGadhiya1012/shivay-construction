@@ -189,7 +189,9 @@ class ProfileScreen extends StatelessWidget {
                               leading: Icons.refresh,
                               title: 'Change  Company',
                               onTap: () {
-                                _controller.logoutUser();
+                                _controller.changeCompany(
+                                  context,
+                                ); // <-- only this line changes
                               },
                             ),
                             Divider(

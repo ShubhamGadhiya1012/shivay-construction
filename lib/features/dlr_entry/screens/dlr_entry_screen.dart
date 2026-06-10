@@ -299,14 +299,14 @@ class DlrEntryScreen extends StatelessWidget {
                         tablet: tablet,
                       ),
                     ),
-                    AppSpaces.h12,
-                    Expanded(
-                      child: _buildDetailColumn(
-                        label: 'Skill Rate',
-                        value: (item['SkillRate'] ?? 0.0).toStringAsFixed(2),
-                        tablet: tablet,
-                      ),
-                    ),
+                    // AppSpaces.h12,
+                    // Expanded(
+                    //   child: _buildDetailColumn(
+                    //     label: 'Skill Rate',
+                    //     value: (item['SkillRate'] ?? 0.0).toStringAsFixed(2),
+                    //     tablet: tablet,
+                    //   ),
+                    // ),
                     AppSpaces.h12,
                     Expanded(
                       child: _buildDetailColumn(
@@ -315,14 +315,14 @@ class DlrEntryScreen extends StatelessWidget {
                         tablet: tablet,
                       ),
                     ),
-                    AppSpaces.h12,
-                    Expanded(
-                      child: _buildDetailColumn(
-                        label: 'Unskill Rate',
-                        value: (item['UnSkillRate'] ?? 0.0).toStringAsFixed(2),
-                        tablet: tablet,
-                      ),
-                    ),
+                    // AppSpaces.h12,
+                    // Expanded(
+                    //   child: _buildDetailColumn(
+                    //     label: 'Unskill Rate',
+                    //     value: (item['UnSkillRate'] ?? 0.0).toStringAsFixed(2),
+                    //     tablet: tablet,
+                    //   ),
+                    // ),
                   ],
                 ),
                 if ((item['Activity'] ?? '').toString().isNotEmpty ||
@@ -528,7 +528,7 @@ class DlrEntryScreen extends StatelessWidget {
                             Expanded(
                               child: AppTextFormField(
                                 controller: _controller.skillController,
-                                hintText: 'Skill',
+                                hintText: 'Skill*',
                                 keyboardType:
                                     const TextInputType.numberWithOptions(
                                       decimal: true,
@@ -547,30 +547,8 @@ class DlrEntryScreen extends StatelessWidget {
                             tablet ? AppSpaces.h16 : AppSpaces.h12,
                             Expanded(
                               child: AppTextFormField(
-                                controller: _controller.skillRateController,
-                                hintText: 'Skill Rate',
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.allow(
-                                    RegExp(r'^\d+\.?\d{0,3}'),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        tablet ? AppSpaces.v16 : AppSpaces.v12,
-
-                        // Unskill & Unskill Rate
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AppTextFormField(
                                 controller: _controller.unskillController,
-                                hintText: 'Unskill',
+                                hintText: 'Unskill*',
                                 keyboardType:
                                     const TextInputType.numberWithOptions(
                                       decimal: true,
@@ -586,31 +564,69 @@ class DlrEntryScreen extends StatelessWidget {
                                     : null,
                               ),
                             ),
-                            tablet ? AppSpaces.h16 : AppSpaces.h12,
-                            Expanded(
-                              child: AppTextFormField(
-                                controller: _controller.unskillRateController,
-                                hintText: 'Unskill Rate',
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.allow(
-                                    RegExp(r'^\d+\.?\d{0,3}'),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            // Expanded(
+                            //   child: AppTextFormField(
+                            //     controller: _controller.skillRateController,
+                            //     hintText: 'Skill Rate',
+                            //     keyboardType:
+                            //         const TextInputType.numberWithOptions(
+                            //           decimal: true,
+                            //         ),
+                            //     inputFormatters: [
+                            //       FilteringTextInputFormatter.allow(
+                            //         RegExp(r'^\d+\.?\d{0,3}'),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
                           ],
                         ),
-                        tablet ? AppSpaces.v16 : AppSpaces.v12,
 
-                        // Supervisor dropdown
+                        // Unskill & Unskill Rate
+                        // Row(
+                        //   children: [
+                        // Expanded(
+                        //   child: AppTextFormField(
+                        //     controller: _controller.unskillController,
+                        //     hintText: 'Unskill',
+                        //     keyboardType:
+                        //         const TextInputType.numberWithOptions(
+                        //           decimal: true,
+                        //         ),
+                        //     inputFormatters: [
+                        //       FilteringTextInputFormatter.allow(
+                        //         RegExp(r'^\d+\.?\d{0,3}'),
+                        //       ),
+                        //     ],
+                        //     validator: (value) =>
+                        //         value == null || value.isEmpty
+                        //         ? 'Please enter Unskill'
+                        //         : null,
+                        //   ),
+                        // ),
+                        // tablet ? AppSpaces.h16 : AppSpaces.h12,
+                        // Expanded(
+                        //   child: AppTextFormField(
+                        //     controller: _controller.unskillRateController,
+                        //     hintText: 'Unskill Rate',
+                        //     keyboardType:
+                        //         const TextInputType.numberWithOptions(
+                        //           decimal: true,
+                        //         ),
+                        //     inputFormatters: [
+                        //       FilteringTextInputFormatter.allow(
+                        //         RegExp(r'^\d+\.?\d{0,3}'),
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
+                        //   ],
+                        // ),
+                        tablet ? AppSpaces.v16 : AppSpaces.v12,
                         Obx(
                           () => AppDropdown(
                             items: _controller.supervisorNames,
-                            hintText: 'Supervisor',
+                            hintText: 'Supervisor*',
                             onChanged: _controller.onSupervisorSelected,
                             selectedItem:
                                 _controller

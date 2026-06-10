@@ -3,16 +3,30 @@ import 'package:shivay_construction/services/api_service.dart';
 import 'package:shivay_construction/utils/helpers/secure_storage_helper.dart';
 
 class SiteWiseStockRepo {
-  static Future<List<SiteWiseStockDm>> getSiteWiseStock({String? iCode}) async {
+  static Future<List<SiteWiseStockDm>> getSiteWiseStock({
+    String? iCode,
+    String? siteCode,
+  }) async {
     String? token = await SecureStorageHelper.read('token');
 
+    print(iCode);
+    print(siteCode);
+
     try {
+      Map<String, String> queryParams = {};
+      if (iCode != null && iCode.isNotEmpty) {
+        queryParams['ICode'] = iCode;
+      }
+      if (siteCode != null && siteCode.isNotEmpty) {
+        queryParams['SiteCode'] = siteCode;
+      }
+
       final response = await ApiService.getRequest(
         endpoint: '/Indent/getSiteWiseStock',
-        queryParams: iCode != null ? {'ICode': iCode} : null, // Add this
+        queryParams: queryParams.isNotEmpty ? queryParams : null,
         token: token,
       );
-
+      print(response);
       if (response == null) {
         return [];
       }

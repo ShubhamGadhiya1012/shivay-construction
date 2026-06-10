@@ -104,6 +104,7 @@ class SiteTransferPdfScreen {
           ),
           pw.SizedBox(height: 10),
           pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Expanded(
                 child: pw.Column(
@@ -116,23 +117,16 @@ class SiteTransferPdfScreen {
                         color: textPrimaryColor,
                       ),
                     ),
-                    pw.SizedBox(height: 3),
+                    pw.SizedBox(height: 8),
                     pw.Text(
                       'FROM',
                       style: pw.TextStyle(
-                        fontSize: 10,
+                        fontSize: 11,
                         fontWeight: pw.FontWeight.bold,
-                        color: textPrimaryColor,
+                        color: titleColor,
                       ),
                     ),
-                    pw.Text(
-                      'Godown: ${transfer.fromGodown}',
-                      style: pw.TextStyle(
-                        fontSize: 10,
-                        color: textPrimaryColor,
-                      ),
-                    ),
-                    pw.SizedBox(height: 3),
+                    pw.SizedBox(height: 4),
                     pw.Text(
                       'Site: ${transfer.fromSiteName}',
                       style: pw.TextStyle(
@@ -147,23 +141,16 @@ class SiteTransferPdfScreen {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.SizedBox(height: 16),
+                    pw.SizedBox(height: 22),
                     pw.Text(
                       'TO',
                       style: pw.TextStyle(
-                        fontSize: 10,
+                        fontSize: 11,
                         fontWeight: pw.FontWeight.bold,
-                        color: textPrimaryColor,
+                        color: titleColor,
                       ),
                     ),
-                    pw.Text(
-                      'Godown: ${transfer.toGodown}',
-                      style: pw.TextStyle(
-                        fontSize: 10,
-                        color: textPrimaryColor,
-                      ),
-                    ),
-                    pw.SizedBox(height: 3),
+                    pw.SizedBox(height: 4),
                     pw.Text(
                       'Site: ${transfer.toSiteName}',
                       style: pw.TextStyle(
@@ -171,30 +158,39 @@ class SiteTransferPdfScreen {
                         color: textPrimaryColor,
                       ),
                     ),
-                    if (transfer.remarks.isNotEmpty) ...[
-                      pw.SizedBox(height: 3),
-                      pw.Text(
-                        'Remarks: ${transfer.remarks}',
-                        style: pw.TextStyle(
-                          fontSize: 10,
-                          color: textPrimaryColor,
-                        ),
-                        maxLines: 2,
-                        overflow: pw.TextOverflow.clip,
-                      ),
-                    ],
-                    pw.SizedBox(height: 3),
-                    pw.Text(
-                      'Status: ${transfer.status}',
-                      style: pw.TextStyle(
-                        fontSize: 10,
-                        fontWeight: pw.FontWeight.bold,
-                        color: transfer.status == 'Completed'
-                            ? PdfColor.fromHex('#4CAF50')
-                            : PdfColor.fromHex('#FF9800'),
-                      ),
-                    ),
                   ],
+                ),
+              ),
+            ],
+          ),
+          pw.SizedBox(height: 8),
+          if (transfer.remarks.isNotEmpty) ...[
+            pw.Text(
+              'Remarks: ${transfer.remarks}',
+              style: pw.TextStyle(fontSize: 10, color: textPrimaryColor),
+              maxLines: 2,
+              overflow: pw.TextOverflow.clip,
+            ),
+            pw.SizedBox(height: 4),
+          ],
+          pw.Row(
+            children: [
+              pw.Text(
+                'Status: ',
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                  color: textPrimaryColor,
+                ),
+              ),
+              pw.Text(
+                transfer.status,
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                  color: transfer.status == 'COMPLETE'
+                      ? PdfColor.fromHex('#4CAF50')
+                      : PdfColor.fromHex('#FF9800'),
                 ),
               ),
             ],
@@ -213,9 +209,12 @@ class SiteTransferPdfScreen {
     final headers = [
       'Sr.',
       'Item Name',
+      'Unit',
       'Qty',
-      'Received Qty',
-      'Dispute Godown Qty',
+      'From Head',
+      'To Head',
+      'Received',
+      'Dispute',
     ];
 
     final List<List<String>> rows = [];
@@ -224,18 +223,24 @@ class SiteTransferPdfScreen {
       rows.add([
         detail.srNo.toString(),
         detail.iName,
+        detail.unit,
         detail.qty.toStringAsFixed(2),
+        detail.fromGodown,
+        detail.toGodown,
         detail.receivedQty.toStringAsFixed(2),
         detail.autoReturnQty.toStringAsFixed(2),
       ]);
     }
 
     final columnWidths = {
-      0: const pw.FlexColumnWidth(1),
-      1: const pw.FlexColumnWidth(4),
-      2: const pw.FlexColumnWidth(1.5),
-      3: const pw.FlexColumnWidth(1.5),
+      0: const pw.FlexColumnWidth(0.5),
+      1: const pw.FlexColumnWidth(3),
+      2: const pw.FlexColumnWidth(0.8),
+      3: const pw.FlexColumnWidth(0.8),
       4: const pw.FlexColumnWidth(1.5),
+      5: const pw.FlexColumnWidth(1.5),
+      6: const pw.FlexColumnWidth(0.8),
+      7: const pw.FlexColumnWidth(0.8),
     };
 
     return pw.Table(
@@ -276,7 +281,9 @@ class SiteTransferPdfScreen {
                       style: pw.TextStyle(fontSize: 9, color: textPrimaryColor),
                       textAlign: entry.key == 0
                           ? pw.TextAlign.center
-                          : pw.TextAlign.left,
+                          : entry.key == 1
+                          ? pw.TextAlign.left
+                          : pw.TextAlign.center,
                     ),
                   ),
                 )

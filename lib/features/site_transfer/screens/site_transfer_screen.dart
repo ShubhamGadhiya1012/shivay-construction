@@ -9,6 +9,7 @@ import 'package:shivay_construction/features/site_transfer/controllers/site_tran
 import 'package:shivay_construction/features/site_transfer/models/site_transfer_detail_dm.dart';
 import 'package:shivay_construction/features/site_transfer/models/site_transfer_dm.dart';
 import 'package:shivay_construction/features/site_transfer/widgets/site_transfer_item_card.dart';
+import 'package:shivay_construction/features/indent_entry/screens/site_wise_stock_screen.dart';
 import 'package:shivay_construction/styles/font_sizes.dart';
 import 'package:shivay_construction/styles/text_styles.dart';
 import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
@@ -49,8 +50,8 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
     ).format(DateTime.now());
 
     await _controller.getSites();
-    await _controller.getGodowns();
 
+    await _controller.getItems();
     if (widget.transfer != null && widget.transferDetails != null) {
       await _loadEditData();
     }
@@ -65,18 +66,13 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
     _controller.dateController.text = convertyyyyMMddToddMMyyyy(transfer.date);
     _controller.remarksController.text = transfer.remarks;
 
-    _controller.selectedFromGodownCode.value = transfer.fromGDCode;
-    _controller.selectedFromGodownName.value = transfer.fromGodown;
     _controller.selectedFromSiteCode.value = transfer.fromSiteCode;
-    _controller.fromSiteNameController.text = transfer.fromSiteName;
-
-    _controller.selectedToGodownCode.value = transfer.toGDCode;
-    _controller.selectedToGodownName.value = transfer.toGodown;
+    _controller.selectedFromSiteName.value = transfer.fromSiteName;
     _controller.selectedToSiteCode.value = transfer.toSiteCode;
-    _controller.toSiteNameController.text = transfer.toSiteName;
+    _controller.selectedToSiteName.value = transfer.toSiteName;
 
     _controller.canAddItem.value = true;
-    await _controller.getStockItems();
+    await _controller.getItems();
 
     _controller.itemsToSend.clear();
     int srNo = 1;
@@ -85,9 +81,13 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
         'SrNo': srNo++,
         'ICode': item.iCode,
         'iname': item.iName,
-        'unit': 'Nos',
+        'unit': item.unit,
         'Qty': item.qty,
         'availableQty': item.qty,
+        'FromGDCode': item.fromGDCode,
+        'FromGDName': item.fromGodown,
+        'ToGDCode': item.toGDCode,
+        'ToGDName': item.toGodown,
       });
     }
   }
@@ -154,36 +154,19 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                             tablet ? AppSpaces.v12 : AppSpaces.v8,
                             Obx(
                               () => AppDropdown(
-                                items: _controller.godownNames,
-                                hintText: 'From Head *',
-                                onChanged:
-                                    _controller.onFromGodownSelectedWithClear,
+                                items: _controller.siteNames,
+                                hintText: 'From Site *',
+                                onChanged: _controller.onFromSiteSelected,
                                 selectedItem:
                                     _controller
-                                        .selectedFromGodownName
+                                        .selectedFromSiteName
                                         .value
                                         .isNotEmpty
-                                    ? _controller.selectedFromGodownName.value
+                                    ? _controller.selectedFromSiteName.value
                                     : null,
-                                validatorText: 'Please select from Head',
+                                validatorText: 'Please select from site',
                               ),
                             ),
-                            tablet ? AppSpaces.v12 : AppSpaces.v8,
-                            Obx(() {
-                              if (_controller
-                                  .selectedFromGodownCode
-                                  .value
-                                  .isEmpty) {
-                                return const SizedBox.shrink();
-                              }
-
-                              return AppTextFormField(
-                                controller: _controller.fromSiteNameController,
-                                hintText: 'From Site',
-                                enabled: false,
-                                fillColor: kColorLightGrey,
-                              );
-                            }),
 
                             tablet ? AppSpaces.v20 : AppSpaces.v14,
 
@@ -200,35 +183,19 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                             tablet ? AppSpaces.v12 : AppSpaces.v8,
                             Obx(
                               () => AppDropdown(
-                                items: _controller.godownNames,
-                                hintText: 'To Head *',
-                                onChanged: _controller.onToGodownSelected,
+                                items: _controller.siteNames,
+                                hintText: 'To Site *',
+                                onChanged: _controller.onToSiteSelected,
                                 selectedItem:
                                     _controller
-                                        .selectedToGodownName
+                                        .selectedToSiteName
                                         .value
                                         .isNotEmpty
-                                    ? _controller.selectedToGodownName.value
+                                    ? _controller.selectedToSiteName.value
                                     : null,
-                                validatorText: 'Please select to Head',
+                                validatorText: 'Please select to site',
                               ),
                             ),
-                            tablet ? AppSpaces.v12 : AppSpaces.v8,
-                            Obx(() {
-                              if (_controller
-                                  .selectedToGodownCode
-                                  .value
-                                  .isEmpty) {
-                                return const SizedBox.shrink();
-                              }
-
-                              return AppTextFormField(
-                                controller: _controller.toSiteNameController,
-                                hintText: 'To Site',
-                                enabled: false,
-                                fillColor: kColorLightGrey,
-                              );
-                            }),
 
                             tablet ? AppSpaces.v16 : AppSpaces.v12,
                             AppTextFormField(
@@ -287,8 +254,10 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                                       padding: AppPaddings.custom(bottom: 8),
                                       child: SiteTransferItemCard(
                                         item: item,
-                                        onEdit: () {
-                                          _controller.prepareEditItem(index);
+                                        onEdit: () async {
+                                          await _controller.prepareEditItem(
+                                            index,
+                                          );
                                           _showItemDialog();
                                         },
                                         onDelete: () =>
@@ -316,6 +285,16 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                                 if (_controller.transferFormKey.currentState!
                                     .validate()) {
                                   if (_controller.itemsToSend.isNotEmpty) {
+                                    if (_controller
+                                            .selectedFromSiteCode
+                                            .value ==
+                                        _controller.selectedToSiteCode.value) {
+                                      showErrorSnackbar(
+                                        'Invalid Transfer',
+                                        'Cannot transfer to the same site. Please select a different destination site.',
+                                      );
+                                      return;
+                                    }
                                     _controller.saveSiteTransfer();
                                   } else {
                                     showErrorSnackbar(
@@ -356,9 +335,10 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         child: Container(
-          width: tablet ? 520 : double.infinity,
+          width: tablet ? 700 : double.infinity,
           constraints: BoxConstraints(
-            maxWidth: tablet ? 520 : MediaQuery.of(context).size.width * 0.9,
+            maxWidth: tablet ? 700 : MediaQuery.of(context).size.width * 0.95,
+            maxHeight: MediaQuery.of(context).size.height * 0.85,
           ),
           decoration: BoxDecoration(
             color: kColorWhite,
@@ -422,165 +402,312 @@ class _SiteTransferScreenState extends State<SiteTransferScreen> {
                   ],
                 ),
               ),
-              Padding(
-                padding: tablet ? AppPaddings.p24 : AppPaddings.p20,
-                child: Form(
-                  key: _controller.itemFormKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Obx(
-                        () => AppDropdown(
-                          items: _controller.itemNames,
-                          hintText: 'Select Item *',
-                          onChanged: _controller.onItemSelected,
-                          selectedItem:
-                              _controller.selectedItemName.value.isNotEmpty
-                              ? _controller.selectedItemName.value
-                              : null,
-                          validatorText: 'Please select an item',
-                        ),
-                      ),
-                      tablet ? AppSpaces.v16 : AppSpaces.v12,
-
-                      Obx(() {
-                        if (_controller.selectedItemCode.value.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
-
-                        return Container(
-                          padding: tablet ? AppPaddings.p12 : AppPaddings.p10,
-                          decoration: BoxDecoration(
-                            color: kColorGreen.withOpacity(0.05),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: kColorGreen.withOpacity(0.2),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Available Qty:',
-                                style: TextStyles.kMediumOutfit(
-                                  fontSize: tablet
-                                      ? FontSizes.k14FontSize
-                                      : FontSizes.k12FontSize,
-                                  color: kColorDarkGrey,
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: tablet ? AppPaddings.p24 : AppPaddings.p20,
+                  child: Form(
+                    key: _controller.itemFormKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Item Dropdown with View Stock Button
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Obx(
+                                () => AppDropdown(
+                                  items: _controller.itemNames,
+                                  hintText: 'Select Item *',
+                                  onChanged: _controller.onItemSelected,
+                                  selectedItem:
+                                      _controller
+                                          .selectedItemName
+                                          .value
+                                          .isNotEmpty
+                                      ? _controller.selectedItemName.value
+                                      : null,
+                                  validatorText: 'Please select an item',
                                 ),
                               ),
-                              Text(
-                                '${_controller.availableQty.value.toStringAsFixed(2)} ${_controller.selectedUnit.value}',
-                                style: TextStyles.kSemiBoldOutfit(
-                                  fontSize: tablet
-                                      ? FontSizes.k16FontSize
-                                      : FontSizes.k14FontSize,
-                                  color: kColorGreen,
+                            ),
+                            if (_controller
+                                .selectedItemCode
+                                .value
+                                .isNotEmpty) ...[
+                              tablet ? AppSpaces.h12 : AppSpaces.h8,
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: kColorGreen.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.visibility_rounded,
+                                    color: kColorGreen,
+                                    size: tablet ? 24 : 20,
+                                  ),
+                                  onPressed: () {
+                                    Get.to(
+                                      () => SiteWiseStockScreen(
+                                        iCode:
+                                            _controller.selectedItemCode.value,
+                                        siteCode: _controller
+                                            .selectedFromSiteCode
+                                            .value,
+                                      ),
+                                    );
+                                  },
+                                  tooltip: 'View Stock',
                                 ),
                               ),
                             ],
-                          ),
-                        );
-                      }),
-                      tablet ? AppSpaces.v16 : AppSpaces.v12,
+                          ],
+                        ),
 
-                      Row(
-                        children: [
-                          Expanded(
-                            child: AppTextFormField(
-                              controller: _controller.qtyController,
-                              hintText: 'Transfer Qty *',
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter qty';
-                                }
-                                final qty = double.tryParse(value);
-                                if (qty == null || qty <= 0) {
-                                  return 'Please enter valid qty';
-                                }
-                                if (qty > _controller.availableQty.value) {
-                                  return 'Cannot exceed available qty';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          tablet ? AppSpaces.h16 : AppSpaces.h12,
-                          Expanded(
-                            child: Obx(
-                              () => AppTextFormField(
-                                controller: TextEditingController(
-                                  text: _controller.selectedUnit.value,
-                                ),
-                                hintText: 'Unit',
-                                enabled: false,
-                                fillColor: kColorLightGrey,
+                        tablet ? AppSpaces.v20 : AppSpaces.v16,
+
+                        // Available Stock Display
+                        Obx(() {
+                          if (_controller.selectedItemCode.value.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          return Container(
+                            padding: tablet ? AppPaddings.p12 : AppPaddings.p10,
+                            decoration: BoxDecoration(
+                              color: kColorGreen.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: kColorGreen.withOpacity(0.2),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      tablet ? AppSpaces.v24 : AppSpaces.v20,
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () {
-                                _controller.clearItemForm();
-                                Get.back();
-                              },
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
-                                  color: kColorLightGrey,
-                                  width: 1.5,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    tablet ? 12 : 10,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Available Qty:',
+                                  style: TextStyles.kMediumOutfit(
+                                    fontSize: tablet
+                                        ? FontSizes.k14FontSize
+                                        : FontSizes.k12FontSize,
+                                    color: kColorDarkGrey,
                                   ),
                                 ),
-                                padding: AppPaddings.combined(
-                                  vertical: tablet ? 16 : 14,
-                                  horizontal: 0,
+                                Text(
+                                  '${_controller.availableQty.value.toStringAsFixed(2)} ${_controller.selectedUnit.value}',
+                                  style: TextStyles.kSemiBoldOutfit(
+                                    fontSize: tablet
+                                        ? FontSizes.k16FontSize
+                                        : FontSizes.k14FontSize,
+                                    color: _controller.availableQty.value > 0
+                                        ? kColorGreen
+                                        : kColorRed,
+                                  ),
                                 ),
-                              ),
-                              child: Text(
-                                'Cancel',
-                                style: TextStyles.kMediumOutfit(
-                                  color: kColorDarkGrey,
-                                  fontSize: tablet
-                                      ? FontSizes.k16FontSize
-                                      : FontSizes.k14FontSize,
-                                ),
-                              ),
+                              ],
                             ),
+                          );
+                        }),
+
+                        tablet ? AppSpaces.v20 : AppSpaces.v16,
+
+                        // From Head Dropdown
+                        Text(
+                          'From Head *',
+                          style: TextStyles.kMediumOutfit(
+                            fontSize: tablet
+                                ? FontSizes.k14FontSize
+                                : FontSizes.k12FontSize,
+                            color: kColorTextPrimary,
                           ),
-                          tablet ? AppSpaces.h16 : AppSpaces.h12,
-                          Expanded(
-                            child: Obx(
-                              () => AppButton(
-                                title: _controller.isEditingItem.value
-                                    ? 'Update'
-                                    : 'Add',
-                                buttonColor: kColorPrimary,
-                                titleColor: kColorWhite,
-                                titleSize: tablet
-                                    ? FontSizes.k16FontSize
-                                    : FontSizes.k14FontSize,
-                                buttonHeight: tablet ? 54 : 48,
-                                onPressed: () {
-                                  if (_controller.itemFormKey.currentState!
-                                      .validate()) {
-                                    _controller.addOrUpdateItem();
+                        ),
+                        tablet ? AppSpaces.v8 : AppSpaces.v6,
+                        Obx(
+                          () => AppDropdown(
+                            items: _controller.fromGodownNamesForItem,
+                            hintText: 'Select From Head *',
+                            onChanged: _controller.onFromGodownForItemSelected,
+                            selectedItem:
+                                _controller
+                                    .selectedFromGodownNameForItem
+                                    .value
+                                    .isNotEmpty
+                                ? _controller
+                                      .selectedFromGodownNameForItem
+                                      .value
+                                : null,
+                            validatorText: 'Please select from head',
+                          ),
+                        ),
+
+                        tablet ? AppSpaces.v20 : AppSpaces.v16,
+
+                        // To Head Dropdown
+                        Text(
+                          'To Head *',
+                          style: TextStyles.kMediumOutfit(
+                            fontSize: tablet
+                                ? FontSizes.k14FontSize
+                                : FontSizes.k12FontSize,
+                            color: kColorTextPrimary,
+                          ),
+                        ),
+
+                        // tablet ? AppSpaces.v8 : AppSpaces.v6,
+                        // Obx(
+                        //   () => AppDropdown(
+                        //     items: _controller.toGodownNamesForItem,
+                        //     hintText: 'Select To Head *',
+                        //     onChanged: _controller.onToGodownForItemSelected,
+                        //     selectedItem:
+                        //         _controller
+                        //             .selectedToGodownNameForItem
+                        //             .value
+                        //             .isNotEmpty
+                        //         ? _controller.selectedToGodownNameForItem.value
+                        //         : null,
+                        //     validatorText: 'Please select to head',
+                        //   ),
+                        // ),
+                        tablet ? AppSpaces.v20 : AppSpaces.v16,
+
+                        // Quantity and Unit
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: AppTextFormField(
+                                controller: _controller.qtyController,
+                                hintText: 'Transfer Qty *',
+                                keyboardType: TextInputType.number,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter qty';
                                   }
+                                  final qty = double.tryParse(value);
+                                  if (qty == null || qty <= 0) {
+                                    return 'Please enter valid qty';
+                                  }
+                                  if (_controller.availableQty.value > 0 &&
+                                      qty > _controller.availableQty.value) {
+                                    return 'Cannot exceed available qty (${_controller.availableQty.value.toStringAsFixed(2)})';
+                                  }
+                                  return null;
                                 },
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            tablet ? AppSpaces.h16 : AppSpaces.h12,
+                            Expanded(
+                              flex: 1,
+                              child: Obx(
+                                () => AppTextFormField(
+                                  controller: TextEditingController(
+                                    text: _controller.selectedUnit.value,
+                                  ),
+                                  hintText: 'Unit',
+                                  enabled: false,
+                                  fillColor: kColorLightGrey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        tablet ? AppSpaces.v32 : AppSpaces.v24,
+
+                        // Buttons
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  _controller.clearItemForm();
+                                  Get.back();
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  side: BorderSide(
+                                    color: kColorLightGrey,
+                                    width: 1.5,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      tablet ? 12 : 10,
+                                    ),
+                                  ),
+                                  padding: AppPaddings.combined(
+                                    vertical: tablet ? 16 : 14,
+                                    horizontal: 0,
+                                  ),
+                                ),
+                                child: Text(
+                                  'Cancel',
+                                  style: TextStyles.kMediumOutfit(
+                                    color: kColorDarkGrey,
+                                    fontSize: tablet
+                                        ? FontSizes.k16FontSize
+                                        : FontSizes.k14FontSize,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            tablet ? AppSpaces.h16 : AppSpaces.h12,
+                            Expanded(
+                              child: Obx(
+                                () => AppButton(
+                                  title: _controller.isEditingItem.value
+                                      ? 'Update'
+                                      : 'Add',
+                                  buttonColor: kColorPrimary,
+                                  titleColor: kColorWhite,
+                                  titleSize: tablet
+                                      ? FontSizes.k16FontSize
+                                      : FontSizes.k14FontSize,
+                                  buttonHeight: tablet ? 54 : 48,
+                                  onPressed: () {
+                                    if (_controller.itemFormKey.currentState!
+                                        .validate()) {
+                                      if (_controller
+                                          .selectedFromGodownCodeForItem
+                                          .value
+                                          .isEmpty) {
+                                        showErrorSnackbar(
+                                          'Error',
+                                          'Please select From Head',
+                                        );
+                                        return;
+                                      }
+                                      // if (_controller
+                                      //     .selectedToGodownCodeForItem
+                                      //     .value
+                                      //     .isEmpty) {
+                                      //   showErrorSnackbar(
+                                      //     'Error',
+                                      //     'Please select To Head',
+                                      //   );
+                                      //   return;ub
+                                      // }
+                                      if (_controller
+                                              .selectedFromGodownCodeForItem
+                                              .value ==
+                                          _controller
+                                              .selectedToGodownCodeForItem
+                                              .value) {
+                                        showErrorSnackbar(
+                                          'Invalid Transfer',
+                                          'Cannot transfer to the same head. Please select different heads.',
+                                        );
+                                        return;
+                                      }
+                                      _controller.addOrUpdateItem();
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
