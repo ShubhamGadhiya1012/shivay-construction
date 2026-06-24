@@ -45,9 +45,46 @@ class DlrReportPdfScreen {
           pw.MultiPage(
             pageFormat: PdfPageFormat.a4.landscape,
             margin: const pw.EdgeInsets.all(20),
+            // FIX: build returns a flat List<pw.Widget> so MultiPage can
+            // paginate each widget independently instead of one giant Column.
             build: (context) {
               return [
-                _buildSiteWisePage(
+                pw.Center(
+                  child: pw.Text(
+                    companyName.toUpperCase(),
+                    style: pw.TextStyle(
+                      fontSize: 18,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ),
+                pw.SizedBox(height: 4),
+                pw.Center(
+                  child: pw.Text(
+                    siteName.toUpperCase(),
+                    style: pw.TextStyle(
+                      fontSize: 13,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ),
+                pw.SizedBox(height: 6),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text(
+                      'From: $fromDate   To: $toDate',
+                      style: const pw.TextStyle(fontSize: 8),
+                    ),
+                    pw.Text(
+                      'DLR_$reportDate',
+                      style: const pw.TextStyle(fontSize: 8),
+                    ),
+                  ],
+                ),
+                pw.SizedBox(height: 8),
+                // Spread all table/content widgets directly into the list
+                ..._buildSiteWiseContentWidgets(
                   companyName: companyName,
                   siteName: siteName,
                   reportDate: reportDate,
@@ -72,7 +109,9 @@ class DlrReportPdfScreen {
     }
   }
 
-  static pw.Widget _buildSiteWisePage({
+  // Renamed from _buildSiteWisePage, now returns List<pw.Widget>
+  // so MultiPage can paginate across them properly.
+  static List<pw.Widget> _buildSiteWiseContentWidgets({
     required String companyName,
     required String siteName,
     required String reportDate,
@@ -304,40 +343,7 @@ class DlrReportPdfScreen {
       ),
     );
 
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-      children: [
-        pw.Center(
-          child: pw.Text(
-            companyName.toUpperCase(),
-            style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
-          ),
-        ),
-        pw.SizedBox(height: 4),
-
-        pw.Center(
-          child: pw.Text(
-            siteName.toUpperCase(),
-            style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold),
-          ),
-        ),
-        pw.SizedBox(height: 6),
-
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          children: [
-            pw.Text(
-              'From: $fromDate   To: $toDate',
-              style: const pw.TextStyle(fontSize: 8),
-            ),
-            pw.Text('DLR_$reportDate', style: const pw.TextStyle(fontSize: 8)),
-          ],
-        ),
-        pw.SizedBox(height: 8),
-
-        ...contentWidgets,
-      ],
-    );
+    return contentWidgets;
   }
 
   static Future<void> generateSummaryPdf({
@@ -381,7 +387,6 @@ class DlrReportPdfScreen {
         for (var item in companyItems) {
           final key = '${item.agencyName}__${item.activity}';
           agencyActivityMap[key] = item.activity;
-          // Store description (use first non-empty one found)
           if (!agencyDescMap.containsKey(key)) {
             agencyDescMap[key] = item.description.isNotEmpty
                 ? item.description
