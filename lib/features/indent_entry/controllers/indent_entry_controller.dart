@@ -160,6 +160,7 @@ class IndentEntryController extends GetxController {
 
     selectedGodownName.value = '';
     selectedGodownCode.value = '';
+    reqDateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
   }
 
   void prepareEditItem(int index) {
@@ -201,20 +202,6 @@ class IndentEntryController extends GetxController {
 
   void addOrUpdateItem() {
     double qty = double.tryParse(qtyController.text) ?? 0;
-
-    if (!isEditingItem.value) {
-      final isDuplicate = itemsToSend.any(
-        (item) => item['ICode'] == selectedItemCode.value,
-      );
-
-      if (isDuplicate) {
-        showErrorSnackbar(
-          'Duplicate Item',
-          'This item is already added. Please select a different item.',
-        );
-        return;
-      }
-    }
 
     Map<String, dynamic> itemData = {
       "SrNo": isEditingItem.value

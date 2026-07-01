@@ -758,6 +758,8 @@ class AuthIndentItemCard extends StatelessWidget {
                                         hintText: 'Enter Remark',
                                         maxLines: 2,
                                         floatingLabelRequired: false,
+                                        enabled: false,
+                                        fillColor: kColorLightGrey,
                                       ),
                                     ],
                                   ] else ...[
