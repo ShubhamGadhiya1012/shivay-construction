@@ -1379,6 +1379,8 @@ class _PurchaseOrderScreenState extends State<PurchaseOrderScreen> {
                     hintText: 'Enter Remark',
                     maxLines: 2,
                     floatingLabelRequired: true,
+                    enabled: false,
+                    fillColor: kColorLightGrey,
                     onChanged: (value) {
                       _controller.selectedPurchaseItems[index]['IndentRemark'] =
                           value;

@@ -158,6 +158,22 @@ class GrnItemCardForIssue extends StatelessWidget {
                   ),
                 ],
               ),
+
+              if (item.remark.isNotEmpty)
+                tablet ? AppSpaces.v12 : AppSpaces.v10,
+              if (item.remark.isNotEmpty)
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildInfoColumn(
+                        label: 'Remark',
+                        value: item.remark,
+                        tablet: tablet,
+                        valueColor: kColorSecondary,
+                      ),
+                    ),
+                  ],
+                ),
               if (isSelected) ...[
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
 

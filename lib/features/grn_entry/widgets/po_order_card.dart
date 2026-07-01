@@ -288,6 +288,8 @@ class PoOrderCard extends StatelessWidget {
                           hintText: 'Enter Remark',
                           maxLines: 2,
                           floatingLabelRequired: false,
+                          enabled: false,
+                          fillColor: kColorLightGrey,
                           onChanged: (value) {
                             if (controller.selectedPoOrders.containsKey(key)) {
                               controller.selectedPoOrders[key]!['PORemark'] =

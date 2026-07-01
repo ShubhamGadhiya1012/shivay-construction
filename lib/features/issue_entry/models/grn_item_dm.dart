@@ -47,6 +47,7 @@ class GrnItemDetailDm {
   final String gdName;
   final String cpCode;
   final String cpName;
+  final String remark;
 
   GrnItemDetailDm({
     required this.grnSrNo,
@@ -61,6 +62,7 @@ class GrnItemDetailDm {
     required this.gdName,
     required this.cpCode,
     required this.cpName,
+    required this.remark,
   });
 
   factory GrnItemDetailDm.fromJson(Map<String, dynamic> json) {
@@ -79,6 +81,7 @@ class GrnItemDetailDm {
       gdName: json['gdName'] ?? json['GDName'] ?? '',
       cpCode: json['cpCode'] ?? json['CPCode'] ?? '',
       cpName: json['cpName'] ?? json['CPName'] ?? '',
+      remark: json['remark'] ?? json['remark'] ?? '',
     );
   }
 }
