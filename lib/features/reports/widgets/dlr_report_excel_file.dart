@@ -9,9 +9,6 @@ import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:universal_html/html.dart' as html;
 
 class DlrReportExcelFile {
-  // ─────────────────────────────────────────────────────────────────────────
-  // SITE WISE EXCEL
-  // ─────────────────────────────────────────────────────────────────────────
   static Future<void> generateSiteWiseReport({
     required List<DlrReportDm> reportList,
     required String fromDate,
@@ -19,10 +16,9 @@ class DlrReportExcelFile {
   }) async {
     try {
       final excel = Excel.createExcel();
-      // Remove default sheet
+
       final defaultSheet = excel.getDefaultSheet();
 
-      // Group by site
       final Map<String, List<DlrReportDm>> groupedBySite = {};
       for (var item in reportList) {
         groupedBySite.putIfAbsent(item.siteCode, () => []).add(item);
@@ -77,7 +73,6 @@ class DlrReportExcelFile {
     int rowIndex = 0;
     final reportDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
 
-    // ── Styles ──────────────────────────────────────────────────────────────
     final titleStyle = CellStyle(
       bold: true,
       fontSize: 18,
@@ -145,7 +140,6 @@ class DlrReportExcelFile {
 
     const int totalCols = 6;
 
-    // ── Row 0: Company Name ─────────────────────────────────────────────────
     sheet.merge(
       CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
       CellIndex.indexByColumnRow(
@@ -160,7 +154,6 @@ class DlrReportExcelFile {
     cell.cellStyle = titleStyle;
     rowIndex++;
 
-    // ── Row 1: Site Name ────────────────────────────────────────────────────
     sheet.merge(
       CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
       CellIndex.indexByColumnRow(
@@ -175,7 +168,6 @@ class DlrReportExcelFile {
     cell.cellStyle = subtitleStyle;
     rowIndex++;
 
-    // ── Row 2: DLR date right-aligned ───────────────────────────────────────
     sheet.merge(
       CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
       CellIndex.indexByColumnRow(
@@ -198,9 +190,8 @@ class DlrReportExcelFile {
     cell.cellStyle = dateRightStyle;
     rowIndex++;
 
-    rowIndex++; // blank row
+    rowIndex++;
 
-    // ── Column Headers ───────────────────────────────────────────────────────
     final headers = [
       'Sr. No',
       'Name of Agency',
@@ -218,7 +209,6 @@ class DlrReportExcelFile {
     }
     rowIndex++;
 
-    // ── Group by Activity ────────────────────────────────────────────────────
     final Map<String, List<DlrReportDm>> groupedByActivity = {};
     for (var item in siteItems) {
       groupedByActivity.putIfAbsent(item.activity, () => []).add(item);
@@ -229,7 +219,6 @@ class DlrReportExcelFile {
     groupedByActivity.forEach((activity, items) {
       double actSkill = 0, actUnSkill = 0, actTotal = 0;
 
-      // Activity header row
       sheet.merge(
         CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
         CellIndex.indexByColumnRow(
@@ -245,31 +234,30 @@ class DlrReportExcelFile {
       rowIndex++;
 
       for (var entry in items) {
-        // Sr. No
         cell = sheet.cell(
           CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
         );
         cell.value = IntCellValue(entry.srNo);
         cell.cellStyle = dataCenterStyle;
-        // Agency
+
         cell = sheet.cell(
           CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex),
         );
         cell.value = TextCellValue(entry.agencyName);
         cell.cellStyle = dataStyle;
-        // Skill
+
         cell = sheet.cell(
           CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: rowIndex),
         );
         cell.value = DoubleCellValue(entry.skill);
         cell.cellStyle = dataCenterStyle;
-        // Unskilled
+
         cell = sheet.cell(
           CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: rowIndex),
         );
         cell.value = DoubleCellValue(entry.unSkill);
         cell.cellStyle = dataCenterStyle;
-        // Description
+
         cell = sheet.cell(
           CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: rowIndex),
         );
@@ -277,7 +265,7 @@ class DlrReportExcelFile {
           entry.description.isNotEmpty ? entry.description : '-',
         );
         cell.cellStyle = dataStyle;
-        // Remark
+
         cell = sheet.cell(
           CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: rowIndex),
         );
@@ -292,7 +280,6 @@ class DlrReportExcelFile {
         rowIndex++;
       }
 
-      // Sub Total
       cell = sheet.cell(
         CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex),
       );
@@ -323,7 +310,6 @@ class DlrReportExcelFile {
       rowIndex++;
     });
 
-    // ── Grand Total ───────────────────────────────────────────────────────────
     cell = sheet.cell(
       CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex),
     );
@@ -342,7 +328,6 @@ class DlrReportExcelFile {
     cell.value = DoubleCellValue(grandUnSkill);
     cell.cellStyle = grandTotalStyle;
 
-    // Col 4 middle (description col) - just show grandTotal
     cell = sheet.cell(
       CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: rowIndex),
     );
@@ -355,7 +340,6 @@ class DlrReportExcelFile {
     cell.value = TextCellValue('');
     cell.cellStyle = grandTotalStyle;
 
-    // ── Column widths ─────────────────────────────────────────────────────────
     sheet.setColumnWidth(0, 8);
     sheet.setColumnWidth(1, 22);
     sheet.setColumnWidth(2, 10);
@@ -364,9 +348,6 @@ class DlrReportExcelFile {
     sheet.setColumnWidth(5, 18);
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // SUMMARY EXCEL
-  // ─────────────────────────────────────────────────────────────────────────
   static Future<void> generateSummaryReport({
     required List<DlrReportDm> reportList,
     required String fromDate,
@@ -376,7 +357,6 @@ class DlrReportExcelFile {
       final excel = Excel.createExcel();
       final defaultSheet = excel.getDefaultSheet();
 
-      // Group by Company
       final Map<String, List<DlrReportDm>> groupedByCompany = {};
       for (var item in reportList) {
         final key = '${item.coCode}_${item.coName}';
@@ -426,9 +406,8 @@ class DlrReportExcelFile {
     required String toDate,
   }) {
     int rowIndex = 0;
-    final reportDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
+    DateFormat('dd-MM-yyyy').format(DateTime.now());
 
-    // Unique sites in order
     final List<String> siteNames = [];
     for (var item in companyItems) {
       if (!siteNames.contains(item.siteName)) {
@@ -436,10 +415,8 @@ class DlrReportExcelFile {
       }
     }
 
-    // Total columns: Sr.No + Agency + WorkDesc + [sites] + Total
     final int totalCols = 3 + siteNames.length + 1;
 
-    // ── Styles ──────────────────────────────────────────────────────────────
     final companyTitleStyle = CellStyle(
       bold: true,
       fontSize: 14,
@@ -490,7 +467,6 @@ class DlrReportExcelFile {
       backgroundColorHex: ExcelColor.fromHexString('#B4C6E7'),
     );
 
-    // ── Row 0: Company Name ──────────────────────────────────────────────────
     sheet.merge(
       CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
       CellIndex.indexByColumnRow(
@@ -505,7 +481,6 @@ class DlrReportExcelFile {
     cell.cellStyle = companyTitleStyle;
     rowIndex++;
 
-    // ── Row 1: "Summary" ─────────────────────────────────────────────────────
     sheet.merge(
       CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
       CellIndex.indexByColumnRow(
@@ -520,7 +495,6 @@ class DlrReportExcelFile {
     cell.cellStyle = subtitleStyle;
     rowIndex++;
 
-    // ── Row 2: Month ─────────────────────────────────────────────────────────
     sheet.merge(
       CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
       CellIndex.indexByColumnRow(
@@ -538,9 +512,8 @@ class DlrReportExcelFile {
     cell.cellStyle = monthStyle;
     rowIndex++;
 
-    rowIndex++; // blank row
+    rowIndex++;
 
-    // ── Row 4: "Day Report - date" header ────────────────────────────────────
     sheet.merge(
       CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
       CellIndex.indexByColumnRow(
@@ -551,30 +524,28 @@ class DlrReportExcelFile {
     cell = sheet.cell(
       CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
     );
-    cell.value = TextCellValue('Day Report - $reportDate');
+    cell.value = TextCellValue('Day Report - $fromDate to $toDate');
     cell.cellStyle = dayReportStyle;
     rowIndex++;
 
-    // ── Column headers ───────────────────────────────────────────────────────
-    // Sr. No
     cell = sheet.cell(
       CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
     );
     cell.value = TextCellValue('Sr.\nNo.');
     cell.cellStyle = headerStyle;
-    // Agency
+
     cell = sheet.cell(
       CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex),
     );
     cell.value = TextCellValue('Name of Agency');
     cell.cellStyle = headerStyle;
-    // Work Desc
+
     cell = sheet.cell(
       CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: rowIndex),
     );
     cell.value = TextCellValue('Work Description');
     cell.cellStyle = headerStyle;
-    // Sites
+
     for (int i = 0; i < siteNames.length; i++) {
       cell = sheet.cell(
         CellIndex.indexByColumnRow(columnIndex: 3 + i, rowIndex: rowIndex),
@@ -582,7 +553,7 @@ class DlrReportExcelFile {
       cell.value = TextCellValue(siteNames[i]);
       cell.cellStyle = headerStyle;
     }
-    // Total
+
     cell = sheet.cell(
       CellIndex.indexByColumnRow(
         columnIndex: 3 + siteNames.length,
@@ -593,7 +564,6 @@ class DlrReportExcelFile {
     cell.cellStyle = headerStyle;
     rowIndex++;
 
-    // ── Build agency data grouped by Agency + Activity ─────────────────────
     final Map<String, Map<String, double>> agencyData = {};
     final Map<String, String> agencyActivityMap = {};
     final Map<String, String> agencyDescMap = {};
@@ -601,7 +571,7 @@ class DlrReportExcelFile {
     for (var item in companyItems) {
       final key = '${item.agencyName}__${item.activity}';
       agencyActivityMap[key] = item.activity;
-      // Store description (use first non-empty one found)
+
       if (!agencyDescMap.containsKey(key)) {
         agencyDescMap[key] = item.description.isNotEmpty
             ? item.description
@@ -627,25 +597,24 @@ class DlrReportExcelFile {
       final activity = agencyActivityMap[key] ?? '';
       double rowTotal = siteMap.values.fold(0, (a, b) => a + b);
 
-      // Sr. No
       cell = sheet.cell(
         CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
       );
       cell.value = IntCellValue(srNo);
       cell.cellStyle = dataCenterStyle;
-      // Agency
+
       cell = sheet.cell(
         CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex),
       );
       cell.value = TextCellValue(agencyName);
       cell.cellStyle = dataStyle;
-      // Work Desc
+
       cell = sheet.cell(
         CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: rowIndex),
       );
       cell.value = TextCellValue(activity.isNotEmpty ? activity : '-');
       cell.cellStyle = dataStyle;
-      // Site columns
+
       for (int i = 0; i < siteNames.length; i++) {
         cell = sheet.cell(
           CellIndex.indexByColumnRow(columnIndex: 3 + i, rowIndex: rowIndex),
@@ -656,7 +625,7 @@ class DlrReportExcelFile {
         );
         cell.cellStyle = dataCenterStyle;
       }
-      // Total
+
       cell = sheet.cell(
         CellIndex.indexByColumnRow(
           columnIndex: 3 + siteNames.length,
@@ -672,10 +641,8 @@ class DlrReportExcelFile {
       rowIndex++;
     });
 
-    // 2 blank rows
     rowIndex += 2;
 
-    // ── Total footer row ──────────────────────────────────────────────────────
     cell = sheet.cell(
       CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
     );
@@ -706,7 +673,6 @@ class DlrReportExcelFile {
     cell.value = DoubleCellValue(grandTotal);
     cell.cellStyle = totalFooterStyle;
 
-    // ── Column widths ─────────────────────────────────────────────────────────
     sheet.setColumnWidth(0, 7);
     sheet.setColumnWidth(1, 22);
     sheet.setColumnWidth(2, 22);
@@ -716,9 +682,6 @@ class DlrReportExcelFile {
     sheet.setColumnWidth(3 + siteNames.length, 14);
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // SAVE & OPEN
-  // ─────────────────────────────────────────────────────────────────────────
   static Future<void> _saveAndOpenExcel(
     List<int> excelBytes,
     String fileName,

@@ -609,7 +609,7 @@ class DlrReportPdfScreen {
           ),
           child: pw.Center(
             child: pw.Text(
-              'Day Report - $reportDate',
+              'Day Report - $fromDate to $toDate',
               style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
             ),
           ),
