@@ -23,16 +23,19 @@ class DirectGrnItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool tablet = AppScreenUtils.isTablet(context);
+    final double qty = ((item['qty'] ?? 0.0) as num).toDouble();
+    final double rate = ((item['rate'] ?? 0.0) as num).toDouble();
+    final double amount = qty * rate;
 
     return Container(
       decoration: BoxDecoration(
         color: kColorWhite,
-        borderRadius: BorderRadius.circular(tablet ? 12 : 10),
+        borderRadius: BorderRadius.circular(tablet ? 14 : 12),
         border: Border.all(color: kColorLightGrey.withOpacity(0.3)),
         boxShadow: [
           BoxShadow(
             color: kColorPrimary.withOpacity(0.06),
-            blurRadius: 6,
+            blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
@@ -44,8 +47,20 @@ class DirectGrnItemCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Container(
+                padding: AppPaddings.p8,
+                decoration: BoxDecoration(
+                  color: kColorPrimary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.inventory_2_rounded,
+                  color: kColorPrimary,
+                  size: tablet ? 18 : 16,
+                ),
+              ),
+              AppSpaces.h10,
               Expanded(
                 child: Text(
                   item['iname'] ?? '',
@@ -55,48 +70,41 @@ class DirectGrnItemCard extends StatelessWidget {
                         : FontSizes.k16FontSize,
                     color: kColorTextPrimary,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Row(
-                children: [
-                  Material(
-                    color: kColorPrimary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(tablet ? 8 : 6),
-                    child: InkWell(
-                      onTap: onEdit,
-                      borderRadius: BorderRadius.circular(tablet ? 8 : 6),
-                      child: Container(
-                        padding: tablet
-                            ? AppPaddings.combined(horizontal: 10, vertical: 10)
-                            : AppPaddings.combined(horizontal: 8, vertical: 8),
-                        child: Icon(
-                          Icons.edit_rounded,
-                          size: tablet ? 20 : 18,
-                          color: kColorPrimary,
-                        ),
-                      ),
+              Material(
+                color: kColorPrimary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(tablet ? 8 : 6),
+                child: InkWell(
+                  onTap: onEdit,
+                  borderRadius: BorderRadius.circular(tablet ? 8 : 6),
+                  child: Padding(
+                    padding: AppPaddings.combined(horizontal: 8, vertical: 8),
+                    child: Icon(
+                      Icons.edit_rounded,
+                      size: tablet ? 20 : 18,
+                      color: kColorPrimary,
                     ),
                   ),
-                  tablet ? AppSpaces.h12 : AppSpaces.h8,
-                  Material(
-                    color: kColorRed.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(tablet ? 8 : 6),
-                    child: InkWell(
-                      onTap: onDelete,
-                      borderRadius: BorderRadius.circular(tablet ? 8 : 6),
-                      child: Container(
-                        padding: tablet
-                            ? AppPaddings.combined(horizontal: 10, vertical: 10)
-                            : AppPaddings.combined(horizontal: 8, vertical: 8),
-                        child: Icon(
-                          Icons.delete_rounded,
-                          size: tablet ? 20 : 18,
-                          color: kColorRed,
-                        ),
-                      ),
+                ),
+              ),
+              AppSpaces.h8,
+              Material(
+                color: kColorRed.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(tablet ? 8 : 6),
+                child: InkWell(
+                  onTap: onDelete,
+                  borderRadius: BorderRadius.circular(tablet ? 8 : 6),
+                  child: Padding(
+                    padding: AppPaddings.combined(horizontal: 8, vertical: 8),
+                    child: Icon(
+                      Icons.delete_rounded,
+                      size: tablet ? 20 : 18,
+                      color: kColorRed,
                     ),
                   ),
-                ],
+                ),
               ),
             ],
           ),
@@ -110,30 +118,61 @@ class DirectGrnItemCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: kColorPrimary.withOpacity(0.2)),
             ),
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: _buildDetailColumn(
-                    label: 'Rate',
-                    value: (item['rate'] ?? 0.0).toStringAsFixed(2),
-                    tablet: tablet,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildDetailColumn(
+                        label: 'Qty',
+                        value: qty.toStringAsFixed(2),
+                        tablet: tablet,
+                      ),
+                    ),
+                    AppSpaces.h12,
+                    Expanded(
+                      child: _buildDetailColumn(
+                        label: 'Rate',
+                        value: rate.toStringAsFixed(2),
+                        tablet: tablet,
+                      ),
+                    ),
+                    AppSpaces.h12,
+                    Expanded(
+                      child: _buildDetailColumn(
+                        label: 'Unit',
+                        value: item['unit'] ?? '',
+                        tablet: tablet,
+                      ),
+                    ),
+                  ],
                 ),
-                AppSpaces.h12,
-                Expanded(
-                  child: _buildDetailColumn(
-                    label: 'Qty',
-                    value: (item['qty'] ?? 0.0).toStringAsFixed(2),
-                    tablet: tablet,
-                  ),
+                Divider(
+                  height: tablet ? 16 : 12,
+                  color: kColorPrimary.withOpacity(0.15),
                 ),
-                AppSpaces.h12,
-                Expanded(
-                  child: _buildDetailColumn(
-                    label: 'Unit',
-                    value: item['unit'] ?? '',
-                    tablet: tablet,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Amount',
+                      style: TextStyles.kRegularOutfit(
+                        fontSize: tablet
+                            ? FontSizes.k12FontSize
+                            : FontSizes.k10FontSize,
+                        color: kColorDarkGrey,
+                      ),
+                    ),
+                    Text(
+                      amount.toStringAsFixed(2),
+                      style: TextStyles.kSemiBoldOutfit(
+                        fontSize: tablet
+                            ? FontSizes.k16FontSize
+                            : FontSizes.k14FontSize,
+                        color: kColorPrimary,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -5,6 +5,7 @@ class IndentDm {
   final String gdName;
   final String siteCode;
   final String siteName;
+  final String entryByUserName;
   final bool authorize;
   final bool closeIndent;
   final String attachments;
@@ -17,6 +18,7 @@ class IndentDm {
     required this.siteCode,
     required this.siteName,
     required this.authorize,
+    required this.entryByUserName,
     required this.closeIndent,
     required this.attachments,
   });
@@ -29,6 +31,7 @@ class IndentDm {
       gdName: json['GDName'] ?? '',
       siteCode: json['SiteCode'] ?? '',
       siteName: json['SiteName'] ?? '',
+      entryByUserName: json['EntryByUserName'] ?? '',
       authorize: json['Authorize'] ?? false,
       closeIndent: json['CloseIndent'] ?? false,
       attachments: json['Attachments'] ?? '',
