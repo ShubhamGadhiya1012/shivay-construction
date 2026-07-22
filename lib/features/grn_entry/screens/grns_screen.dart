@@ -57,67 +57,67 @@ class _GrnsScreenState extends State<GrnsScreen> {
                   color: kColorPrimary,
                 ),
               ),
-              actions: [
-                PopupMenuButton<String>(
-                  icon: Icon(Icons.more_vert, color: kColorPrimary),
-                  offset: const Offset(0, 45),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 4,
-                  color: Colors.white,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(
-                    minWidth: 160,
-                    maxWidth: 180,
-                  ),
-                  onSelected: (value) {
-                    if (value == 'direct') {
-                      Get.to(
-                        () =>
-                            const GrnEntryScreen(isEdit: false, isDirect: true),
-                      )?.then((_) {
-                        _controller.getGrns();
-                      });
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'direct',
-                      height: 45,
-                      padding: AppPaddings.combined(
-                        horizontal: 12,
-                        vertical: 0,
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: AppPaddings.p6,
-                            decoration: BoxDecoration(
-                              color: kColorPrimary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              Icons.add_circle_outline,
-                              color: kColorPrimary,
-                              size: 18,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Direct GRN',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[800],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              // actions: [
+              //   PopupMenuButton<String>(
+              //     icon: Icon(Icons.more_vert, color: kColorPrimary),
+              //     offset: const Offset(0, 45),
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(12),
+              //     ),
+              //     elevation: 4,
+              //     color: Colors.white,
+              //     padding: EdgeInsets.zero,
+              //     constraints: const BoxConstraints(
+              //       minWidth: 160,
+              //       maxWidth: 180,
+              //     ),
+              //     onSelected: (value) {
+              //       if (value == 'direct') {
+              //         Get.to(
+              //           () =>
+              //               const GrnEntryScreen(isEdit: false, isDirect: true),
+              //         )?.then((_) {
+              //           _controller.getGrns();
+              //         });
+              //       }
+              //     },
+              //     itemBuilder: (context) => [
+              //       PopupMenuItem(
+              //         value: 'direct',
+              //         height: 45,
+              //         padding: AppPaddings.combined(
+              //           horizontal: 12,
+              //           vertical: 0,
+              //         ),
+              //         child: Row(
+              //           children: [
+              //             Container(
+              //               padding: AppPaddings.p6,
+              //               decoration: BoxDecoration(
+              //                 color: kColorPrimary.withOpacity(0.1),
+              //                 borderRadius: BorderRadius.circular(8),
+              //               ),
+              //               child: Icon(
+              //                 Icons.add_circle_outline,
+              //                 color: kColorPrimary,
+              //                 size: 18,
+              //               ),
+              //             ),
+              //             const SizedBox(width: 12),
+              //             Text(
+              //               'Direct GRN',
+              //               style: TextStyle(
+              //                 fontSize: 14,
+              //                 fontWeight: FontWeight.w500,
+              //                 color: Colors.grey[800],
+              //               ),
+              //             ),
+              //           ],
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ],
             ),
             body: RefreshIndicator(
               elevation: 0,
@@ -133,16 +133,66 @@ class _GrnsScreenState extends State<GrnsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppTextFormField(
-                      controller: _controller.searchController,
-                      hintText: 'Search GRN',
-                      onChanged: (query) {
-                        _controller.searchQuery.value = query;
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AppTextFormField(
+                            controller: _controller.searchController,
+                            hintText: 'Search GRN',
+                            onChanged: (query) {
+                              _controller.searchQuery.value = query;
 
-                        setState(() {
-                          expandedIndex = null;
-                        });
-                      },
+                              setState(() {
+                                expandedIndex = null;
+                              });
+                            },
+                          ),
+                        ),
+                        AppSpaces.h8,
+                        InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () {
+                            Get.to(
+                              () => const GrnEntryScreen(
+                                isEdit: false,
+                                isDirect: true,
+                              ),
+                            )?.then((_) {
+                              _controller.getGrns();
+                            });
+                          },
+                          child: Container(
+                            padding: AppPaddings.combined(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: kColorPrimary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.add_card,
+                                  color: kColorPrimary,
+                                  size: tablet ? 24 : 20,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Direct GRN',
+                                  style: TextStyles.kSemiBoldOutfit(
+                                    fontSize: tablet
+                                        ? FontSizes.k14FontSize
+                                        : FontSizes.k12FontSize,
+                                    color: kColorPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     tablet ? AppSpaces.v16 : AppSpaces.v12,
                     Obx(() {
@@ -234,7 +284,7 @@ class _GrnsScreenState extends State<GrnsScreen> {
                   size: tablet ? 24 : 20,
                 ),
                 label: Text(
-                  'Add New',
+                  'Add PO Against GRN',
                   style: TextStyles.kSemiBoldOutfit(
                     fontSize: tablet
                         ? FontSizes.k16FontSize

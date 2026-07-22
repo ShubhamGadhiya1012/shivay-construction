@@ -109,7 +109,7 @@ class ChatbotService {
           // Remove "assets/" prefix if present
           String path = screenshot.toString().replaceFirst('assets/', '');
 
-          return 'http://160.187.80.215:8080/$path';
+          return 'http://160.187.81.68:8080/$path';
         }),
       );
     }

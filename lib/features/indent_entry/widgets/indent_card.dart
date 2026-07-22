@@ -101,6 +101,16 @@ class _IndentCardState extends State<IndentCard> {
                               color: kColorDarkGrey,
                             ),
                           ),
+                          AppSpaces.v4,
+                          Text(
+                            'Entry By: ${widget.indent.entryByUserName}',
+                            style: TextStyles.kRegularOutfit(
+                              fontSize: tablet
+                                  ? FontSizes.k14FontSize
+                                  : FontSizes.k12FontSize,
+                              color: kColorDarkGrey,
+                            ),
+                          ),
                         ],
                       ),
                     ),

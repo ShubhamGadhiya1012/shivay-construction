@@ -1086,4 +1086,3 @@ class _IndentEntryScreenState extends State<IndentEntryScreen> {
     );
   }
 }
-  
