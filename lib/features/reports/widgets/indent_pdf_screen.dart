@@ -124,7 +124,6 @@ class IndentPdfScreen {
     PdfColor groupHeaderColor,
     PdfColor textColor,
   ) {
-    // Group data by item code
     final Map<String, List<IndentReportDm>> groupedData = {};
     for (var item in data) {
       if (!groupedData.containsKey(item.iCode)) {
@@ -143,22 +142,24 @@ class IndentPdfScreen {
       'Pending Qty',
       'Ref PO No',
       'Status',
-      'Head', // NEW: Second to last
-      'Remark', // NEW: Last column
+      'Head',
+      'Entry By',
+      'Remark',
     ];
 
     final columnWidths = {
-      0: const pw.FlexColumnWidth(2.5), // Site Name
-      1: const pw.FlexColumnWidth(1.5), // Req Date
-      2: const pw.FlexColumnWidth(1.5), // Indent Date
-      3: const pw.FlexColumnWidth(1.5), // Indent Qty
-      4: const pw.FlexColumnWidth(2.5), // Indent No
-      5: const pw.FlexColumnWidth(1.5), // Order Qty
-      6: const pw.FlexColumnWidth(1.5), // Pending Qty
-      7: const pw.FlexColumnWidth(2.0), // Ref PO No
-      8: const pw.FlexColumnWidth(1.5), // Status
-      9: const pw.FlexColumnWidth(2.0), // Head (GDName)
-      10: const pw.FlexColumnWidth(2.5), // Remark
+      0: const pw.FlexColumnWidth(2.5),
+      1: const pw.FlexColumnWidth(1.5),
+      2: const pw.FlexColumnWidth(1.5),
+      3: const pw.FlexColumnWidth(1.5),
+      4: const pw.FlexColumnWidth(2.5),
+      5: const pw.FlexColumnWidth(1.5),
+      6: const pw.FlexColumnWidth(1.5),
+      7: const pw.FlexColumnWidth(2.0),
+      8: const pw.FlexColumnWidth(1.5),
+      9: const pw.FlexColumnWidth(2.0),
+      10: const pw.FlexColumnWidth(2.0),
+      11: const pw.FlexColumnWidth(2.5),
     };
 
     List<pw.Widget> widgets = [];
@@ -167,7 +168,6 @@ class IndentPdfScreen {
       final firstItem = items.first;
       final totalQty = items.fold(0.0, (sum, item) => sum + item.indentQty);
 
-      // Item header
       widgets.add(
         pw.Container(
           width: double.infinity,
@@ -198,13 +198,11 @@ class IndentPdfScreen {
         ),
       );
 
-      // Details table
       widgets.add(
         pw.Table(
           border: pw.TableBorder.all(color: PdfColors.grey, width: 0.5),
           columnWidths: columnWidths,
           children: [
-            // Table header
             pw.TableRow(
               decoration: pw.BoxDecoration(color: headerBgColor),
               children: detailHeaders
@@ -223,7 +221,7 @@ class IndentPdfScreen {
                   )
                   .toList(),
             ),
-            // Detail rows
+
             ...items.asMap().entries.map((entry) {
               final item = entry.value;
               return pw.TableRow(
@@ -267,16 +265,14 @@ class IndentPdfScreen {
                     _getStatusColor(item.indentStatus),
                     align: pw.TextAlign.center,
                   ),
+                  _cell(item.gdName, textColor),
                   _cell(
-                    item.gdName,
-                    textColor,
-                  ), // NEW: Head column (second to last)
-                  _cell(
-                    item.remark.isNotEmpty
-                        ? item.remark
-                        : '-', // NEW: Remark column (last)
+                    item.entryByUserName.isNotEmpty
+                        ? item.entryByUserName
+                        : '-',
                     textColor,
                   ),
+                  _cell(item.remark.isNotEmpty ? item.remark : '-', textColor),
                 ],
               );
             }),
@@ -296,7 +292,6 @@ class IndentPdfScreen {
     PdfColor groupHeaderColor,
     PdfColor textColor,
   ) {
-    // Group data by site code
     final Map<String, List<IndentReportDm>> groupedData = {};
     for (var item in data) {
       if (!groupedData.containsKey(item.siteCode)) {
@@ -315,22 +310,24 @@ class IndentPdfScreen {
       'Pending Qty',
       'Ref PO No',
       'Status',
-      'Head', // NEW: Second to last
-      'Remark', // NEW: Last column
+      'Head',
+      'Entry By',
+      'Remark',
     ];
 
     final columnWidths = {
-      0: const pw.FlexColumnWidth(3.0), // Item Name
-      1: const pw.FlexColumnWidth(1.5), // Req Date
-      2: const pw.FlexColumnWidth(1.5), // Indent Date
-      3: const pw.FlexColumnWidth(1.5), // Indent Qty
-      4: const pw.FlexColumnWidth(2.5), // Indent No
-      5: const pw.FlexColumnWidth(1.5), // Order Qty
-      6: const pw.FlexColumnWidth(1.5), // Pending Qty
-      7: const pw.FlexColumnWidth(2.0), // Ref PO No
-      8: const pw.FlexColumnWidth(1.5), // Status
-      9: const pw.FlexColumnWidth(2.0), // Head (GDName)
-      10: const pw.FlexColumnWidth(2.5), // Remark
+      0: const pw.FlexColumnWidth(3.0),
+      1: const pw.FlexColumnWidth(1.5),
+      2: const pw.FlexColumnWidth(1.5),
+      3: const pw.FlexColumnWidth(1.5),
+      4: const pw.FlexColumnWidth(2.5),
+      5: const pw.FlexColumnWidth(1.5),
+      6: const pw.FlexColumnWidth(1.5),
+      7: const pw.FlexColumnWidth(2.0),
+      8: const pw.FlexColumnWidth(1.5),
+      9: const pw.FlexColumnWidth(2.0),
+      10: const pw.FlexColumnWidth(2.0),
+      11: const pw.FlexColumnWidth(2.5),
     };
 
     List<pw.Widget> widgets = [];
@@ -339,7 +336,6 @@ class IndentPdfScreen {
       final firstItem = items.first;
       final totalQty = items.fold(0.0, (sum, item) => sum + item.indentQty);
 
-      // Site header
       widgets.add(
         pw.Container(
           width: double.infinity,
@@ -370,13 +366,11 @@ class IndentPdfScreen {
         ),
       );
 
-      // Details table
       widgets.add(
         pw.Table(
           border: pw.TableBorder.all(color: PdfColors.grey, width: 0.5),
           columnWidths: columnWidths,
           children: [
-            // Table header
             pw.TableRow(
               decoration: pw.BoxDecoration(color: headerBgColor),
               children: detailHeaders
@@ -395,7 +389,7 @@ class IndentPdfScreen {
                   )
                   .toList(),
             ),
-            // Detail rows
+
             ...items.asMap().entries.map((entry) {
               final item = entry.value;
               return pw.TableRow(
@@ -439,16 +433,14 @@ class IndentPdfScreen {
                     _getStatusColor(item.indentStatus),
                     align: pw.TextAlign.center,
                   ),
+                  _cell(item.gdName, textColor),
                   _cell(
-                    item.gdName,
-                    textColor,
-                  ), // NEW: Head column (second to last)
-                  _cell(
-                    item.remark.isNotEmpty
-                        ? item.remark
-                        : '-', // NEW: Remark column (last)
+                    item.entryByUserName.isNotEmpty
+                        ? item.entryByUserName
+                        : '-',
                     textColor,
                   ),
+                  _cell(item.remark.isNotEmpty ? item.remark : '-', textColor),
                 ],
               );
             }),
