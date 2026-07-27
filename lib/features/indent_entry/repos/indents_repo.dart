@@ -105,4 +105,22 @@ class IndentsRepo {
       rethrow;
     }
   }
+
+  static Future<dynamic> deleteIndent({required String invNo}) async {
+    String? token = await SecureStorageHelper.read('token');
+
+    final Map<String, dynamic> requestBody = {"Invno": invNo};
+
+    try {
+      var response = await ApiService.postRequest(
+        endpoint: '/Indent/deleteIndent',
+        requestBody: requestBody,
+        token: token,
+      );
+
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

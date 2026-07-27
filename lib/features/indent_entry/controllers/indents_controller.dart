@@ -165,4 +165,25 @@ class IndentsController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> deleteIndent({required String invNo}) async {
+    isLoading.value = true;
+    try {
+      var response = await IndentsRepo.deleteIndent(invNo: invNo);
+
+      if (response != null && response.containsKey('message')) {
+        String message = response['message'];
+        await getIndents();
+        showSuccessSnackbar('Success', message);
+      }
+    } catch (e) {
+      if (e is Map<String, dynamic>) {
+        showErrorSnackbar('Error', e['message']);
+      } else {
+        showErrorSnackbar('Error', e.toString());
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }
