@@ -232,9 +232,35 @@ class DlrCard extends StatelessWidget {
                     ],
                   ],
                 ),
-
                 // Entries count badge
                 tablet ? AppSpaces.v12 : AppSpaces.v10,
+
+                if (dlr.shift == 'Night' &&
+                    (dlr.inTime.isNotEmpty || dlr.outTime.isNotEmpty)) ...[
+                  Row(
+                    children: [
+                      if (dlr.inTime.isNotEmpty)
+                        Expanded(
+                          child: _buildInfoRow(
+                            label: 'In Time',
+                            value: convertTimeToDisplay(dlr.inTime),
+                            tablet: tablet,
+                          ),
+                        ),
+                      if (dlr.inTime.isNotEmpty && dlr.outTime.isNotEmpty)
+                        tablet ? AppSpaces.h16 : AppSpaces.h12,
+                      if (dlr.outTime.isNotEmpty)
+                        Expanded(
+                          child: _buildInfoRow(
+                            label: 'Out Time',
+                            value: convertTimeToDisplay(dlr.outTime),
+                            tablet: tablet,
+                          ),
+                        ),
+                    ],
+                  ),
+                  tablet ? AppSpaces.v12 : AppSpaces.v10,
+                ],
                 Container(
                   padding: tablet
                       ? AppPaddings.combined(horizontal: 10, vertical: 5)
@@ -254,6 +280,7 @@ class DlrCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                // Entries count badge
 
                 // Expanded details
                 AnimatedCrossFade(
@@ -393,6 +420,22 @@ class DlrCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String convertTimeToDisplay(String timeStr) {
+    if (timeStr.isEmpty) return '';
+    try {
+      final parts = timeStr.split(':');
+      if (parts.length < 2) return timeStr;
+      int hour = int.parse(parts[0]);
+      final minute = parts[1];
+      final period = hour >= 12 ? 'PM' : 'AM';
+      hour = hour % 12;
+      if (hour == 0) hour = 12;
+      return '$hour:$minute $period';
+    } catch (_) {
+      return timeStr;
+    }
   }
 
   void _showDeleteDialog(BuildContext context, bool tablet) {

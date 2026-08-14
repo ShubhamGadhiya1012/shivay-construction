@@ -118,6 +118,14 @@ class IndentPdfScreen {
                         color: textPrimaryColor,
                       ),
                     ),
+                    pw.SizedBox(height: 3),
+                    pw.Text(
+                      'Entry By: ${indent.entryByUserName.isNotEmpty ? indent.entryByUserName : "-"}', // NEW
+                      style: pw.TextStyle(
+                        fontSize: 10,
+                        color: textPrimaryColor,
+                      ),
+                    ),
                   ],
                 ),
               ),

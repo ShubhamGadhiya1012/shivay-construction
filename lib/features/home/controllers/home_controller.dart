@@ -25,6 +25,11 @@ class HomeController extends GetxController {
   var coCode = ''.obs;
   var companyName = ''.obs;
   var currentBannerIndex = 0.obs;
+
+  var isSearchVisible = false.obs;
+  var searchController = TextEditingController();
+  var searchQuery = ''.obs;
+
   List<String> get bannerImages {
     return coCode.value == '1'
         ? [kImageSCBanner1, kImageSCBanner2, kImageSCBanner3, kImageSCBanner4]
@@ -35,13 +40,30 @@ class HomeController extends GetxController {
     currentBannerIndex.value = index;
   }
 
+  void toggleSearch() {
+    isSearchVisible.value = !isSearchVisible.value;
+    if (!isSearchVisible.value) {
+      searchController.clear();
+      searchQuery.value = '';
+    }
+  }
+
   @override
   Future<void> onInit() async {
     super.onInit();
+    searchController.addListener(() {
+      searchQuery.value = searchController.text.toLowerCase();
+    });
 
     await loadCompany();
     await loadMenuFromAPI();
     await checkAppVersion();
+  }
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
   }
 
   Future<void> loadCompany() async {

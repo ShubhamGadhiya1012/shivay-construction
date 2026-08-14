@@ -118,23 +118,25 @@ class DlrReportController extends GetxController {
       builder: (BuildContext dialogContext) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(tablet ? 20 : 16),
+            borderRadius: BorderRadius.circular(tablet ? 14 : 12),
           ),
           backgroundColor: Colors.transparent,
           elevation: 0,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 32),
           child: Container(
-            width: tablet ? 450 : double.infinity,
+            width: tablet ? 380 : double.infinity,
             constraints: BoxConstraints(
-              maxWidth: tablet ? 450 : MediaQuery.of(context).size.width * 0.85,
+              maxWidth: tablet ? 380 : MediaQuery.of(context).size.width * 0.85,
             ),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(tablet ? 20 : 16),
+              borderRadius: BorderRadius.circular(tablet ? 14 : 12),
+              border: Border.all(color: Colors.grey.shade200, width: 1),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.blue.withOpacity(0.15),
+                  color: Colors.black.withOpacity(0.10),
                   blurRadius: 20,
-                  offset: const Offset(0, 10),
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
@@ -142,100 +144,66 @@ class DlrReportController extends GetxController {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Header
-                Container(
-                  padding: tablet
-                      ? const EdgeInsets.symmetric(horizontal: 24, vertical: 20)
-                      : const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 16,
-                        ),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.08),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(tablet ? 20 : 16),
-                      topRight: Radius.circular(tablet ? 20 : 16),
-                    ),
-                  ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 16, 12, 12),
                   child: Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(tablet ? 12 : 10),
-                        ),
-                        child: Icon(
-                          Icons.description_rounded,
-                          color: Colors.blue,
-                          size: tablet ? 26 : 22,
-                        ),
-                      ),
-                      SizedBox(width: tablet ? 12 : 10),
                       Expanded(
                         child: Text(
-                          'Select Report Format',
+                          'Export Report',
                           style: TextStyle(
-                            fontSize: tablet ? 22 : 18,
+                            fontSize: tablet ? 16.5 : 15.5,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                            color: const Color(0xFF1A1A1A),
+                          ),
+                        ),
+                      ),
+                      InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () => Navigator.of(dialogContext).pop(),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.close_rounded,
+                            color: Colors.grey[500],
+                            size: 18,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                // Body
-                Padding(
-                  padding: tablet
-                      ? const EdgeInsets.all(24)
-                      : const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Choose the format in which you want to generate the report:',
-                        style: TextStyle(
-                          fontSize: tablet ? 16 : 14,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                      SizedBox(height: tablet ? 24 : 20),
-                      Row(
-                        children: [
-                          // PDF Button
-                          Expanded(
-                            child: _buildFormatButton(
-                              context: context,
-                              icon: Icons.picture_as_pdf_rounded,
-                              label: 'PDF',
-                              color: Colors.red,
-                              tablet: tablet,
-                              onPressed: () {
-                                Navigator.of(dialogContext).pop();
-                                _generatePdfReport();
-                              },
-                            ),
-                          ),
-                          SizedBox(width: tablet ? 16 : 12),
-                          // Excel Button
-                          Expanded(
-                            child: _buildFormatButton(
-                              context: context,
-                              icon: Icons.table_chart_rounded,
-                              label: 'Excel',
-                              color: Colors.green,
-                              tablet: tablet,
-                              onPressed: () {
-                                Navigator.of(dialogContext).pop();
-                                _generateExcelReport();
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+
+                Divider(height: 1, color: Colors.grey.shade200),
+
+                // List options
+                _buildFormatButton(
+                  icon: Icons.picture_as_pdf_rounded,
+                  label: 'PDF',
+                  subtitle: 'Print-ready file',
+                  color: const Color(0xFFE53935),
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                    _generatePdfReport();
+                  },
                 ),
+                Divider(
+                  height: 1,
+                  color: Colors.grey.shade100,
+                  indent: 16,
+                  endIndent: 16,
+                ),
+                _buildFormatButton(
+                  icon: Icons.grid_on_rounded,
+                  label: 'Excel',
+                  subtitle: 'Editable sheet',
+                  color: const Color(0xFF2E7D32),
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                    _generateExcelReport();
+                  },
+                ),
+                const SizedBox(height: 6),
               ],
             ),
           ),
@@ -245,25 +213,60 @@ class DlrReportController extends GetxController {
   }
 
   Widget _buildFormatButton({
-    required BuildContext context,
     required IconData icon,
     required String label,
+    required String subtitle,
     required Color color,
-    required bool tablet,
     required VoidCallback onPressed,
   }) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: tablet ? 24 : 20),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.white,
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(tablet ? 12 : 10),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        hoverColor: color.withOpacity(0.05),
+        splashColor: color.withOpacity(0.10),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.10),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: color.withOpacity(0.25), width: 1),
+                ),
+                child: Icon(icon, color: color, size: 18),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1A1A1A),
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(fontSize: 11.5, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: Colors.grey[400],
+                size: 20,
+              ),
+            ],
+          ),
         ),
-        padding: EdgeInsets.symmetric(vertical: tablet ? 16 : 14),
       ),
     );
   }

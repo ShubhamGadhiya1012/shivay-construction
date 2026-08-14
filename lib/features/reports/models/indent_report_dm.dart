@@ -15,7 +15,8 @@ class IndentReportDm {
   final String indentStatus;
   final double totalIndentQty;
   final String reqDate;
-  final String remark; // New field
+  final String remark;
+  final String entryByUserName;
 
   IndentReportDm({
     required this.invno,
@@ -32,7 +33,8 @@ class IndentReportDm {
     required this.indentStatus,
     required this.totalIndentQty,
     required this.reqDate,
-    required this.remark, // New field
+    required this.remark,
+    required this.entryByUserName,
   });
 
   factory IndentReportDm.fromJson(Map<String, dynamic> json) {
@@ -48,10 +50,11 @@ class IndentReportDm {
       indentQty: (json['IndentQty'] ?? 0).toDouble(),
       orderQty: (json['OrderQty'] ?? 0).toDouble(),
       refPOInvNo: json['RefPOInvNo'] ?? '',
+      entryByUserName: json['EntryByUserName'] ?? '',
       indentStatus: json['IndentStatus'] ?? '',
       totalIndentQty: (json['TotalIndentQty'] ?? 0).toDouble(),
       reqDate: json['ReqDate'] ?? '',
-      remark: json['Remark'] ?? '', // New field
+      remark: json['Remark'] ?? '',
     );
   }
 

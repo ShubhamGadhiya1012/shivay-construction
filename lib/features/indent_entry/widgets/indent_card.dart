@@ -196,6 +196,37 @@ class _IndentCardState extends State<IndentCard> {
                       ),
                     if (!widget.indent.authorize && !widget.indent.closeIndent)
                       AppSpaces.h8,
+                    if (!widget.indent.authorize && !widget.indent.closeIndent)
+                      Material(
+                        color: kColorRed.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                        child: InkWell(
+                          onTap: () => _showDeleteIndentDialog(context),
+                          borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                          child: Container(
+                            padding: tablet
+                                ? AppPaddings.combined(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  )
+                                : AppPaddings.combined(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.delete_rounded,
+                                  size: tablet ? 18 : 16,
+                                  color: kColorRed,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (!widget.indent.authorize && !widget.indent.closeIndent)
+                      AppSpaces.h8,
                     AnimatedRotation(
                       turns: widget.isExpanded ? 0.5 : 0, // Changed here
                       duration: const Duration(milliseconds: 300),
@@ -362,8 +393,6 @@ class _IndentCardState extends State<IndentCard> {
                           );
                         }
 
-                        // Replace the existing item ListView.builder section (around line 280-350) with this:
-
                         return ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
@@ -476,7 +505,6 @@ class _IndentCardState extends State<IndentCard> {
                                       ),
                                     ],
                                   ),
-                                  // ADD THIS AFTER THE ABOVE ROW:
                                   if (detail.gdName.isNotEmpty) ...[
                                     AppSpaces.v8,
                                     _buildDetailRow(
@@ -951,6 +979,166 @@ class _IndentCardState extends State<IndentCard> {
                               onPressed: () {
                                 Navigator.of(dialogContext).pop();
                                 widget.controller.closeIndent(
+                                  invNo: widget.indent.invNo,
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteIndentDialog(BuildContext context) {
+    final bool tablet = AppScreenUtils.isTablet(context);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(tablet ? 20 : 16),
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            width: tablet ? 400 : double.infinity,
+            constraints: BoxConstraints(
+              maxWidth: tablet ? 400 : MediaQuery.of(context).size.width * 0.9,
+            ),
+            decoration: BoxDecoration(
+              color: kColorWhite,
+              borderRadius: BorderRadius.circular(tablet ? 20 : 16),
+              boxShadow: [
+                BoxShadow(
+                  color: kColorRed.withOpacity(0.15),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: tablet
+                      ? AppPaddings.combined(horizontal: 24, vertical: 20)
+                      : AppPaddings.combined(horizontal: 20, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: kColorRed.withOpacity(0.08),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(tablet ? 20 : 16),
+                      topRight: Radius.circular(tablet ? 20 : 16),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: AppPaddings.p10,
+                        decoration: BoxDecoration(
+                          color: kColorRed.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(tablet ? 12 : 10),
+                        ),
+                        child: Icon(
+                          Icons.delete_rounded,
+                          color: kColorRed,
+                          size: tablet ? 26 : 22,
+                        ),
+                      ),
+                      tablet ? AppSpaces.h12 : AppSpaces.h10,
+                      Expanded(
+                        child: Text(
+                          'Delete Indent',
+                          style: TextStyles.kSemiBoldOutfit(
+                            fontSize: tablet
+                                ? FontSizes.k22FontSize
+                                : FontSizes.k18FontSize,
+                            color: kColorTextPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: tablet ? AppPaddings.p24 : AppPaddings.p20,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Are you sure you want to delete indent "${widget.indent.invNo}"?',
+                        style: TextStyles.kRegularOutfit(
+                          fontSize: tablet
+                              ? FontSizes.k16FontSize
+                              : FontSizes.k14FontSize,
+                          color: kColorTextPrimary,
+                        ),
+                      ),
+                      tablet ? AppSpaces.v8 : AppSpaces.v6,
+                      Text(
+                        'This action cannot be undone.',
+                        style: TextStyles.kRegularOutfit(
+                          fontSize: tablet
+                              ? FontSizes.k14FontSize
+                              : FontSizes.k12FontSize,
+                          color: kColorDarkGrey,
+                        ),
+                      ),
+                      tablet ? AppSpaces.v24 : AppSpaces.v20,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(
+                                  color: kColorLightGrey,
+                                  width: 1.5,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    tablet ? 12 : 10,
+                                  ),
+                                ),
+                                padding: AppPaddings.combined(
+                                  vertical: tablet ? 16 : 14,
+                                  horizontal: 0,
+                                ),
+                              ),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyles.kMediumOutfit(
+                                  color: kColorDarkGrey,
+                                  fontSize: tablet
+                                      ? FontSizes.k16FontSize
+                                      : FontSizes.k14FontSize,
+                                ),
+                              ),
+                            ),
+                          ),
+                          tablet ? AppSpaces.h16 : AppSpaces.h12,
+                          Expanded(
+                            child: AppButton(
+                              title: 'Delete',
+                              buttonColor: kColorRed,
+                              titleColor: kColorWhite,
+                              titleSize: tablet
+                                  ? FontSizes.k16FontSize
+                                  : FontSizes.k14FontSize,
+                              buttonHeight: tablet ? 54 : 48,
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop();
+                                widget.controller.deleteIndent(
                                   invNo: widget.indent.invNo,
                                 );
                               },

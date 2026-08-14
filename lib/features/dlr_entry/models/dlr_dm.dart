@@ -65,6 +65,8 @@ class DlrDm {
   final String siteCode;
   final String siteName;
   final List<DlrDataDm> dlrData;
+  final String inTime;
+  final String outTime;
 
   DlrDm({
     required this.invno,
@@ -73,12 +75,16 @@ class DlrDm {
     required this.siteCode,
     required this.siteName,
     required this.dlrData,
+    required this.inTime,
+    required this.outTime,
   });
 
   factory DlrDm.fromJson(Map<String, dynamic> json) {
     return DlrDm(
       invno: json['invno'] ?? '',
       date: json['date'] ?? '',
+      inTime: json['inTime'] ?? '',
+      outTime: json['outTime'] ?? '',
       shift: json['shift'] ?? '',
       siteCode: json['siteCode'] ?? '',
       siteName: json['siteName'] ?? '',
@@ -95,6 +101,8 @@ class DlrDm {
       'invno': invno,
       'date': date,
       'shift': shift,
+      'inTime': inTime,
+      'outTime': outTime,
       'siteCode': siteCode,
       'siteName': siteName,
       'dlrData': dlrData.map((d) => d.toJson()).toList(),
