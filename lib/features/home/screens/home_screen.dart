@@ -302,26 +302,42 @@ class HomeScreen extends StatelessWidget {
     final String menuName = section['menuName'] as String;
     final List items = section['items'] as List;
 
+    List<Map<String, dynamic>> accessible;
+
     if (menuName == 'item help') {
-      if (!controller.hasAccessToMenu('Item Help')) return [];
-      return items.cast<Map<String, dynamic>>();
+      accessible = controller.hasAccessToMenu('Item Help')
+          ? items.cast<Map<String, dynamic>>()
+          : <Map<String, dynamic>>[];
+    } else if (!controller.hasAccessToMenu(menuName)) {
+      accessible = <Map<String, dynamic>>[];
+    } else {
+      accessible = items
+          .where((item) {
+            final String key = (item['submenu'] as String).toLowerCase();
+            return controller.menuAccess.any(
+              (menu) =>
+                  menu.menuName.toLowerCase() == menuName &&
+                  menu.subMenu.any(
+                    (sub) =>
+                        sub.subMenuName.toLowerCase() == key &&
+                        sub.subMenuAccess,
+                  ),
+            );
+          })
+          .cast<Map<String, dynamic>>()
+          .toList();
     }
 
-    if (!controller.hasAccessToMenu(menuName)) return [];
+    final String query = controller.searchQuery.value;
+    if (query.isEmpty) return accessible;
 
-    return items
-        .where((item) {
-          final String key = (item['submenu'] as String).toLowerCase();
-          return controller.menuAccess.any(
-            (menu) =>
-                menu.menuName.toLowerCase() == menuName &&
-                menu.subMenu.any(
-                  (sub) =>
-                      sub.subMenuName.toLowerCase() == key && sub.subMenuAccess,
-                ),
-          );
-        })
-        .cast<Map<String, dynamic>>()
+    return accessible
+        .where(
+          (item) => (item['label'] as String)
+              .toLowerCase()
+              .replaceAll('\n', ' ')
+              .contains(query),
+        )
         .toList();
   }
 
@@ -357,45 +373,84 @@ class HomeScreen extends StatelessWidget {
                       width: 1,
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Builder(
-                        builder: (ctx) => IconButton(
+                  child: Obx(() {
+                    final bool isSearching = _controller.isSearchVisible.value;
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Builder(
+                          builder: (ctx) => IconButton(
+                            icon: Icon(
+                              Icons.menu_rounded,
+                              color: kColorPrimary,
+                              size: tablet ? 32 : 26,
+                            ),
+                            onPressed: () => Scaffold.of(ctx).openDrawer(),
+                          ),
+                        ),
+                        Expanded(
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 250),
+                            transitionBuilder: (child, animation) =>
+                                FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                ),
+                            child: isSearching
+                                ? TextField(
+                                    key: const ValueKey('search'),
+                                    controller: _controller.searchController,
+                                    autofocus: true,
+                                    textAlign: TextAlign.left,
+                                    decoration: InputDecoration(
+                                      hintText: 'Search menu...',
+                                      border: InputBorder.none,
+                                      isDense: true,
+                                    ),
+                                    style: TextStyles.kRegularOutfit(
+                                      fontSize: tablet
+                                          ? FontSizes.k18FontSize
+                                          : FontSizes.k14FontSize,
+                                      color: kColorTextPrimary,
+                                    ),
+                                  )
+                                : Text(
+                                    key: const ValueKey('brand'),
+                                    _controller.company.value.isNotEmpty
+                                        ? _controller.company.value
+                                        : 'Shivay Construction',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyles.kSemiBoldOutfit(
+                                      fontSize: tablet
+                                          ? FontSizes.k26FontSize
+                                          : FontSizes.k20FontSize,
+                                      color: kColorPrimary,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        IconButton(
                           icon: Icon(
-                            Icons.menu_rounded,
+                            Icons.person_rounded,
                             color: kColorPrimary,
                             size: tablet ? 32 : 26,
                           ),
-                          onPressed: () => Scaffold.of(ctx).openDrawer(),
+                          onPressed: () => Get.to(() => ProfileScreen()),
                         ),
-                      ),
-                      Expanded(
-                        child: Obx(
-                          () => Text(
-                            _controller.company.value.isNotEmpty
-                                ? _controller.company.value
-                                : 'Shivay Construction',
-                            textAlign: TextAlign.center,
-                            style: TextStyles.kSemiBoldOutfit(
-                              fontSize: tablet
-                                  ? FontSizes.k26FontSize
-                                  : FontSizes.k20FontSize,
-                              color: kColorPrimary,
-                            ),
+
+                        IconButton(
+                          icon: Icon(
+                            isSearching
+                                ? Icons.close_rounded
+                                : Icons.search_rounded,
+                            color: kColorPrimary,
+                            size: tablet ? 30 : 24,
                           ),
+                          onPressed: _controller.toggleSearch,
                         ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.person_rounded,
-                          color: kColorPrimary,
-                          size: tablet ? 32 : 26,
-                        ),
-                        onPressed: () => Get.to(() => ProfileScreen()),
-                      ),
-                    ],
-                  ),
+                      ],
+                    );
+                  }),
                 ),
                 tablet ? AppSpaces.v20 : AppSpaces.v10,
 
@@ -539,8 +594,8 @@ class HomeScreen extends StatelessWidget {
     required List<Map<String, dynamic>> items,
     required bool tablet,
   }) {
-    final int crossAxisCount = tablet ? 4 : 3;
     final double spacing = tablet ? 12.0 : 8.0;
+    final double maxTileWidth = tablet ? 110.0 : 85.0;
 
     return Padding(
       padding: AppPaddings.combined(horizontal: tablet ? 16 : 12, vertical: 0),
@@ -550,39 +605,54 @@ class HomeScreen extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(tablet ? 8 : 6),
-                decoration: BoxDecoration(
-                  color: kColorPrimary.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(tablet ? 10 : 8),
+                padding: AppPaddings.combined(
+                  horizontal: tablet ? 14 : 10,
+                  vertical: tablet ? 8 : 5,
                 ),
-                child: Icon(
-                  section['icon'] as IconData,
-                  color: kColorPrimary,
-                  size: tablet ? 22 : 18,
+                decoration: BoxDecoration(
+                  color: kColorPrimary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(tablet ? 12 : 9),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      section['icon'] as IconData,
+                      color: kColorPrimary,
+                      size: tablet ? 20 : 16,
+                    ),
+                    SizedBox(width: tablet ? 8 : 6),
+                    Text(
+                      section['title'] as String,
+                      style: TextStyles.kSemiBoldOutfit(
+                        fontSize: tablet
+                            ? FontSizes.k18FontSize
+                            : FontSizes.k14FontSize,
+                        color: kColorPrimary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               SizedBox(width: tablet ? 10 : 8),
-              Text(
-                section['title'] as String,
-                style: TextStyles.kSemiBoldOutfit(
-                  fontSize: tablet
-                      ? FontSizes.k22FontSize
-                      : FontSizes.k18FontSize,
-                  color: kColorPrimary,
+              Expanded(
+                child: Container(
+                  height: 1,
+                  color: kColorPrimary.withOpacity(0.12),
                 ),
               ),
             ],
           ),
-          SizedBox(height: tablet ? 14 : 10),
+          SizedBox(height: tablet ? 18 : 14),
 
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: maxTileWidth,
               crossAxisSpacing: spacing,
               mainAxisSpacing: spacing,
-              childAspectRatio: tablet ? 1.05 : 1.0,
+              childAspectRatio: tablet ? 0.85 : 0.9,
             ),
             itemCount: items.length,
             itemBuilder: (context, index) {
@@ -596,8 +666,6 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           SizedBox(height: tablet ? 24 : 16),
-          Divider(color: kColorPrimary.withOpacity(0.1), thickness: 1),
-          SizedBox(height: tablet ? 20 : 14),
         ],
       ),
     );
@@ -612,48 +680,34 @@ class HomeScreen extends StatelessWidget {
     return InkWell(
       onTap: () => _navigateToSubmenu(submenu),
       borderRadius: BorderRadius.circular(tablet ? 14 : 10),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              kColorPrimary.withOpacity(0.09),
-              kColorPrimary.withOpacity(0.04),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            padding: tablet ? AppPaddings.p12 : AppPaddings.p10,
+            decoration: BoxDecoration(
+              color: kColorPrimary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(tablet ? 14 : 10),
+            ),
+            child: Icon(icon, color: kColorPrimary, size: tablet ? 30 : 24),
           ),
-          borderRadius: BorderRadius.circular(tablet ? 14 : 10),
-          border: Border.all(color: kColorPrimary.withOpacity(0.18), width: 1),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: EdgeInsets.all(tablet ? 10 : 8),
-              decoration: BoxDecoration(
-                color: kColorPrimary.withOpacity(0.13),
-                borderRadius: BorderRadius.circular(tablet ? 10 : 8),
-              ),
-              child: Icon(icon, color: kColorPrimary, size: tablet ? 26 : 22),
+          SizedBox(height: tablet ? 10 : 8),
+          SizedBox(
+            width: double.infinity,
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyles.kMediumOutfit(
+                fontSize: tablet
+                    ? FontSizes.k12FontSize
+                    : FontSizes.k10FontSize,
+                color: kColorTextPrimary,
+              ).copyWith(height: 1.2),
             ),
-            SizedBox(height: tablet ? 8 : 6),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: tablet ? 6 : 4),
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyles.kMediumOutfit(
-                  fontSize: tablet
-                      ? FontSizes.k12FontSize
-                      : FontSizes.k10FontSize,
-                  color: kColorTextPrimary,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -1,5 +1,7 @@
 import 'dart:io';
-import 'package:excel/excel.dart';
+import 'dart:typed_data';
+import 'package:syncfusion_flutter_xlsio/xlsio.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
@@ -8,6 +10,258 @@ import 'package:shivay_construction/utils/dialogs/app_dialogs.dart';
 import 'package:shivay_construction/utils/screen_utils/app_screen_utils.dart';
 import 'package:universal_html/html.dart' as html;
 
+import 'package:shivay_construction/constants/image_constants.dart';
+
+class _ActivityTotals {
+  double daySkill = 0;
+  double dayUnSkill = 0;
+  double nightSkill = 0;
+  double nightUnSkill = 0;
+
+  double get dayTotal => daySkill + dayUnSkill;
+  double get nightTotal => nightSkill + nightUnSkill;
+  double get grandTotal => dayTotal + nightTotal;
+}
+
+class _SiteWiseStyles {
+  final Style title;
+  final Style dlr;
+  final Style labelBox;
+  final Style brandLabel;
+  final Style dayNightHeader;
+  final Style dayNightValue;
+  final Style header;
+  final Style activityHeader;
+  final Style data;
+  final Style dataCenter;
+  final Style subTotal;
+  final Style grandTotal;
+  final Style summaryHeader;
+  final Style summaryDataLabel;
+  final Style summaryFooter;
+
+  _SiteWiseStyles._({
+    required this.title,
+    required this.dlr,
+    required this.labelBox,
+    required this.brandLabel,
+    required this.dayNightHeader,
+    required this.dayNightValue,
+    required this.header,
+    required this.activityHeader,
+    required this.data,
+    required this.dataCenter,
+    required this.subTotal,
+    required this.grandTotal,
+    required this.summaryHeader,
+    required this.summaryDataLabel,
+    required this.summaryFooter,
+  });
+
+  factory _SiteWiseStyles(Workbook workbook) {
+    final title = workbook.styles.add('dlrTitleStyle')
+      ..bold = true
+      ..fontSize = 22
+      ..hAlign = HAlignType.left
+      ..vAlign = VAlignType.center;
+
+    final dlr = workbook.styles.add('dlrHeaderStyle')
+      ..bold = true
+      ..fontSize = 16
+      ..hAlign = HAlignType.center
+      ..vAlign = VAlignType.center;
+
+    final labelBox = workbook.styles.add('dlrLabelBoxStyle')
+      ..bold = true
+      ..fontSize = 10
+      ..hAlign = HAlignType.left
+      ..vAlign = VAlignType.center;
+    labelBox.borders.left.lineStyle = LineStyle.thin;
+    labelBox.borders.right.lineStyle = LineStyle.thin;
+    labelBox.borders.top.lineStyle = LineStyle.thin;
+    labelBox.borders.bottom.lineStyle = LineStyle.thin;
+
+    final brandLabel = workbook.styles.add('dlrBrandLabelStyle')
+      ..bold = true
+      ..fontSize = 14
+      ..fontColor = '#1565C0'
+      ..hAlign = HAlignType.center
+      ..vAlign = VAlignType.center
+      ..wrapText = true;
+
+    final dayNightHeader = workbook.styles.add('dlrDayNightHeaderStyle')
+      ..bold = true
+      ..fontSize = 11
+      ..fontColor = '#FFFFFF'
+      ..hAlign = HAlignType.center
+      ..vAlign = VAlignType.center
+      ..backColor = '#4472C4';
+
+    final dayNightValue = workbook.styles.add('dlrDayNightValueStyle')
+      ..bold = true
+      ..fontSize = 14
+      ..hAlign = HAlignType.center
+      ..vAlign = VAlignType.center
+      ..backColor = '#DCE6F1';
+
+    final header = workbook.styles.add('dlrHeaderCellStyle')
+      ..bold = true
+      ..fontSize = 10
+      ..fontColor = '#FFFFFF'
+      ..hAlign = HAlignType.center
+      ..vAlign = VAlignType.center
+      ..backColor = '#4472C4'
+      ..wrapText = true;
+
+    final activityHeader = workbook.styles.add('dlrActivityHeaderStyle')
+      ..bold = true
+      ..fontSize = 9
+      ..hAlign = HAlignType.center
+      ..vAlign = VAlignType.center
+      ..backColor = '#B4C6E7';
+
+    final data = workbook.styles.add('dlrDataStyle')
+      ..fontSize = 9
+      ..hAlign = HAlignType.left
+      ..vAlign = VAlignType.center;
+
+    final dataCenter = workbook.styles.add('dlrDataCenterStyle')
+      ..fontSize = 9
+      ..hAlign = HAlignType.center
+      ..vAlign = VAlignType.center;
+
+    final subTotal = workbook.styles.add('dlrSubTotalStyle')
+      ..bold = true
+      ..fontSize = 9
+      ..hAlign = HAlignType.center
+      ..vAlign = VAlignType.center
+      ..backColor = '#E2EFDA';
+
+    final grandTotal = workbook.styles.add('dlrGrandTotalStyle')
+      ..bold = true
+      ..fontSize = 10
+      ..fontColor = '#FFFFFF'
+      ..hAlign = HAlignType.center
+      ..vAlign = VAlignType.center
+      ..backColor = '#4472C4';
+
+    final summaryHeader = workbook.styles.add('dlrSummaryHeaderStyle')
+      ..bold = true
+      ..fontSize = 10
+      ..fontColor = '#FFFFFF'
+      ..hAlign = HAlignType.center
+      ..vAlign = VAlignType.center
+      ..backColor = '#4472C4';
+
+    final summaryDataLabel = workbook.styles.add('dlrSummaryDataLabelStyle')
+      ..fontSize = 9
+      ..hAlign = HAlignType.left
+      ..vAlign = VAlignType.center;
+
+    final summaryFooter = workbook.styles.add('dlrSummaryFooterStyle')
+      ..bold = true
+      ..fontSize = 10
+      ..hAlign = HAlignType.center
+      ..vAlign = VAlignType.center
+      ..backColor = '#B4C6E7';
+
+    return _SiteWiseStyles._(
+      title: title,
+      dlr: dlr,
+      labelBox: labelBox,
+      brandLabel: brandLabel,
+      dayNightHeader: dayNightHeader,
+      dayNightValue: dayNightValue,
+      header: header,
+      activityHeader: activityHeader,
+      data: data,
+      dataCenter: dataCenter,
+      subTotal: subTotal,
+      grandTotal: grandTotal,
+      summaryHeader: summaryHeader,
+      summaryDataLabel: summaryDataLabel,
+      summaryFooter: summaryFooter,
+    );
+  }
+}
+
+class _SummaryStyles {
+  final Style companyTitle;
+  final Style subtitle;
+  final Style month;
+  final Style dayReport;
+  final Style header;
+  final Style data;
+  final Style dataCenter;
+  final Style totalFooter;
+
+  _SummaryStyles._({
+    required this.companyTitle,
+    required this.subtitle,
+    required this.month,
+    required this.dayReport,
+    required this.header,
+    required this.data,
+    required this.dataCenter,
+    required this.totalFooter,
+  });
+
+  factory _SummaryStyles(Workbook workbook) {
+    final companyTitle = workbook.styles.add('sumCompanyTitleStyle')
+      ..bold = true
+      ..fontSize = 14
+      ..hAlign = HAlignType.left;
+
+    final subtitle = workbook.styles.add('sumSubtitleStyle')
+      ..fontSize = 10
+      ..hAlign = HAlignType.left;
+
+    final month = workbook.styles.add('sumMonthStyle')
+      ..bold = true
+      ..fontSize = 10
+      ..hAlign = HAlignType.left;
+
+    final dayReport = workbook.styles.add('sumDayReportStyle')
+      ..bold = true
+      ..fontSize = 10
+      ..hAlign = HAlignType.center;
+
+    final header = workbook.styles.add('sumHeaderStyle')
+      ..bold = true
+      ..fontSize = 9
+      ..fontColor = '#FFFFFF'
+      ..hAlign = HAlignType.center
+      ..vAlign = VAlignType.center
+      ..backColor = '#4472C4'
+      ..wrapText = true;
+
+    final data = workbook.styles.add('sumDataStyle')
+      ..fontSize = 9
+      ..hAlign = HAlignType.left;
+
+    final dataCenter = workbook.styles.add('sumDataCenterStyle')
+      ..fontSize = 9
+      ..hAlign = HAlignType.center;
+
+    final totalFooter = workbook.styles.add('sumTotalFooterStyle')
+      ..bold = true
+      ..fontSize = 10
+      ..hAlign = HAlignType.center
+      ..backColor = '#B4C6E7';
+
+    return _SummaryStyles._(
+      companyTitle: companyTitle,
+      subtitle: subtitle,
+      month: month,
+      dayReport: dayReport,
+      header: header,
+      data: data,
+      dataCenter: dataCenter,
+      totalFooter: totalFooter,
+    );
+  }
+}
+
 class DlrReportExcelFile {
   static Future<void> generateSiteWiseReport({
     required List<DlrReportDm> reportList,
@@ -15,43 +269,69 @@ class DlrReportExcelFile {
     required String toDate,
   }) async {
     try {
-      final excel = Excel.createExcel();
-
-      final defaultSheet = excel.getDefaultSheet();
+      final Workbook workbook = Workbook();
+      final styles = _SiteWiseStyles(workbook);
 
       final Map<String, List<DlrReportDm>> groupedBySite = {};
       for (var item in reportList) {
         groupedBySite.putIfAbsent(item.siteCode, () => []).add(item);
       }
 
+      final Map<int, Uint8List?> logoCache = {};
+
       bool firstSheet = true;
-      groupedBySite.forEach((siteCode, siteItems) {
+      for (final entry in groupedBySite.entries) {
+        final siteItems = entry.value;
         final siteName = siteItems.first.siteName;
         final companyName = siteItems.first.coName;
+        final coCode = siteItems.first.coCode;
         final sheetName = siteName.length > 31
             ? siteName.substring(0, 31)
             : siteName;
 
-        Sheet sheet = excel[sheetName];
-
-        if (firstSheet && defaultSheet != null && defaultSheet != sheetName) {
-          excel.delete(defaultSheet);
+        Worksheet sheet;
+        if (firstSheet) {
+          sheet = workbook.worksheets[0];
+          sheet.name = sheetName;
           firstSheet = false;
         } else {
-          firstSheet = false;
+          sheet = workbook.worksheets.addWithName(sheetName);
         }
 
-        _writeSiteWiseSheet(
-          sheet: sheet,
-          siteItems: siteItems,
-          companyName: companyName,
-          siteName: siteName,
-          fromDate: fromDate,
-          toDate: toDate,
-        );
-      });
+        if (!logoCache.containsKey(coCode)) {
+          logoCache[coCode] = await _loadLogoBytes(coCode);
+        }
+        final resolvedLogoBytes = logoCache[coCode];
 
-      final bytes = excel.encode()!;
+        final Map<String, List<DlrReportDm>> groupedByDate = {};
+        for (var item in siteItems) {
+          groupedByDate.putIfAbsent(item.date, () => []).add(item);
+        }
+        final sortedDates = groupedByDate.keys.toList()
+          ..sort((a, b) => _parseDate(b).compareTo(_parseDate(a)));
+
+        int startRow = 0;
+        for (final currentDate in sortedDates) {
+          final dateItems = groupedByDate[currentDate]!;
+
+          startRow = _writeSiteWiseSheet(
+            sheet: sheet,
+            styles: styles,
+            siteItems: dateItems,
+            companyName: companyName,
+            siteName: siteName,
+            fromDate: currentDate,
+            toDate: currentDate,
+            logoBytes: resolvedLogoBytes,
+            startRow: startRow,
+          );
+
+          startRow += 2;
+        }
+      }
+
+      final List<int> bytes = workbook.saveAsStream();
+      workbook.dispose();
       await _saveAndOpenExcel(bytes, 'DLR_SiteWise_Report');
 
       if (!AppScreenUtils.isWeb) {
@@ -62,290 +342,417 @@ class DlrReportExcelFile {
     }
   }
 
-  static void _writeSiteWiseSheet({
-    required Sheet sheet,
+  static DateTime _parseDate(String dateStr) {
+    try {
+      return DateFormat('dd-MM-yyyy').parseStrict(dateStr);
+    } catch (_) {
+      try {
+        return DateTime.parse(dateStr);
+      } catch (_) {
+        return DateTime(1900);
+      }
+    }
+  }
+
+  static int _writeSiteWiseSheet({
+    required Worksheet sheet,
+    required _SiteWiseStyles styles,
     required List<DlrReportDm> siteItems,
     required String companyName,
     required String siteName,
     required String fromDate,
     required String toDate,
+    Uint8List? logoBytes,
+    required int startRow,
   }) {
-    int rowIndex = 0;
-    final reportDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
+    int rowIndex = startRow;
 
-    final titleStyle = CellStyle(
-      bold: true,
-      fontSize: 18,
-      horizontalAlign: HorizontalAlign.Center,
-      verticalAlign: VerticalAlign.Center,
-    );
+    const int totalCols = 11;
 
-    final subtitleStyle = CellStyle(
-      bold: true,
-      fontSize: 13,
-      horizontalAlign: HorizontalAlign.Center,
-      verticalAlign: VerticalAlign.Center,
-    );
+    Range rangeAt(int col, int row) => sheet.getRangeByIndex(row + 1, col + 1);
 
-    final dateRightStyle = CellStyle(
-      fontSize: 9,
-      horizontalAlign: HorizontalAlign.Right,
-    );
+    Range rangeBlock(int c1, int r1, int c2, int r2) =>
+        sheet.getRangeByIndex(r1 + 1, c1 + 1, r2 + 1, c2 + 1);
 
-    final headerStyle = CellStyle(
-      bold: true,
-      fontSize: 10,
-      fontColorHex: ExcelColor.fromHexString('#FFFFFF'),
-      horizontalAlign: HorizontalAlign.Center,
-      verticalAlign: VerticalAlign.Center,
-      backgroundColorHex: ExcelColor.fromHexString('#4472C4'),
-    );
-
-    final activityHeaderStyle = CellStyle(
-      bold: true,
-      fontSize: 9,
-      horizontalAlign: HorizontalAlign.Center,
-      verticalAlign: VerticalAlign.Center,
-      backgroundColorHex: ExcelColor.fromHexString('#B4C6E7'),
-    );
-
-    final dataStyle = CellStyle(
-      fontSize: 9,
-      horizontalAlign: HorizontalAlign.Left,
-      verticalAlign: VerticalAlign.Center,
-    );
-
-    final dataCenterStyle = CellStyle(
-      fontSize: 9,
-      horizontalAlign: HorizontalAlign.Center,
-      verticalAlign: VerticalAlign.Center,
-    );
-
-    final subTotalStyle = CellStyle(
-      bold: true,
-      fontSize: 9,
-      horizontalAlign: HorizontalAlign.Center,
-      verticalAlign: VerticalAlign.Center,
-      backgroundColorHex: ExcelColor.fromHexString('#E2EFDA'),
-    );
-
-    final grandTotalStyle = CellStyle(
-      bold: true,
-      fontSize: 10,
-      fontColorHex: ExcelColor.fromHexString('#FFFFFF'),
-      horizontalAlign: HorizontalAlign.Center,
-      verticalAlign: VerticalAlign.Center,
-      backgroundColorHex: ExcelColor.fromHexString('#4472C4'),
-    );
-
-    const int totalCols = 6;
-
-    sheet.merge(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-      CellIndex.indexByColumnRow(
-        columnIndex: totalCols - 1,
-        rowIndex: rowIndex,
-      ),
-    );
-    var cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-    );
-    cell.value = TextCellValue(companyName.toUpperCase());
-    cell.cellStyle = titleStyle;
-    rowIndex++;
-
-    sheet.merge(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-      CellIndex.indexByColumnRow(
-        columnIndex: totalCols - 1,
-        rowIndex: rowIndex,
-      ),
-    );
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-    );
-    cell.value = TextCellValue(siteName.toUpperCase());
-    cell.cellStyle = subtitleStyle;
-    rowIndex++;
-
-    sheet.merge(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-      CellIndex.indexByColumnRow(
-        columnIndex: totalCols - 2,
-        rowIndex: rowIndex,
-      ),
-    );
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-    );
-    cell.value = TextCellValue('');
-
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(
-        columnIndex: totalCols - 1,
-        rowIndex: rowIndex,
-      ),
-    );
-    cell.value = TextCellValue('DLR_$reportDate');
-    cell.cellStyle = dateRightStyle;
-    rowIndex++;
-
-    rowIndex++;
-
-    final headers = [
-      'Sr. No',
-      'Name of Agency',
-      'Skill',
-      'Unskilled',
-      'Work Description',
-      'Remark',
-    ];
-    for (int i = 0; i < headers.length; i++) {
-      cell = sheet.cell(
-        CellIndex.indexByColumnRow(columnIndex: i, rowIndex: rowIndex),
-      );
-      cell.value = TextCellValue(headers[i]);
-      cell.cellStyle = headerStyle;
+    void setText(int col, int row, String text, Style style) {
+      final r = rangeAt(col, row);
+      r.setText(text);
+      r.cellStyle = style;
     }
-    rowIndex++;
+
+    void setNumber(int col, int row, double value, Style style) {
+      final r = rangeAt(col, row);
+      r.setNumber(value);
+      r.cellStyle = style;
+    }
+
+    void merge(int c1, int r1, int c2, int r2) {
+      rangeBlock(c1, r1, c2, r2).merge();
+    }
+
+    void mergeSetText(
+      int c1,
+      int r1,
+      int c2,
+      int r2,
+      String text,
+      Style style,
+    ) {
+      final block = rangeBlock(c1, r1, c2, r2);
+      block.merge();
+      rangeAt(c1, r1).setText(text);
+      block.cellStyle = style;
+    }
+
+    void mergeSetNumber(
+      int c1,
+      int r1,
+      int c2,
+      int r2,
+      double value,
+      Style style,
+    ) {
+      final block = rangeBlock(c1, r1, c2, r2);
+      block.merge();
+      rangeAt(c1, r1).setNumber(value);
+      block.cellStyle = style;
+    }
+
+    void applyStyleOnly(int col, int row, Style style) {
+      rangeAt(col, row).cellStyle = style;
+    }
 
     final Map<String, List<DlrReportDm>> groupedByActivity = {};
     for (var item in siteItems) {
       groupedByActivity.putIfAbsent(item.activity, () => []).add(item);
     }
 
-    double grandSkill = 0, grandUnSkill = 0, grandTotal = 0;
+    final Map<String, _ActivityTotals> activityTotals = {};
+    double grandDaySkill = 0, grandDayUnSkill = 0;
+    double grandNightSkill = 0, grandNightUnSkill = 0;
 
     groupedByActivity.forEach((activity, items) {
-      double actSkill = 0, actUnSkill = 0, actTotal = 0;
+      final t = _ActivityTotals();
+      for (var item in items) {
+        if (item.isNight) {
+          t.nightSkill += item.skill;
+          t.nightUnSkill += item.unSkill;
+        } else {
+          t.daySkill += item.skill;
+          t.dayUnSkill += item.unSkill;
+        }
+      }
+      activityTotals[activity] = t;
+      grandDaySkill += t.daySkill;
+      grandDayUnSkill += t.dayUnSkill;
+      grandNightSkill += t.nightSkill;
+      grandNightUnSkill += t.nightUnSkill;
+    });
 
-      sheet.merge(
-        CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-        CellIndex.indexByColumnRow(
-          columnIndex: totalCols - 1,
-          rowIndex: rowIndex,
-        ),
+    final double grandDayTotal = grandDaySkill + grandDayUnSkill;
+    final double grandNightTotal = grandNightSkill + grandNightUnSkill;
+
+    if (startRow == 0) {
+      mergeSetText(
+        0,
+        rowIndex,
+        7,
+        rowIndex,
+        companyName.toUpperCase(),
+        styles.title,
       );
-      cell = sheet.cell(
-        CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
+
+      merge(8, rowIndex, 10, rowIndex);
+      rangeAt(0, rowIndex).rowHeight = 44;
+
+      if (logoBytes != null) {
+        final picture = sheet.pictures.addStream(rowIndex + 1, 9, logoBytes);
+        picture.height = 58;
+        picture.width = 190;
+      } else {
+        setText(
+          8,
+          rowIndex,
+          _brandLabelForCompany(companyName),
+          styles.brandLabel,
+        );
+      }
+      rowIndex++;
+    }
+
+    mergeSetText(0, rowIndex, totalCols - 1, rowIndex, 'DLR', styles.dlr);
+    rowIndex++;
+
+    mergeSetText(
+      0,
+      rowIndex,
+      4,
+      rowIndex,
+      'Name Of Project : $siteName',
+      styles.labelBox,
+    );
+    mergeSetText(6, rowIndex, 7, rowIndex, 'Day', styles.dayNightHeader);
+    mergeSetText(8, rowIndex, 9, rowIndex, 'Night', styles.dayNightHeader);
+    rowIndex++;
+
+    mergeSetText(
+      0,
+      rowIndex,
+      4,
+      rowIndex,
+      'Name of Contractor : $companyName',
+      styles.labelBox,
+    );
+    mergeSetNumber(
+      6,
+      rowIndex,
+      7,
+      rowIndex,
+      grandDayTotal,
+      styles.dayNightValue,
+    );
+    mergeSetNumber(
+      8,
+      rowIndex,
+      9,
+      rowIndex,
+      grandNightTotal,
+      styles.dayNightValue,
+    );
+    rowIndex++;
+
+    mergeSetText(
+      0,
+      rowIndex,
+      4,
+      rowIndex,
+      fromDate == toDate ? 'Date : $fromDate' : 'Date : $fromDate  to  $toDate',
+      styles.labelBox,
+    );
+    rowIndex++;
+
+    rowIndex++;
+
+    final headerTopRow = rowIndex;
+    final headerSubRow = rowIndex + 1;
+
+    mergeSetText(0, headerTopRow, 0, headerSubRow, 'Sr.\nNo', styles.header);
+    mergeSetText(
+      1,
+      headerTopRow,
+      1,
+      headerSubRow,
+      'Name Of Agency',
+      styles.header,
+    );
+    mergeSetText(
+      2,
+      headerTopRow,
+      2,
+      headerSubRow,
+      'Work Description',
+      styles.header,
+    );
+    mergeSetText(3, headerTopRow, 4, headerTopRow, 'DAY Work', styles.header);
+    mergeSetText(5, headerTopRow, 6, headerTopRow, 'Night Work', styles.header);
+    mergeSetText(7, headerTopRow, 8, headerTopRow, 'Time Night', styles.header);
+    mergeSetText(
+      9,
+      headerTopRow,
+      9,
+      headerSubRow,
+      'Total\n(A+B)',
+      styles.header,
+    );
+    mergeSetText(10, headerTopRow, 10, headerSubRow, 'Remark', styles.header);
+
+    final subHeaders = {
+      3: 'Skill',
+      4: 'Unskilled',
+      5: 'Skill',
+      6: 'Unskilled',
+      7: 'In',
+      8: 'Out',
+    };
+    subHeaders.forEach((col, label) {
+      setText(col, headerSubRow, label, styles.header);
+    });
+
+    rowIndex = headerSubRow + 1;
+
+    groupedByActivity.forEach((activity, items) {
+      mergeSetText(
+        0,
+        rowIndex,
+        totalCols - 1,
+        rowIndex,
+        activity,
+        styles.activityHeader,
       );
-      cell.value = TextCellValue(activity);
-      cell.cellStyle = activityHeaderStyle;
       rowIndex++;
 
-      for (var entry in items) {
-        cell = sheet.cell(
-          CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
+      for (var item in items) {
+        setNumber(0, rowIndex, item.srNo.toDouble(), styles.dataCenter);
+        setText(1, rowIndex, item.agencyName, styles.data);
+        setText(
+          2,
+          rowIndex,
+          item.description.isNotEmpty ? item.description : '-',
+          styles.data,
         );
-        cell.value = IntCellValue(entry.srNo);
-        cell.cellStyle = dataCenterStyle;
 
-        cell = sheet.cell(
-          CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex),
-        );
-        cell.value = TextCellValue(entry.agencyName);
-        cell.cellStyle = dataStyle;
+        if (item.isNight) {
+          setNumber(5, rowIndex, item.skill, styles.dataCenter);
+          setNumber(6, rowIndex, item.unSkill, styles.dataCenter);
 
-        cell = sheet.cell(
-          CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: rowIndex),
-        );
-        cell.value = DoubleCellValue(entry.skill);
-        cell.cellStyle = dataCenterStyle;
+          if (item.inTime.isNotEmpty) {
+            setText(7, rowIndex, item.inTime, styles.dataCenter);
+          }
+          if (item.outTime.isNotEmpty) {
+            setText(8, rowIndex, item.outTime, styles.dataCenter);
+          }
+        } else {
+          setNumber(3, rowIndex, item.skill, styles.dataCenter);
+          setNumber(4, rowIndex, item.unSkill, styles.dataCenter);
+        }
 
-        cell = sheet.cell(
-          CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: rowIndex),
+        setNumber(9, rowIndex, item.skill + item.unSkill, styles.dataCenter);
+        setText(
+          10,
+          rowIndex,
+          item.remark.isNotEmpty ? item.remark : '-',
+          styles.data,
         );
-        cell.value = DoubleCellValue(entry.unSkill);
-        cell.cellStyle = dataCenterStyle;
 
-        cell = sheet.cell(
-          CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: rowIndex),
-        );
-        cell.value = TextCellValue(
-          entry.description.isNotEmpty ? entry.description : '-',
-        );
-        cell.cellStyle = dataStyle;
-
-        cell = sheet.cell(
-          CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: rowIndex),
-        );
-        cell.value = TextCellValue(
-          entry.remark.isNotEmpty ? entry.remark : '-',
-        );
-        cell.cellStyle = dataStyle;
-
-        actSkill += entry.skill;
-        actUnSkill += entry.unSkill;
-        actTotal += entry.total;
         rowIndex++;
       }
 
-      cell = sheet.cell(
-        CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex),
-      );
-      cell.value = TextCellValue('Sub Total');
-      cell.cellStyle = subTotalStyle;
+      final t = activityTotals[activity]!;
+      mergeSetText(0, rowIndex, 1, rowIndex, 'Sub Total', styles.subTotal);
+      applyStyleOnly(2, rowIndex, styles.subTotal);
 
-      cell = sheet.cell(
-        CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: rowIndex),
-      );
-      cell.value = DoubleCellValue(actSkill);
-      cell.cellStyle = subTotalStyle;
+      setNumber(3, rowIndex, t.daySkill, styles.subTotal);
+      setNumber(4, rowIndex, t.dayUnSkill, styles.subTotal);
+      setNumber(5, rowIndex, t.nightSkill, styles.subTotal);
+      setNumber(6, rowIndex, t.nightUnSkill, styles.subTotal);
 
-      cell = sheet.cell(
-        CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: rowIndex),
-      );
-      cell.value = DoubleCellValue(actUnSkill);
-      cell.cellStyle = subTotalStyle;
-
-      cell = sheet.cell(
-        CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: rowIndex),
-      );
-      cell.value = DoubleCellValue(actTotal);
-      cell.cellStyle = subTotalStyle;
-
-      grandSkill += actSkill;
-      grandUnSkill += actUnSkill;
-      grandTotal += actTotal;
+      mergeSetText(7, rowIndex, 8, rowIndex, 'G. Total', styles.subTotal);
+      setNumber(9, rowIndex, t.grandTotal, styles.subTotal);
+      applyStyleOnly(10, rowIndex, styles.subTotal);
       rowIndex++;
     });
 
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex),
-    );
-    cell.value = TextCellValue('Grand Total');
-    cell.cellStyle = grandTotalStyle;
+    mergeSetText(0, rowIndex, 1, rowIndex, 'Grand Total', styles.grandTotal);
+    applyStyleOnly(2, rowIndex, styles.grandTotal);
+    setNumber(3, rowIndex, grandDaySkill, styles.grandTotal);
+    setNumber(4, rowIndex, grandDayUnSkill, styles.grandTotal);
+    setNumber(5, rowIndex, grandNightSkill, styles.grandTotal);
+    setNumber(6, rowIndex, grandNightUnSkill, styles.grandTotal);
+    merge(7, rowIndex, 8, rowIndex);
+    applyStyleOnly(7, rowIndex, styles.grandTotal);
+    setNumber(9, rowIndex, grandDayTotal + grandNightTotal, styles.grandTotal);
+    applyStyleOnly(10, rowIndex, styles.grandTotal);
+    rowIndex += 2;
 
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: rowIndex),
-    );
-    cell.value = DoubleCellValue(grandSkill);
-    cell.cellStyle = grandTotalStyle;
+    final sumHeaderTop = rowIndex;
+    final sumHeaderSub = rowIndex + 1;
 
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: rowIndex),
+    mergeSetText(
+      0,
+      sumHeaderTop,
+      2,
+      sumHeaderSub,
+      'Work Description',
+      styles.summaryHeader,
     );
-    cell.value = DoubleCellValue(grandUnSkill);
-    cell.cellStyle = grandTotalStyle;
-
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: rowIndex),
+    mergeSetText(
+      3,
+      sumHeaderTop,
+      4,
+      sumHeaderTop,
+      'DAY Work',
+      styles.summaryHeader,
     );
-    cell.value = DoubleCellValue(grandTotal);
-    cell.cellStyle = grandTotalStyle;
-
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: rowIndex),
+    mergeSetText(
+      5,
+      sumHeaderTop,
+      6,
+      sumHeaderTop,
+      'Night Work',
+      styles.summaryHeader,
     );
-    cell.value = TextCellValue('');
-    cell.cellStyle = grandTotalStyle;
 
-    sheet.setColumnWidth(0, 8);
-    sheet.setColumnWidth(1, 22);
-    sheet.setColumnWidth(2, 10);
-    sheet.setColumnWidth(3, 12);
-    sheet.setColumnWidth(4, 38);
-    sheet.setColumnWidth(5, 18);
+    final sumSubHeaders = {
+      3: 'Skill',
+      4: 'Unskilled',
+      5: 'Skill',
+      6: 'Unskilled',
+    };
+    sumSubHeaders.forEach((col, label) {
+      setText(col, sumHeaderSub, label, styles.summaryHeader);
+    });
+    rowIndex = sumHeaderSub + 1;
+
+    for (final activity in groupedByActivity.keys) {
+      final t = activityTotals[activity]!;
+
+      mergeSetText(0, rowIndex, 2, rowIndex, activity, styles.summaryDataLabel);
+
+      setNumber(3, rowIndex, t.daySkill, styles.dataCenter);
+      setNumber(4, rowIndex, t.dayUnSkill, styles.dataCenter);
+      setNumber(5, rowIndex, t.nightSkill, styles.dataCenter);
+      setNumber(6, rowIndex, t.nightUnSkill, styles.dataCenter);
+      rowIndex++;
+    }
+
+    mergeSetText(
+      0,
+      rowIndex,
+      2,
+      rowIndex,
+      'Total Manpower',
+      styles.summaryFooter,
+    );
+    setNumber(3, rowIndex, grandDaySkill, styles.summaryFooter);
+    setNumber(4, rowIndex, grandDayUnSkill, styles.summaryFooter);
+    setNumber(5, rowIndex, grandNightSkill, styles.summaryFooter);
+    setNumber(6, rowIndex, grandNightUnSkill, styles.summaryFooter);
+    rowIndex++;
+
+    if (startRow == 0) {
+      sheet.getRangeByIndex(1, 1).columnWidth = 7;
+      sheet.getRangeByIndex(1, 2).columnWidth = 20;
+      sheet.getRangeByIndex(1, 3).columnWidth = 30;
+      sheet.getRangeByIndex(1, 4).columnWidth = 9;
+      sheet.getRangeByIndex(1, 5).columnWidth = 11;
+      sheet.getRangeByIndex(1, 6).columnWidth = 9;
+      sheet.getRangeByIndex(1, 7).columnWidth = 11;
+      sheet.getRangeByIndex(1, 8).columnWidth = 8;
+      sheet.getRangeByIndex(1, 9).columnWidth = 8;
+      sheet.getRangeByIndex(1, 10).columnWidth = 10;
+      sheet.getRangeByIndex(1, 11).columnWidth = 18;
+    }
+
+    return rowIndex;
+  }
+
+  static Future<Uint8List?> _loadLogoBytes(int coCode) async {
+    final assetPath = coCode == 1 ? kImageSCFULLLogo : kImagefulllogo;
+
+    try {
+      final data = await rootBundle.load(assetPath);
+      return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static String _brandLabelForCompany(String companyName) {
+    final name = companyName.toUpperCase();
+    if (name.contains('URBANSPACE') || name.contains('URBAN SPACE')) {
+      return 'SHIVAY\nURBANSPACE PVT. LTD.';
+    }
+    return 'SHIVAY\nCONSTRUCTION';
   }
 
   static Future<void> generateSummaryReport({
@@ -354,8 +761,8 @@ class DlrReportExcelFile {
     required String toDate,
   }) async {
     try {
-      final excel = Excel.createExcel();
-      final defaultSheet = excel.getDefaultSheet();
+      final Workbook workbook = Workbook();
+      final styles = _SummaryStyles(workbook);
 
       final Map<String, List<DlrReportDm>> groupedByCompany = {};
       for (var item in reportList) {
@@ -370,16 +777,18 @@ class DlrReportExcelFile {
             ? companyName.substring(0, 31)
             : companyName;
 
-        Sheet sheet = excel[sheetName];
-        if (firstSheet && defaultSheet != null && defaultSheet != sheetName) {
-          excel.delete(defaultSheet);
+        Worksheet sheet;
+        if (firstSheet) {
+          sheet = workbook.worksheets[0];
+          sheet.name = sheetName;
           firstSheet = false;
         } else {
-          firstSheet = false;
+          sheet = workbook.worksheets.addWithName(sheetName);
         }
 
         _writeSummarySheet(
           sheet: sheet,
+          styles: styles,
           companyItems: companyItems,
           companyName: companyName,
           fromDate: fromDate,
@@ -387,7 +796,8 @@ class DlrReportExcelFile {
         );
       });
 
-      final bytes = excel.encode()!;
+      final List<int> bytes = workbook.saveAsStream();
+      workbook.dispose();
       await _saveAndOpenExcel(bytes, 'DLR_Summary_Report');
 
       if (!AppScreenUtils.isWeb) {
@@ -399,14 +809,14 @@ class DlrReportExcelFile {
   }
 
   static void _writeSummarySheet({
-    required Sheet sheet,
+    required Worksheet sheet,
+    required _SummaryStyles styles,
     required List<DlrReportDm> companyItems,
     required String companyName,
     required String fromDate,
     required String toDate,
   }) {
     int rowIndex = 0;
-    DateFormat('dd-MM-yyyy').format(DateTime.now());
 
     final List<String> siteNames = [];
     for (var item in companyItems) {
@@ -417,166 +827,97 @@ class DlrReportExcelFile {
 
     final int totalCols = 3 + siteNames.length + 1;
 
-    final companyTitleStyle = CellStyle(
-      bold: true,
-      fontSize: 14,
-      horizontalAlign: HorizontalAlign.Left,
-    );
+    Range rangeAt(int col, int row) => sheet.getRangeByIndex(row + 1, col + 1);
+    Range rangeBlock(int c1, int r1, int c2, int r2) =>
+        sheet.getRangeByIndex(r1 + 1, c1 + 1, r2 + 1, c2 + 1);
 
-    final subtitleStyle = CellStyle(
-      fontSize: 10,
-      horizontalAlign: HorizontalAlign.Left,
-    );
+    void setText(int col, int row, String text, Style style) {
+      final r = rangeAt(col, row);
+      r.setText(text);
+      r.cellStyle = style;
+    }
 
-    final monthStyle = CellStyle(
-      bold: true,
-      fontSize: 10,
-      horizontalAlign: HorizontalAlign.Left,
-    );
+    void setNumber(int col, int row, double value, Style style) {
+      final r = rangeAt(col, row);
+      r.setNumber(value);
+      r.cellStyle = style;
+    }
 
-    final dayReportStyle = CellStyle(
-      bold: true,
-      fontSize: 10,
-      horizontalAlign: HorizontalAlign.Center,
-    );
+    void mergeSetText(
+      int c1,
+      int r1,
+      int c2,
+      int r2,
+      String text,
+      Style style,
+    ) {
+      final block = rangeBlock(c1, r1, c2, r2);
+      block.merge();
+      rangeAt(c1, r1).setText(text);
+      block.cellStyle = style;
+    }
 
-    final headerStyle = CellStyle(
-      bold: true,
-      fontSize: 9,
-      fontColorHex: ExcelColor.fromHexString('#FFFFFF'),
-      horizontalAlign: HorizontalAlign.Center,
-      verticalAlign: VerticalAlign.Center,
-      backgroundColorHex: ExcelColor.fromHexString('#4472C4'),
-      textWrapping: TextWrapping.WrapText,
+    mergeSetText(
+      0,
+      rowIndex,
+      totalCols - 1,
+      rowIndex,
+      companyName,
+      styles.companyTitle,
     );
-
-    final dataStyle = CellStyle(
-      fontSize: 9,
-      horizontalAlign: HorizontalAlign.Left,
-    );
-
-    final dataCenterStyle = CellStyle(
-      fontSize: 9,
-      horizontalAlign: HorizontalAlign.Center,
-    );
-
-    final totalFooterStyle = CellStyle(
-      bold: true,
-      fontSize: 10,
-      horizontalAlign: HorizontalAlign.Center,
-      backgroundColorHex: ExcelColor.fromHexString('#B4C6E7'),
-    );
-
-    sheet.merge(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-      CellIndex.indexByColumnRow(
-        columnIndex: totalCols - 1,
-        rowIndex: rowIndex,
-      ),
-    );
-    var cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-    );
-    cell.value = TextCellValue(companyName);
-    cell.cellStyle = companyTitleStyle;
     rowIndex++;
 
-    sheet.merge(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-      CellIndex.indexByColumnRow(
-        columnIndex: totalCols - 1,
-        rowIndex: rowIndex,
-      ),
+    mergeSetText(
+      0,
+      rowIndex,
+      totalCols - 1,
+      rowIndex,
+      'Summary',
+      styles.subtitle,
     );
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-    );
-    cell.value = TextCellValue('Summary');
-    cell.cellStyle = subtitleStyle;
     rowIndex++;
 
-    sheet.merge(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-      CellIndex.indexByColumnRow(
-        columnIndex: totalCols - 1,
-        rowIndex: rowIndex,
-      ),
-    );
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-    );
     final monthStr = DateFormat(
       'MMMM-yyyy',
     ).format(DateFormat('dd-MM-yyyy').parse(toDate));
-    cell.value = TextCellValue('Month : $monthStr');
-    cell.cellStyle = monthStyle;
+    mergeSetText(
+      0,
+      rowIndex,
+      totalCols - 1,
+      rowIndex,
+      'Month : $monthStr',
+      styles.month,
+    );
     rowIndex++;
 
     rowIndex++;
 
-    sheet.merge(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-      CellIndex.indexByColumnRow(
-        columnIndex: totalCols - 1,
-        rowIndex: rowIndex,
-      ),
+    mergeSetText(
+      0,
+      rowIndex,
+      totalCols - 1,
+      rowIndex,
+      'Day Report - $fromDate to $toDate',
+      styles.dayReport,
     );
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-    );
-    cell.value = TextCellValue('Day Report - $fromDate to $toDate');
-    cell.cellStyle = dayReportStyle;
     rowIndex++;
 
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-    );
-    cell.value = TextCellValue('Sr.\nNo.');
-    cell.cellStyle = headerStyle;
-
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex),
-    );
-    cell.value = TextCellValue('Name of Agency');
-    cell.cellStyle = headerStyle;
-
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: rowIndex),
-    );
-    cell.value = TextCellValue('Work Description');
-    cell.cellStyle = headerStyle;
+    setText(0, rowIndex, 'Sr.\nNo.', styles.header);
+    setText(1, rowIndex, 'Name of Agency', styles.header);
+    setText(2, rowIndex, 'Work Description', styles.header);
 
     for (int i = 0; i < siteNames.length; i++) {
-      cell = sheet.cell(
-        CellIndex.indexByColumnRow(columnIndex: 3 + i, rowIndex: rowIndex),
-      );
-      cell.value = TextCellValue(siteNames[i]);
-      cell.cellStyle = headerStyle;
+      setText(3 + i, rowIndex, siteNames[i], styles.header);
     }
-
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(
-        columnIndex: 3 + siteNames.length,
-        rowIndex: rowIndex,
-      ),
-    );
-    cell.value = TextCellValue('Total\nPerson');
-    cell.cellStyle = headerStyle;
+    setText(3 + siteNames.length, rowIndex, 'Total\nPerson', styles.header);
     rowIndex++;
 
     final Map<String, Map<String, double>> agencyData = {};
     final Map<String, String> agencyActivityMap = {};
-    final Map<String, String> agencyDescMap = {};
 
     for (var item in companyItems) {
       final key = '${item.agencyName}__${item.activity}';
       agencyActivityMap[key] = item.activity;
-
-      if (!agencyDescMap.containsKey(key)) {
-        agencyDescMap[key] = item.description.isNotEmpty
-            ? item.description
-            : '-';
-      }
       agencyData.putIfAbsent(key, () => {});
       agencyData[key]![item.siteName] =
           (agencyData[key]![item.siteName] ?? 0) + item.total;
@@ -597,45 +938,26 @@ class DlrReportExcelFile {
       final activity = agencyActivityMap[key] ?? '';
       double rowTotal = siteMap.values.fold(0, (a, b) => a + b);
 
-      cell = sheet.cell(
-        CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-      );
-      cell.value = IntCellValue(srNo);
-      cell.cellStyle = dataCenterStyle;
-
-      cell = sheet.cell(
-        CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex),
-      );
-      cell.value = TextCellValue(agencyName);
-      cell.cellStyle = dataStyle;
-
-      cell = sheet.cell(
-        CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: rowIndex),
-      );
-      cell.value = TextCellValue(activity.isNotEmpty ? activity : '-');
-      cell.cellStyle = dataStyle;
+      setNumber(0, rowIndex, srNo.toDouble(), styles.dataCenter);
+      setText(1, rowIndex, agencyName, styles.data);
+      setText(2, rowIndex, activity.isNotEmpty ? activity : '-', styles.data);
 
       for (int i = 0; i < siteNames.length; i++) {
-        cell = sheet.cell(
-          CellIndex.indexByColumnRow(columnIndex: 3 + i, rowIndex: rowIndex),
-        );
         final val = siteMap[siteNames[i]];
-        cell.value = TextCellValue(
+        setText(
+          3 + i,
+          rowIndex,
           val != null && val > 0 ? val.toStringAsFixed(0) : '-',
+          styles.dataCenter,
         );
-        cell.cellStyle = dataCenterStyle;
       }
 
-      cell = sheet.cell(
-        CellIndex.indexByColumnRow(
-          columnIndex: 3 + siteNames.length,
-          rowIndex: rowIndex,
-        ),
-      );
-      cell.value = TextCellValue(
+      setText(
+        3 + siteNames.length,
+        rowIndex,
         rowTotal > 0 ? rowTotal.toStringAsFixed(0) : '-',
+        styles.dataCenter,
       );
-      cell.cellStyle = dataCenterStyle;
 
       srNo++;
       rowIndex++;
@@ -643,43 +965,19 @@ class DlrReportExcelFile {
 
     rowIndex += 2;
 
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex),
-    );
-    cell.value = TextCellValue('');
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex),
-    );
-    cell.value = TextCellValue('');
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: rowIndex),
-    );
-    cell.value = TextCellValue('');
-
     for (int i = 0; i < siteNames.length; i++) {
-      cell = sheet.cell(
-        CellIndex.indexByColumnRow(columnIndex: 3 + i, rowIndex: rowIndex),
-      );
       final val = siteColumnTotals[siteNames[i]] ?? 0;
-      cell.value = DoubleCellValue(val);
-      cell.cellStyle = totalFooterStyle;
+      setNumber(3 + i, rowIndex, val, styles.totalFooter);
     }
-    cell = sheet.cell(
-      CellIndex.indexByColumnRow(
-        columnIndex: 3 + siteNames.length,
-        rowIndex: rowIndex,
-      ),
-    );
-    cell.value = DoubleCellValue(grandTotal);
-    cell.cellStyle = totalFooterStyle;
+    setNumber(3 + siteNames.length, rowIndex, grandTotal, styles.totalFooter);
 
-    sheet.setColumnWidth(0, 7);
-    sheet.setColumnWidth(1, 22);
-    sheet.setColumnWidth(2, 22);
+    sheet.getRangeByIndex(1, 1).columnWidth = 7;
+    sheet.getRangeByIndex(1, 2).columnWidth = 22;
+    sheet.getRangeByIndex(1, 3).columnWidth = 22;
     for (int i = 0; i < siteNames.length; i++) {
-      sheet.setColumnWidth(3 + i, 12);
+      sheet.getRangeByIndex(1, 4 + i).columnWidth = 12;
     }
-    sheet.setColumnWidth(3 + siteNames.length, 14);
+    sheet.getRangeByIndex(1, 4 + siteNames.length).columnWidth = 14;
   }
 
   static Future<void> _saveAndOpenExcel(

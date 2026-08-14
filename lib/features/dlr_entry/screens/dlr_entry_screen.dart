@@ -19,6 +19,7 @@ import 'package:shivay_construction/widgets/app_date_picker_text_form_field.dart
 import 'package:shivay_construction/widgets/app_dropdown.dart';
 import 'package:shivay_construction/widgets/app_loading_overlay.dart';
 import 'package:shivay_construction/widgets/app_text_form_field.dart';
+import 'package:shivay_construction/widgets/app_time_picker_field.dart';
 
 class DlrEntryScreen extends StatelessWidget {
   final DlrDm? dlr;
@@ -95,6 +96,48 @@ class DlrEntryScreen extends StatelessWidget {
                               ),
                             ),
                             tablet ? AppSpaces.v16 : AppSpaces.v10,
+
+                            // Time Pickers - Only for Night Shift
+                            Obx(
+                              () => _controller.selectedShift.value == 'Night'
+                                  ? Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: AppTimePickerField(
+                                                timeController: _controller
+                                                    .inTimeController,
+                                                hintText: 'In Time *',
+                                                validator: (value) =>
+                                                    value == null ||
+                                                        value.isEmpty
+                                                    ? 'Please select in time'
+                                                    : null,
+                                              ),
+                                            ),
+                                            tablet
+                                                ? AppSpaces.h16
+                                                : AppSpaces.h12,
+                                            Expanded(
+                                              child: AppTimePickerField(
+                                                timeController: _controller
+                                                    .outTimeController,
+                                                hintText: 'Out Time *',
+                                                validator: (value) =>
+                                                    value == null ||
+                                                        value.isEmpty
+                                                    ? 'Please select out time'
+                                                    : null,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        tablet ? AppSpaces.v16 : AppSpaces.v10,
+                                      ],
+                                    )
+                                  : SizedBox.shrink(),
+                            ),
 
                             // Site
                             Obx(

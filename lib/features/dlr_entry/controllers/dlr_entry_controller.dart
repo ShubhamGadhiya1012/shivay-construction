@@ -28,6 +28,9 @@ class DlrEntryController extends GetxController {
 
   var dateController = TextEditingController();
 
+  var inTimeController = TextEditingController();
+  var outTimeController = TextEditingController();
+
   var shifts = ['Morning', 'Night'].obs;
   var selectedShift = ''.obs;
 
@@ -264,6 +267,10 @@ class DlrEntryController extends GetxController {
     selectedSiteCode.value = dlr.siteCode;
     selectedSiteName.value = dlr.siteName;
 
+    // Fill in/out time for Night shift
+    inTimeController.text = _convertToDisplayTime(dlr.inTime);
+    outTimeController.text = _convertToDisplayTime(dlr.outTime);
+
     dlrItems.assignAll(
       dlr.dlrData.map((d) {
         return {
@@ -281,6 +288,18 @@ class DlrEntryController extends GetxController {
         };
       }).toList(),
     );
+  }
+
+  String _convertToDisplayTime(String timeStr) {
+    if (timeStr.isEmpty) return '';
+    try {
+      final parsed = DateFormat('HH:mm:ss').parse(timeStr);
+      return DateFormat(
+        'hh:mm a',
+      ).format(parsed); // match AppTimePickerField's format
+    } catch (_) {
+      return '';
+    }
   }
 
   String _convertyyyyMMddToddMMyyyy(String dateStr) {
@@ -326,6 +345,8 @@ class DlrEntryController extends GetxController {
         invno: isEditMode.value ? currentInvNo.value : '',
         date: _convertToApiDateFormat(dateController.text),
         shift: selectedShift.value,
+        inTime: selectedShift.value == 'Night' ? inTimeController.text : '',
+        outTime: selectedShift.value == 'Night' ? outTimeController.text : '',
         deviceId: deviceId,
         siteCode: selectedSiteCode.value,
         dlrData: dlrData,
@@ -363,5 +384,7 @@ class DlrEntryController extends GetxController {
     dlrItems.clear();
     clearItemForm();
     isEditMode.value = false;
+    inTimeController.clear();
+    outTimeController.clear();
   }
 }

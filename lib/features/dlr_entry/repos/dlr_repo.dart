@@ -19,7 +19,7 @@ class DlrRepo {
         'SearchText': searchText,
         'SiteCode': siteCode,
       };
-
+      print(queryParams);
       final response = await ApiService.getRequest(
         endpoint: '/DLR/getDLR',
         token: token,
@@ -65,6 +65,8 @@ class DlrRepo {
     required String invno,
     required String date,
     required String shift,
+    required String inTime,
+    required String outTime,
     required String deviceId,
     required String siteCode,
     required List<Map<String, dynamic>> dlrData,
@@ -75,6 +77,8 @@ class DlrRepo {
       'Invno': invno,
       'Date': date,
       'Shift': shift,
+      'InTime': inTime,
+      'OutTime': outTime,
       'DeviceId': deviceId,
       'SiteCode': siteCode,
       'DLRData': dlrData,
